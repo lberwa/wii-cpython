@@ -1,0 +1,17 @@
+# Wii/devkitPPC local module config
+DEVKITPRO?=/opt/devkitpro
+
+# Wii helper module (+ libcurl HTTPS)
+wiitools wiitoolsmodule.c \
+    -I$(srcdir) \
+    -I/opt/devkitpro/extras/bitmap/include \
+    -I/opt/devkitpro/extras/mysd_sdkarte_mounten/include \
+    -I$(srcdir)/../curl/wii/include \
+    -I$(DEVKITPRO)/libogc/include \
+    -I$(DEVKITPRO)/libogc/gc \
+    -I$(DEVKITPRO)/libogc/gc/ogc \
+    -I$(srcdir)/../curl/include \
+    -I$(srcdir)/../curl/mbedtls/install-wii/include \
+    -L$(srcdir)/../curl/build-wii/lib \
+    -L$(srcdir)/../curl/mbedtls/install-wii/lib \
+    -lcurl -lmbedtls -lmbedx509 -lmbedcrypto -ltfpsacrypto
