@@ -3052,7 +3052,17 @@ init_set_builtins_open(void)
     goto done;
 
 error:
+#ifdef WII_BUILD
+    /* Wii: if _io isn't available yet, avoid hard failure. */
+    PyErr_Clear();
+    if (bimod != NULL) {
+        Py_INCREF(Py_None);
+        PyObject_SetAttrString(bimod, "open", Py_None);
+    }
+    res = _PyStatus_OK();
+#else
     res = _PyStatus_ERR("can't initialize io.open");
+#endif
 
 done:
     Py_XDECREF(bimod);
@@ -3150,7 +3160,22 @@ init_sys_streams(PyThreadState *tstate)
     goto done;
 
 error:
+#ifdef WII_BUILD
+    /* Wii: fall back to None streams to avoid hard failure. */
+    PyErr_Clear();
+    Py_INCREF(Py_None);
+    PySys_SetObject("__stdin__", Py_None);
+    _PySys_SetAttr(&_Py_ID(stdin), Py_None);
+    Py_INCREF(Py_None);
+    PySys_SetObject("__stdout__", Py_None);
+    _PySys_SetAttr(&_Py_ID(stdout), Py_None);
+    Py_INCREF(Py_None);
+    PySys_SetObject("__stderr__", Py_None);
+    _PySys_SetAttr(&_Py_ID(stderr), Py_None);
+    res = _PyStatus_OK();
+#else
     res = _PyStatus_ERR("can't initialize sys standard streams");
+#endif
 
 done:
     Py_XDECREF(iomod);

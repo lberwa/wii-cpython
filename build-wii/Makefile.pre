@@ -84,7 +84,7 @@ MAKESETUP=      $(srcdir)/Modules/makesetup
 OPT=		-DNDEBUG -g -O3 -Wall
 BASECFLAGS=	 -fno-strict-overflow -Wsign-compare
 BASECPPFLAGS=	-IObjects -IInclude -IPython
-CONFIGURE_CFLAGS=	-mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/bitmap/include -Os -Wall  -DWII_BUILD
+CONFIGURE_CFLAGS=	-mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD
 # CFLAGS_NODIST is used for building the interpreter and stdlib C extensions.
 # Use it when a compiler flag should _not_ be part of the distutils CFLAGS
 # once Python is installed (Issue #21121).
@@ -378,7 +378,7 @@ EXEMODE=	755
 FILEMODE=	644
 
 # configure script arguments
-CONFIG_ARGS=	 '--host=powerpc-eabi' '--build=x86_64-pc-linux-gnu' '--with-build-python=/opt/devkitpro/extras/cpython/3.15.0a7/build-host/python' '--without-ensurepip' '--disable-shared' '--disable-ipv6' '--with-mimalloc=no' 'build_alias=x86_64-pc-linux-gnu' 'host_alias=powerpc-eabi' 'CC=/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc' 'CFLAGS=-mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/bitmap/include -Os -Wall  -DWII_BUILD' 'CPPFLAGS= -DWII_BUILD'
+CONFIG_ARGS=	 '--host=powerpc-eabi' '--build=x86_64-pc-linux-gnu' '--with-build-python=/opt/devkitpro/extras/cpython/3.15.0a7/build-host/python' '--without-ensurepip' '--disable-shared' '--disable-ipv6' '--with-mimalloc=no' 'build_alias=x86_64-pc-linux-gnu' 'host_alias=powerpc-eabi' 'CC=/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc' 'CFLAGS=-mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD' 'CPPFLAGS= -DWII_BUILD'
 
 
 # Subdirectories with code

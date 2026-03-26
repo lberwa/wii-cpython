@@ -18,7 +18,6 @@
 
 #include <stdlib.h>
 
-
 // Define PY_TIMEOUT_MAX constant.
 #ifdef _POSIX_THREADS
    // PyThread_acquire_lock_timed() uses (us * 1000) to convert microseconds

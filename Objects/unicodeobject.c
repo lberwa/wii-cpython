@@ -14741,8 +14741,19 @@ init_stdio_encoding(PyInterpreterState *interp)
     /* Update the stdio encoding to the normalized Python codec name. */
     PyConfig *config = (PyConfig*)_PyInterpreterState_GetConfig(interp);
     if (config_get_codec_name(&config->stdio_encoding) < 0) {
+#ifdef WII_BUILD
+        /* Wii: avoid Python codec lookup during early init. */
+        PyErr_Clear();
+        PyStatus status = PyConfig_SetString(
+            config, &config->stdio_encoding, L"utf-8");
+        if (_PyStatus_EXCEPTION(status)) {
+            return status;
+        }
+        return _PyStatus_OK();
+#else
         return _PyStatus_ERR("failed to get the Python codec name "
                              "of the stdio encoding");
+#endif
     }
     return _PyStatus_OK();
 }
@@ -14815,9 +14826,19 @@ init_fs_encoding(PyThreadState *tstate)
        (Python codec name). */
     PyConfig *config = (PyConfig*)_PyInterpreterState_GetConfig(interp);
     if (config_get_codec_name(&config->filesystem_encoding) < 0) {
+#ifdef WII_BUILD
+        /* Wii: avoid Python codec lookup during early init. */
+        PyErr_Clear();
+        PyStatus status = PyConfig_SetString(
+            config, &config->filesystem_encoding, L"utf-8");
+        if (_PyStatus_EXCEPTION(status)) {
+            return status;
+        }
+#else
         _Py_DumpPathConfig(tstate);
         return _PyStatus_ERR("failed to get the Python codec "
                              "of the filesystem encoding");
+#endif
     }
 
     if (init_fs_codec(interp) < 0) {

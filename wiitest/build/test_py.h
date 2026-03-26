@@ -6,7 +6,7 @@
 extern const uint8_t test_py[];
 extern const uint8_t test_py_end[];
 #if __cplusplus >= 201103L
-static constexpr size_t test_py_size=16194;
+static constexpr size_t test_py_size=16362;
 #else
-static const size_t test_py_size=16194;
+static const size_t test_py_size=16362;
 #endif

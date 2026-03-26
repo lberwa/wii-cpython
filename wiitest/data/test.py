@@ -86,6 +86,13 @@ else:
 
 
 print("hello world!!!!!!!!!!!!!!!!!!!!!!")
+print("3/2 =", 3/2)
+
+print("import test")
+import wiitools
+print("hello WORLD!!!!!!!!!!!!!!!!!!!!!!")
+wiitools.usleep(1000000)
+print("exiting ... .... ...............")
 """
 import wiitools
 import sys

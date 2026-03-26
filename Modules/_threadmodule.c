@@ -15,7 +15,13 @@
 
 #include <stddef.h>               // offsetof()
 #ifdef HAVE_SIGNAL_H
-#  include <signal.h>             // SIGINT
+  #include <signal.h>             // SIGINT
+#endif
+
+#include <my_text_renderer.h>
+
+#ifndef WII_BUILD
+#define WII_BUILD
 #endif
 
 // ThreadError is just an alias to PyExc_RuntimeError

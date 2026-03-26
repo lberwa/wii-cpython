@@ -1685,7 +1685,13 @@ _PyCodec_InitRegistry(PyInterpreterState *interp)
     // search functions, so this is done after everything else is initialized.
     PyObject *mod = PyImport_ImportModule("encodings");
     if (mod == NULL) {
+#if defined(WII_BUILD)
+        // Wii notlösung: allow startup without encodings package
+        PyErr_Clear();
+        return PyStatus_Ok();
+#else
         return PyStatus_Error("Failed to import encodings module");
+#endif
     }
     Py_DECREF(mod);
 

@@ -161,7 +161,7 @@ int main(void) {
     #endif
 
     terminal_print("initalise ...");
-    wait(100);
+    //wait(100);
     PyConfig config;
     PyConfig_InitIsolatedConfig(&config);
     config.use_environment = 0;
@@ -245,20 +245,16 @@ int main(void) {
     //wait(100);
     rc = PyRun_SimpleString(script);
     terminal_print("after PyRun_SimpleString");
-    wait(100);
+    //wait(100);
     free(script);
     if (rc != 0) {
         terminal_print("python script returned error");
     }
-    wait(100);
+    //wait(100);
 
     terminal_print("py_finalize: return 0: exiting ...");
-    wait(100);
+    //wait(100);
     Py_Finalize();
     terminal_print("done");
-    wait(100);
-    while (1) {
-        wait(500);
-    }
     return 0;
 }

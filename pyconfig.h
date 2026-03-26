@@ -40,7 +40,7 @@
 #define Py_NO_ENABLE_SHARED 1
 #define HAVE_STD_ATOMIC 1
 #define NATIVE_TSS_KEY_T pthread_key_t
-#define HAVE_PTHREAD_H 1
+#define HAVE_PTHREAD_H 0
 
 /* End */
 #endif
