@@ -11,6 +11,13 @@
 #include "osdefs.h"               // DELIM
 #include <wchar.h>
 
+#if defined(TERMINAL_PRINT_DEBUG)
+#  include <my_text_renderer.h>
+#  define TP(msg) terminal_print(msg)
+#else
+#  define TP(msg) ((void)0)
+#endif
+
 #ifdef MS_WINDOWS
 #  include <windows.h>            // GetFullPathNameW(), MAX_PATH
 #  include <pathcch.h>
@@ -855,30 +862,46 @@ _Py_Get_Getpath_CodeObject(void)
 PyStatus
 _PyConfig_InitPathConfig(PyConfig *config, int compute_path_config)
 {
+    TP("getpath: enter");
     PyStatus status = _PyPathConfig_ReadGlobal(config);
 
+    TP("getpath: after ReadGlobal");
     if (_PyStatus_EXCEPTION(status) || !compute_path_config) {
+        TP("getpath: early return");
         return status;
     }
 
+#if defined(WII_BUILD)
+    // Wii: if paths are already provided, skip getpath.py evaluation
+    if (config->module_search_paths_set) {
+        TP("getpath: paths preset, skip eval");
+        return _PyStatus_OK();
+    }
+#endif
+
     if (!_PyThreadState_GET()) {
+        TP("getpath: no tstate");
         return PyStatus_Error("cannot calculate path configuration without GIL");
     }
 
+    TP("getpath: have tstate");
     PyObject *configDict = _PyConfig_AsDict(config);
     if (!configDict) {
+        TP("getpath: configDict NULL");
         PyErr_Clear();
         return PyStatus_NoMemory();
     }
 
     PyObject *dict = PyDict_New();
     if (!dict) {
+        TP("getpath: dict NULL");
         PyErr_Clear();
         Py_DECREF(configDict);
         return PyStatus_NoMemory();
     }
 
     if (PyDict_SetItemString(dict, "config", configDict) < 0) {
+        TP("getpath: set config failed");
         PyErr_Clear();
         Py_DECREF(configDict);
         Py_DECREF(dict);
@@ -889,6 +912,7 @@ _PyConfig_InitPathConfig(PyConfig *config, int compute_path_config)
 
     PyObject *co = _Py_Get_Getpath_CodeObject();
     if (!co || !PyCode_Check(co)) {
+        TP("getpath: getpath code invalid");
         PyErr_Clear();
         Py_XDECREF(co);
         Py_DECREF(dict);
@@ -911,6 +935,7 @@ _PyConfig_InitPathConfig(PyConfig *config, int compute_path_config)
     }
 #endif
 
+    TP("getpath: fill dict");
     if (
 #ifdef MS_WINDOWS
         !decode_to_dict(dict, "os_name", "nt") ||
@@ -953,23 +978,28 @@ _PyConfig_InitPathConfig(PyConfig *config, int compute_path_config)
 #endif
         PyDict_SetItemString(dict, "__builtins__", PyEval_GetBuiltins()) < 0
     ) {
+        TP("getpath: fill dict failed");
         Py_DECREF(co);
         Py_DECREF(dict);
         PyErr_FormatUnraisable("Exception ignored while preparing getpath");
         return PyStatus_Error("error evaluating initial values");
     }
 
+    TP("getpath: before eval");
     PyObject *r = PyEval_EvalCode(co, dict, dict);
     Py_DECREF(co);
 
     if (!r) {
+        TP("getpath: eval failed");
         Py_DECREF(dict);
         PyErr_FormatUnraisable("Exception ignored while running getpath");
         return PyStatus_Error("error evaluating path");
     }
     Py_DECREF(r);
 
+    TP("getpath: before FromDict");
     if (_PyConfig_FromDict(config, configDict) < 0) {
+        TP("getpath: FromDict failed");
         PyErr_FormatUnraisable("Exception ignored while reading getpath results");
         Py_DECREF(dict);
         return PyStatus_Error("error getting getpath results");
@@ -977,5 +1007,6 @@ _PyConfig_InitPathConfig(PyConfig *config, int compute_path_config)
 
     Py_DECREF(dict);
 
+    TP("getpath: ok");
     return _PyStatus_OK();
 }

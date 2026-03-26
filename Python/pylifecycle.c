@@ -105,6 +105,14 @@ static void wait_for_thread_shutdown(PyThreadState *tstate);
 static void finalize_subinterpreters(void);
 static void call_ll_exitfuncs(_PyRuntimeState *runtime);
 
+#define TP(msg) ((void)0)
+
+#ifndef __powerpc__
+#define __powerpc__
+#endif
+#ifndef __PPC__
+#define __PPC__
+#endif
 
 /* The following places the `_PyRuntime` structure in a location that can be
  * found without any external information. This is meant to ease access to the
@@ -590,18 +598,23 @@ init_interp_settings(PyInterpreterState *interp,
 static void
 init_interp_create_gil(PyThreadState *tstate, int gil)
 {
+    TP("create_gil: enter");
     /* finalize_interp_delete() comment explains why _PyEval_FiniGIL() is
        only called here. */
     // XXX This is broken with a per-interpreter GIL.
+    TP("create_gil: before _PyEval_FiniGIL");
     _PyEval_FiniGIL(tstate->interp);
 
     /* Auto-thread-state API */
+    TP("create_gil: before _PyGILState_SetTstate");
     _PyGILState_SetTstate(tstate);
 
     int own_gil = (gil == PyInterpreterConfig_OWN_GIL);
 
     /* Create the GIL and take it */
+    TP("create_gil: before _PyEval_InitGIL");
     _PyEval_InitGIL(tstate, own_gil);
+    TP("create_gil: ok");
 }
 
 static int
@@ -622,10 +635,13 @@ pycore_create_interpreter(_PyRuntimeState *runtime,
                           const PyConfig *src_config,
                           PyThreadState **tstate_p)
 {
+    TP("create_interp: enter");
     PyStatus status;
     PyInterpreterState *interp;
+    TP("create_interp: before _PyInterpreterState_New");
     status = _PyInterpreterState_New(NULL, &interp);
     if (_PyStatus_EXCEPTION(status)) {
+        TP("create_interp: _PyInterpreterState_New failed");
         return status;
     }
     assert(interp != NULL);
@@ -634,18 +650,24 @@ pycore_create_interpreter(_PyRuntimeState *runtime,
     interp->_ready = 1;
 
     /* Initialize the module dict watcher early, before any modules are created */
+    TP("create_interp: before module dict watcher");
     if (_PyModule_InitModuleDictWatcher(interp) != 0) {
+        TP("create_interp: module dict watcher failed");
         return _PyStatus_ERR("failed to initialize module dict watcher");
     }
 
+    TP("create_interp: before config copy");
     status = _PyConfig_Copy(&interp->config, src_config);
     if (_PyStatus_EXCEPTION(status)) {
+        TP("create_interp: config copy failed");
         return status;
     }
 
     /* Auto-thread-state API */
+    TP("create_interp: before GILState init");
     status = _PyGILState_Init(interp);
     if (_PyStatus_EXCEPTION(status)) {
+        TP("create_interp: GILState init failed");
         return status;
     }
 
@@ -654,15 +676,19 @@ pycore_create_interpreter(_PyRuntimeState *runtime,
     // init extensions.
     config.gil = PyInterpreterConfig_OWN_GIL;
     config.check_multi_interp_extensions = 0;
+    TP("create_interp: before init_interp_settings");
     status = init_interp_settings(interp, &config);
     if (_PyStatus_EXCEPTION(status)) {
+        TP("create_interp: init_interp_settings failed");
         return status;
     }
 
     // This could be done in init_interpreter() (in pystate.c) if it
     // didn't depend on interp->feature_flags being set already.
+    TP("create_interp: before _PyObject_InitState");
     status = _PyObject_InitState(interp);
     if (_PyStatus_EXCEPTION(status)) {
+        TP("create_interp: _PyObject_InitState failed");
         return status;
     }
 
@@ -677,24 +703,32 @@ pycore_create_interpreter(_PyRuntimeState *runtime,
     // initialize the interp->obmalloc state.  This must be done after
     // the settings are loaded (so that feature_flags are set) but before
     // any calls are made to obmalloc functions.
+    TP("create_interp: before obmalloc init");
     if (_PyMem_init_obmalloc(interp) < 0) {
+        TP("create_interp: obmalloc init failed");
         return _PyStatus_NO_MEMORY();
     }
 
+    TP("create_interp: before tracemalloc init");
     status = _PyTraceMalloc_Init();
     if (_PyStatus_EXCEPTION(status)) {
+        TP("create_interp: tracemalloc init failed");
         return status;
     }
 
+    TP("create_interp: before ThreadState_New");
     PyThreadState *tstate = _PyThreadState_New(interp,
                                                _PyThreadState_WHENCE_INIT);
     if (tstate == NULL) {
+        TP("create_interp: ThreadState_New failed");
         return _PyStatus_ERR("can't make first thread");
     }
     runtime->main_tstate = tstate;
     _PyThreadState_Bind(tstate);
 
+    TP("create_interp: before create_gil");
     init_interp_create_gil(tstate, config.gil);
+    TP("create_interp: ok");
 
     *tstate_p = tstate;
     return _PyStatus_OK();
@@ -961,31 +995,37 @@ done:
     return status;
 }
 
-
 static PyStatus
 pyinit_config(_PyRuntimeState *runtime,
               PyThreadState **tstate_p,
               const PyConfig *config)
 {
+    TP("pyinit_config: enter");
     PyStatus status = pycore_init_runtime(runtime, config);
     if (_PyStatus_EXCEPTION(status)) {
+        TP("pyinit_config: pycore_init_runtime failed");
         return status;
     }
 
     PyThreadState *tstate;
+    TP("pyinit_config: before create_interpreter");
     status = pycore_create_interpreter(runtime, config, &tstate);
     if (_PyStatus_EXCEPTION(status)) {
+        TP("pyinit_config: create_interpreter failed");
         return status;
     }
     *tstate_p = tstate;
 
+    TP("pyinit_config: before interp_init");
     status = pycore_interp_init(tstate);
     if (_PyStatus_EXCEPTION(status)) {
+        TP("pyinit_config: interp_init failed");
         return status;
     }
 
     /* Only when we get here is the runtime core fully initialized */
     runtime->core_initialized = 1;
+    TP("pyinit_config: ok");
     return _PyStatus_OK();
 }
 
@@ -1119,13 +1159,14 @@ pyinit_core(_PyRuntimeState *runtime,
             const PyConfig *src_config,
             PyThreadState **tstate_p)
 {
+    TP("10.0,3");
     PyStatus status;
-
+    TP("10.0,6");
     status = _Py_PreInitializeFromConfig(src_config, NULL);
     if (_PyStatus_EXCEPTION(status)) {
         return status;
     }
-
+    TP("10.1");
     PyConfig config;
     PyConfig_InitPythonConfig(&config);
 
@@ -1133,25 +1174,36 @@ pyinit_core(_PyRuntimeState *runtime,
     if (_PyStatus_EXCEPTION(status)) {
         goto done;
     }
-
+    TP("10.2");
     // Read the configuration, but don't compute the path configuration
     // (it is computed in the main init).
     status = _PyConfig_Read(&config, 0);
     if (_PyStatus_EXCEPTION(status)) {
         goto done;
     }
-
+    TP("10.3");
+    {
+        char msg[64];
+        snprintf(msg, sizeof(msg), "core_initialized=%d", runtime->core_initialized);
+        TP(msg);
+    }
     if (!runtime->core_initialized) {
+        TP("10.3.1");
+        TP("hello");
         status = pyinit_config(runtime, tstate_p, &config);
     }
     else {
+        TP("10.3.2");
         status = pyinit_core_reconfigure(runtime, tstate_p, &config);
     }
+    TP("10.3.3");
     if (_PyStatus_EXCEPTION(status)) {
+        TP("10.3.4");
         goto done;
     }
-
+    TP("10.4");
 done:
+    TP("10.5");
     PyConfig_Clear(&config);
     return status;
 }
@@ -1206,11 +1258,13 @@ init_interp_main(PyThreadState *tstate)
 {
     assert(!_PyErr_Occurred(tstate));
 
+    TP("31.1");
+
     PyStatus status;
     int is_main_interp = _Py_IsMainInterpreter(tstate->interp);
     PyInterpreterState *interp = tstate->interp;
     const PyConfig *config = _PyInterpreterState_GetConfig(interp);
-
+    TP("31.2");
     if (!config->_install_importlib) {
         /* Special mode for freeze_importlib: run with no import system
          *
@@ -1222,21 +1276,29 @@ init_interp_main(PyThreadState *tstate)
         }
         return _PyStatus_OK();
     }
+    TP("31.3");
+    TP("31.3.0");
 
     // Initialize the import-related configuration.
     status = _PyConfig_InitImportConfig(&interp->config);
+    TP("31.3.1");
     if (_PyStatus_EXCEPTION(status)) {
+        TP("31.3.2");
         return status;
     }
-
+    TP("31.3.3");
     if (interpreter_update_config(tstate, 1) < 0) {
+        TP("31.3.4");
         return _PyStatus_ERR("failed to update the Python config");
     }
-
+    TP("31.3.5");
     status = _PyImport_InitExternal(tstate);
+    TP("31.3.6");
     if (_PyStatus_EXCEPTION(status)) {
+        TP("31.3.7");
         return status;
     }
+    TP("31.4");
 
     if (is_main_interp) {
         /* initialize the faulthandler module */
@@ -1250,6 +1312,7 @@ init_interp_main(PyThreadState *tstate)
     if (_PyStatus_EXCEPTION(status)) {
         return status;
     }
+    TP("31.5");
 
     if (is_main_interp) {
         if (_PySignal_Init(config->install_signal_handlers) < 0) {
@@ -1278,6 +1341,7 @@ init_interp_main(PyThreadState *tstate)
         }
 #endif
     }
+    TP("31.6");
 
     status = init_sys_streams(tstate);
     if (_PyStatus_EXCEPTION(status)) {
@@ -1312,6 +1376,7 @@ init_interp_main(PyThreadState *tstate)
     if (_PyStatus_EXCEPTION(status)) {
         return status;
     }
+    TP("31.7");
 
     if (is_main_interp) {
         /* Initialize warnings. */
@@ -1319,6 +1384,7 @@ init_interp_main(PyThreadState *tstate)
         if (PySys_GetOptionalAttrString("warnoptions", &warnoptions) < 0) {
             return _PyStatus_ERR("can't initialize warnings");
         }
+        TP("31.8");
         if (warnoptions != NULL && PyList_Check(warnoptions) &&
             PyList_Size(warnoptions) > 0)
         {
@@ -1333,6 +1399,7 @@ init_interp_main(PyThreadState *tstate)
 
         interp->runtime->initialized = 1;
     }
+    TP("31.9");
 
     if (config->site_import) {
         status = init_import_site();
@@ -1355,6 +1422,7 @@ init_interp_main(PyThreadState *tstate)
             return _PyStatus_ERR("failed to set lazy imports mode");
         }
     }
+    TP("31.10");
     // If config->lazy_imports == -1, use the default mode, no change needed.
 
     if (is_main_interp) {
@@ -1418,12 +1486,14 @@ init_interp_main(PyThreadState *tstate)
             }
         }
     }
+    TP("31.11");
 
 
     interp->dict_state.watchers[0] = &builtins_dict_watcher;
     if (PyDict_Watch(0, interp->builtins) != 0) {
         return _PyStatus_ERR("failed to set builtin dict watcher");
     }
+    TP("31.12");
 
     assert(!_PyErr_Occurred(tstate));
 
@@ -1445,51 +1515,69 @@ init_interp_main(PyThreadState *tstate)
 static PyStatus
 pyinit_main(PyThreadState *tstate)
 {
+    TP("30.1");
     PyInterpreterState *interp = tstate->interp;
+    TP("30.2");
     if (!interp->runtime->core_initialized) {
+        TP("30.3");
         return _PyStatus_ERR("runtime core not initialized");
     }
 
     if (interp->runtime->initialized) {
+        TP("30.4");
         return pyinit_main_reconfigure(tstate);
     }
-
+    TP("30.5");
     PyStatus status = init_interp_main(tstate);
+    TP("30.6");
     if (_PyStatus_EXCEPTION(status)) {
+        TP("30.7");
         return status;
     }
+    TP("30.8");
     return _PyStatus_OK();
 }
-
 
 PyStatus
 Py_InitializeFromConfig(const PyConfig *config)
 {
+    TP("1.1");
     if (config == NULL) {
+        TP("1.2");
         return _PyStatus_ERR("initialization config is NULL");
     }
-
+    TP("1.3");
     PyStatus status;
 
     status = _PyRuntime_Initialize();
     if (_PyStatus_EXCEPTION(status)) {
         return status;
     }
+    TP("1.4");
     _PyRuntimeState *runtime = &_PyRuntime;
-
+    TP("1.5");
     PyThreadState *tstate = NULL;
+    TP("1.5.1");
     status = pyinit_core(runtime, config, &tstate);
+    TP("1.5.2");
     if (_PyStatus_EXCEPTION(status)) {
+        TP("1.5.3");
         return status;
     }
+    TP("1.6");
     config = _PyInterpreterState_GetConfig(tstate->interp);
+    TP("1.6.1");
 
     if (config->_init_main) {
+        TP("1.6.2");
         status = pyinit_main(tstate);
+        TP("1.6.3");
         if (_PyStatus_EXCEPTION(status)) {
+            TP("1.6.4");
             return status;
         }
     }
+    TP("1.7");
 
     return _PyStatus_OK();
 }
@@ -3329,15 +3417,21 @@ fatal_error_dump_runtime(int fd, _PyRuntimeState *runtime)
 static inline void _Py_NO_RETURN
 fatal_error_exit(int status)
 {
+    TP("22.1");
     if (status < 0) {
 #if defined(MS_WINDOWS) && defined(Py_DEBUG)
         DebugBreak();
 #endif
+        TP("22.2");
         abort();
+        TP("22.3");
     }
     else {
+        TP("22.4");
         exit(status);
+        TP("22.5");
     }
+    TP("22.6");
 }
 
 static inline int
@@ -3489,28 +3583,34 @@ fatal_error(int fd, int header, const char *prefix, const char *msg,
             int status)
 {
     static int reentrant = 0;
-
+    TP("21.1");
     if (reentrant) {
         /* Py_FatalError() caused a second fatal error.
            Example: flush_std_files() raises a recursion error. */
         fatal_error_exit(status);
+        TP("21.2");
     }
     reentrant = 1;
-
+    TP("21.3");
     if (header) {
+        TP("21.4");
         PUTS(fd, "Fatal Python error: ");
         if (prefix) {
+            TP(prefix);
             PUTS(fd, prefix);
             PUTS(fd, ": ");
         }
         if (msg) {
+            TP(msg);
             PUTS(fd, msg);
         }
         else {
+            TP("<message not set>");
             PUTS(fd, "<message not set>");
         }
         PUTS(fd, "\n");
     }
+    TP("21.5");
 
     _PyRuntimeState *runtime = &_PyRuntime;
     fatal_error_dump_runtime(fd, runtime);
@@ -3523,6 +3623,7 @@ fatal_error(int fd, int header, const char *prefix, const char *msg,
 
        tss_tstate != tstate if the current Python thread does not hold the GIL.
        */
+    TP("21.6");
     PyThreadState *tstate = _PyThreadState_GET();
     PyInterpreterState *interp = NULL;
     PyThreadState *tss_tstate = PyGILState_GetThisThreadState();
@@ -3544,6 +3645,7 @@ fatal_error(int fd, int header, const char *prefix, const char *msg,
     else {
         _Py_FatalError_DumpTracebacks(fd, interp, tss_tstate);
     }
+    TP("21.7");
 
     _Py_DumpExtensionModules(fd, interp);
 
@@ -3558,12 +3660,17 @@ fatal_error(int fd, int header, const char *prefix, const char *msg,
         /* Flush sys.stdout and sys.stderr */
         flush_std_files();
     }
+    TP("21.8");
 
 #ifdef MS_WINDOWS
+    TP("21.8.1");
     fatal_output_debug(msg);
+    TP("21.8.2");
 #endif /* MS_WINDOWS */
 
+    TP("21.8.3");
     fatal_error_exit(status);
+    TP("21.9");
 }
 
 
@@ -3579,6 +3686,7 @@ Py_FatalError(const char *msg)
 void _Py_NO_RETURN
 _Py_FatalErrorFunc(const char *func, const char *msg)
 {
+    TP("errorfunc");
     fatal_error(fileno(stderr), 1, func, msg, -1);
 }
 
@@ -3595,6 +3703,12 @@ _Py_FatalErrorFormat(const char *func, const char *format, ...)
 
     FILE *stream = stderr;
     const int fd = fileno(stream);
+    if (func) {
+        TP(func);
+    }
+    if (format) {
+        TP(format);
+    }
     PUTS(fd, "Fatal Python error: ");
     if (func) {
         PUTS(fd, func);

@@ -1,0 +1,1712 @@
+rm -f *.o *.a python buildno*
+for i in Parser Grammar Objects Python Modules; do cd $i && make clean; done || true
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Parser“ wird betreten
+rm -f *.o *.a lexer/*.o
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Parser“ wird verlassen
+/bin/sh: 1: cd: can't cd to Grammar
+/bin/sh: 1: cd: can't cd to Objects
+/bin/sh: 1: cd: can't cd to Python
+/bin/sh: 1: cd: can't cd to Modules
+cd zlib && make clean || true
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/zlib“ wird betreten
+cd contrib/minizip && { make clean ; cd ../.. ; }
+make[2]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/zlib/contrib/minizip“ wird betreten
+/bin/rm -f *.o *~ minizip miniunz test.*
+make[2]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/zlib/contrib/minizip“ wird verlassen
+rm -f *.o *.lo *~ \
+   example minigzip examplesh minigzipsh \
+   example64 minigzip64 \
+   infcover \
+   libz.* foo.gz so_locations \
+   _match.s maketree contrib/infback9/*.o
+rm -rf objs
+rm -f *.gcda *.gcno *.gcov
+rm -f contrib/infback9/*.gcda contrib/infback9/*.gcno contrib/infback9/*.gcov
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/zlib“ wird verlassen
+rm -rf curl/build-wii curl/mbedtls/build-wii*
+cd ./zlib && \
+export CC=/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc AR=/opt/devkitpro/devkitPPC/bin/powerpc-eabi-ar RANLIB=/opt/devkitpro/devkitPPC/bin/powerpc-eabi-ranlib CFLAGS="-Os -Wall -msoft-float" && \
+make distclean || true && \
+./configure --static --prefix=$(pwd)/install-wii && \
+make libz.a V=1
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/zlib“ wird betreten
+cd contrib/minizip && { make clean ; cd ../.. ; }
+make[2]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/zlib/contrib/minizip“ wird betreten
+/bin/rm -f *.o *~ minizip miniunz test.*
+make[2]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/zlib/contrib/minizip“ wird verlassen
+rm -f *.o *.lo *~ \
+   example minigzip examplesh minigzipsh \
+   example64 minigzip64 \
+   infcover \
+   libz.* foo.gz so_locations \
+   _match.s maketree contrib/infback9/*.o
+rm -rf objs
+rm -f *.gcda *.gcno *.gcov
+rm -f contrib/infback9/*.gcda contrib/infback9/*.gcno contrib/infback9/*.gcov
+cp -p zconf.h.in zconf.h
+rm -f Makefile zlib.pc configure.log
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/zlib“ wird verlassen
+Building static library libz.a version 1.3.2.1-motley with /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc.
+Checking for size_t... Yes.
+Checking for off64_t... No.
+Checking for fseeko... Yes.
+Checking for strerror... Yes.
+Checking for unistd.h... Yes.
+Checking for stdarg.h... Yes.
+Checking whether to use vs[n]printf() or s[n]printf()... using vs[n]printf().
+Checking for vsnprintf() in stdio.h... No.
+  WARNING: vsnprintf() not found, falling back to vsprintf(). zlib
+  can build but will be open to possible buffer-overflow security
+  vulnerabilities.
+  The --insecure option must be provided to ./configure in order to
+  compile using the insecure vsprintf() function.
+Checking for return value of vsprintf()... Yes.
+Checking for attribute(visibility) support... Yes.
+Checking for s390x build ... No.
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/zlib“ wird betreten
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o adler32.o adler32.c
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o crc32.o crc32.c
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o deflate.o deflate.c
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o infback.o infback.c
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o inffast.o inffast.c
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o inflate.o inflate.c
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o inftrees.o inftrees.c
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o trees.o trees.c
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o zutil.o zutil.c
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o compress.o compress.c
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o uncompr.o uncompr.c
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o gzclose.o gzclose.c
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o gzlib.o gzlib.c
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o gzread.o gzread.c
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o gzwrite.o gzwrite.c
+gzwrite.c: In function 'gzvprintf':
+gzwrite.c:405:2: warning: #warning "vsnprintf() not available -- gzprintf() stub returns Z_STREAM_ERROR" [-Wcpp]
+  405 | #warning "vsnprintf() not available -- gzprintf() stub returns Z_STREAM_ERROR"
+      |  ^~~~~~~
+gzwrite.c:406:2: warning: #warning "you can recompile with ZLIB_INSECURE defined to use vsprintf()" [-Wcpp]
+  406 | #warning "you can recompile with ZLIB_INSECURE defined to use vsprintf()"
+      |  ^~~~~~~
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-ar rc libz.a adler32.o crc32.o deflate.o infback.o inffast.o inflate.o inftrees.o trees.o zutil.o compress.o uncompr.o gzclose.o gzlib.o gzread.o gzwrite.o 
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/zlib“ wird verlassen
+if test ! -f libpython3.15.a; \
+then for i in Parser Grammar Objects Python Modules; do rm -f $i/*.a; done; true; \
+else true; fi
+for i in Parser Grammar Objects Python Modules; do \
+	(cd $i; make VERSION="3.15" all); \
+	(cd $i; make lib$i.a); \
+done
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Parser“ wird betreten
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -g -O2 -Wall -Wstrict-prototypes -fPIC -Os -Wall -msoft-float -I../Include -I.. -DHAVE_CONFIG_H -c action_helpers.c
+In file included from ../Include/Python.h:14,
+                 from action_helpers.c:1:
+../pyconfig.h:6:9: warning: 'HAVE_CONFIG_H' redefined
+    6 | #define HAVE_CONFIG_H
+      |         ^~~~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+../pyconfig.h:25:18: warning: missing terminating " character
+   25 | #define MACHDEP \"wii\"
+      |                  ^
+../pyconfig.h:27:24: warning: missing terminating " character
+   27 | #define HOST_PLATFORM \"linux\"
+      |                        ^
+In file included from ../Include/Python.h:73:
+../Include/pyport.h:165:5: error: #error "Python needs a typedef for Py_ssize_t in pyport.h."
+  165 | #   error "Python needs a typedef for Py_ssize_t in pyport.h."
+      |     ^~~~~
+../Include/pyport.h:173:9: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  173 | typedef Py_ssize_t Py_hash_t;
+      |         ^~~~~~~~~~
+      |         _ssize_t
+../Include/pyport.h:179:9: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  179 | typedef Py_ssize_t Py_ssize_clean_t;
+      |         ^~~~~~~~~~
+      |         _ssize_t
+In file included from ../Include/Python.h:78:
+../Include/pybuffer.h:23:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   23 |     Py_ssize_t len;
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/pybuffer.h:24:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   24 |     Py_ssize_t itemsize;  /* This is Py_ssize_t so it can be
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/pybuffer.h:29:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   29 |     Py_ssize_t *shape;
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/pybuffer.h:30:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   30 |     Py_ssize_t *strides;
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/pybuffer.h:31:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   31 |     Py_ssize_t *suboffsets;
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/pybuffer.h:51:69: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   51 | PyAPI_FUNC(void *) PyBuffer_GetPointer(const Py_buffer *view, const Py_ssize_t *indices);
+      |                                                                     ^~~~~~~~~~
+      |                                                                     _ssize_t
+In file included from ../Include/pyport.h:391:
+../Include/pybuffer.h:55:12: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   55 | PyAPI_FUNC(Py_ssize_t) PyBuffer_SizeFromFormat(const char *format);
+      |            ^~~~~~~~~~
+../Include/exports.h:89:53: note: in definition of macro 'PyAPI_FUNC'
+   89 | #       define PyAPI_FUNC(RTYPE) Py_EXPORTED_SYMBOL RTYPE
+      |                                                     ^~~~~
+../Include/pybuffer.h:59:39: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   59 |                                       Py_ssize_t len, char order);
+      |                                       ^~~~~~~~~~
+      |                                       _ssize_t
+../Include/pybuffer.h:62:41: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   62 |                                         Py_ssize_t len, char order);
+      |                                         ^~~~~~~~~~
+      |                                         _ssize_t
+../Include/pybuffer.h:87:48: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   87 |                                                Py_ssize_t *shape,
+      |                                                ^~~~~~~~~~
+      |                                                _ssize_t
+../Include/pybuffer.h:88:48: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   88 |                                                Py_ssize_t *strides,
+      |                                                ^~~~~~~~~~
+      |                                                _ssize_t
+../Include/pybuffer.h:98:35: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   98 |                                   Py_ssize_t len, int readonly,
+      |                                   ^~~~~~~~~~
+      |                                   _ssize_t
+In file included from ../Include/pyatomic.h:9,
+                 from ../Include/Python.h:80:
+../Include/cpython/pyatomic.h:129:15: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  129 | static inline Py_ssize_t
+      |               ^~~~~~~~~~
+      |               _ssize_t
+../Include/cpython/pyatomic.h:130:22: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  130 | _Py_atomic_add_ssize(Py_ssize_t *obj, Py_ssize_t value);
+      |                      ^~~~~~~~~~
+      |                      _ssize_t
+../Include/cpython/pyatomic.h:130:39: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  130 | _Py_atomic_add_ssize(Py_ssize_t *obj, Py_ssize_t value);
+      |                                       ^~~~~~~~~~
+      |                                       _ssize_t
+../Include/cpython/pyatomic.h:180:35: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  180 | _Py_atomic_compare_exchange_ssize(Py_ssize_t *obj, Py_ssize_t *expected, Py_ssize_t desired);
+      |                                   ^~~~~~~~~~
+      |                                   _ssize_t
+../Include/cpython/pyatomic.h:180:52: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  180 | _Py_atomic_compare_exchange_ssize(Py_ssize_t *obj, Py_ssize_t *expected, Py_ssize_t desired);
+      |                                                    ^~~~~~~~~~
+      |                                                    _ssize_t
+../Include/cpython/pyatomic.h:180:74: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  180 | _Py_atomic_compare_exchange_ssize(Py_ssize_t *obj, Py_ssize_t *expected, Py_ssize_t desired);
+      |                                                                          ^~~~~~~~~~
+      |                                                                          _ssize_t
+../Include/cpython/pyatomic.h:227:15: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  227 | static inline Py_ssize_t
+      |               ^~~~~~~~~~
+      |               _ssize_t
+../Include/cpython/pyatomic.h:228:27: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  228 | _Py_atomic_exchange_ssize(Py_ssize_t *obj, Py_ssize_t value);
+      |                           ^~~~~~~~~~
+      |                           _ssize_t
+../Include/cpython/pyatomic.h:228:44: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  228 | _Py_atomic_exchange_ssize(Py_ssize_t *obj, Py_ssize_t value);
+      |                                            ^~~~~~~~~~
+      |                                            _ssize_t
+../Include/cpython/pyatomic.h:311:15: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  311 | static inline Py_ssize_t
+      |               ^~~~~~~~~~
+      |               _ssize_t
+../Include/cpython/pyatomic.h:312:29: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  312 | _Py_atomic_load_ssize(const Py_ssize_t *obj);
+      |                             ^~~~~~~~~~
+      |                             _ssize_t
+../Include/cpython/pyatomic.h:378:15: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  378 | static inline Py_ssize_t
+      |               ^~~~~~~~~~
+      |               _ssize_t
+../Include/cpython/pyatomic.h:379:37: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  379 | _Py_atomic_load_ssize_relaxed(const Py_ssize_t *obj);
+      |                                     ^~~~~~~~~~
+      |                                     _ssize_t
+../Include/cpython/pyatomic.h:430:24: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  430 | _Py_atomic_store_ssize(Py_ssize_t* obj, Py_ssize_t value);
+      |                        ^~~~~~~~~~
+      |                        _ssize_t
+../Include/cpython/pyatomic.h:430:41: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  430 | _Py_atomic_store_ssize(Py_ssize_t* obj, Py_ssize_t value);
+      |                                         ^~~~~~~~~~
+      |                                         _ssize_t
+../Include/cpython/pyatomic.h:476:32: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  476 | _Py_atomic_store_ssize_relaxed(Py_ssize_t *obj, Py_ssize_t value);
+      |                                ^~~~~~~~~~
+      |                                _ssize_t
+../Include/cpython/pyatomic.h:476:49: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  476 | _Py_atomic_store_ssize_relaxed(Py_ssize_t *obj, Py_ssize_t value);
+      |                                                 ^~~~~~~~~~
+      |                                                 _ssize_t
+../Include/cpython/pyatomic.h:524:32: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  524 | _Py_atomic_store_ssize_release(Py_ssize_t *obj, Py_ssize_t value);
+      |                                ^~~~~~~~~~
+      |                                _ssize_t
+../Include/cpython/pyatomic.h:524:49: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  524 | _Py_atomic_store_ssize_release(Py_ssize_t *obj, Py_ssize_t value);
+      |                                                 ^~~~~~~~~~
+      |                                                 _ssize_t
+../Include/cpython/pyatomic.h:547:15: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  547 | static inline Py_ssize_t
+      |               ^~~~~~~~~~
+      |               _ssize_t
+../Include/cpython/pyatomic.h:548:37: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  548 | _Py_atomic_load_ssize_acquire(const Py_ssize_t *obj);
+      |                                     ^~~~~~~~~~
+      |                                     _ssize_t
+In file included from ../Include/cpython/pyatomic.h:580:
+../Include/cpython/pyatomic_gcc.h:61:15: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   61 | static inline Py_ssize_t
+      |               ^~~~~~~~~~
+      |               _ssize_t
+../Include/cpython/pyatomic_gcc.h:62:22: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   62 | _Py_atomic_add_ssize(Py_ssize_t *obj, Py_ssize_t value)
+      |                      ^~~~~~~~~~
+      |                      _ssize_t
+../Include/cpython/pyatomic_gcc.h:62:39: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   62 | _Py_atomic_add_ssize(Py_ssize_t *obj, Py_ssize_t value)
+      |                                       ^~~~~~~~~~
+      |                                       _ssize_t
+../Include/cpython/pyatomic_gcc.h:129:35: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  129 | _Py_atomic_compare_exchange_ssize(Py_ssize_t *obj, Py_ssize_t *expected, Py_ssize_t desired)
+      |                                   ^~~~~~~~~~
+      |                                   _ssize_t
+../Include/cpython/pyatomic_gcc.h:129:52: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  129 | _Py_atomic_compare_exchange_ssize(Py_ssize_t *obj, Py_ssize_t *expected, Py_ssize_t desired)
+      |                                                    ^~~~~~~~~~
+      |                                                    _ssize_t
+../Include/cpython/pyatomic_gcc.h:129:74: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  129 | _Py_atomic_compare_exchange_ssize(Py_ssize_t *obj, Py_ssize_t *expected, Py_ssize_t desired)
+      |                                                                          ^~~~~~~~~~
+      |                                                                          _ssize_t
+../Include/cpython/pyatomic_gcc.h:189:15: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  189 | static inline Py_ssize_t
+      |               ^~~~~~~~~~
+      |               _ssize_t
+../Include/cpython/pyatomic_gcc.h:190:27: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  190 | _Py_atomic_exchange_ssize(Py_ssize_t *obj, Py_ssize_t value)
+      |                           ^~~~~~~~~~
+      |                           _ssize_t
+../Include/cpython/pyatomic_gcc.h:190:44: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  190 | _Py_atomic_exchange_ssize(Py_ssize_t *obj, Py_ssize_t value)
+      |                                            ^~~~~~~~~~
+      |                                            _ssize_t
+../Include/cpython/pyatomic_gcc.h:294:15: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  294 | static inline Py_ssize_t
+      |               ^~~~~~~~~~
+      |               _ssize_t
+../Include/cpython/pyatomic_gcc.h:295:29: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  295 | _Py_atomic_load_ssize(const Py_ssize_t *obj)
+      |                             ^~~~~~~~~~
+      |                             _ssize_t
+../Include/cpython/pyatomic_gcc.h:381:15: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  381 | static inline Py_ssize_t
+      |               ^~~~~~~~~~
+      |               _ssize_t
+../Include/cpython/pyatomic_gcc.h:382:37: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  382 | _Py_atomic_load_ssize_relaxed(const Py_ssize_t *obj)
+      |                                     ^~~~~~~~~~
+      |                                     _ssize_t
+../Include/cpython/pyatomic_gcc.h:453:24: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  453 | _Py_atomic_store_ssize(Py_ssize_t *obj, Py_ssize_t value)
+      |                        ^~~~~~~~~~
+      |                        _ssize_t
+../Include/cpython/pyatomic_gcc.h:453:41: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  453 | _Py_atomic_store_ssize(Py_ssize_t *obj, Py_ssize_t value)
+      |                                         ^~~~~~~~~~
+      |                                         _ssize_t
+../Include/cpython/pyatomic_gcc.h:512:32: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  512 | _Py_atomic_store_ssize_relaxed(Py_ssize_t *obj, Py_ssize_t value)
+      |                                ^~~~~~~~~~
+      |                                _ssize_t
+../Include/cpython/pyatomic_gcc.h:512:49: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  512 | _Py_atomic_store_ssize_relaxed(Py_ssize_t *obj, Py_ssize_t value)
+      |                                                 ^~~~~~~~~~
+      |                                                 _ssize_t
+../Include/cpython/pyatomic_gcc.h:580:32: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  580 | _Py_atomic_store_ssize_release(Py_ssize_t *obj, Py_ssize_t value)
+      |                                ^~~~~~~~~~
+      |                                _ssize_t
+../Include/cpython/pyatomic_gcc.h:580:49: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  580 | _Py_atomic_store_ssize_release(Py_ssize_t *obj, Py_ssize_t value)
+      |                                                 ^~~~~~~~~~
+      |                                                 _ssize_t
+../Include/cpython/pyatomic_gcc.h:603:15: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  603 | static inline Py_ssize_t
+      |               ^~~~~~~~~~
+      |               _ssize_t
+../Include/cpython/pyatomic_gcc.h:604:37: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  604 | _Py_atomic_load_ssize_acquire(const Py_ssize_t *obj)
+      |                                     ^~~~~~~~~~
+      |                                     _ssize_t
+In file included from ../Include/Python.h:83:
+../Include/object.h:143:9: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  143 |         Py_ssize_t ob_refcnt;  // part of stable ABI; do not change
+      |         ^~~~~~~~~~
+      |         _ssize_t
+../Include/object.h:176:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  176 |     Py_ssize_t ob_size; // Number of items in variable part. Part of stable ABI
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/object.h:276:12: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  276 | PyAPI_FUNC(Py_ssize_t) Py_SIZE(PyObject *ob);
+      |            ^~~~~~~~~~
+../Include/exports.h:89:53: note: in definition of macro 'PyAPI_FUNC'
+   89 | #       define PyAPI_FUNC(RTYPE) Py_EXPORTED_SYMBOL RTYPE
+      |                                                     ^~~~~
+../Include/object.h:278:47: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  278 | PyAPI_FUNC(void) Py_SET_SIZE(PyVarObject *ob, Py_ssize_t size);
+      |                                               ^~~~~~~~~~
+      |                                               _ssize_t
+../Include/object.h:317:15: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  317 | static inline Py_ssize_t
+      |               ^~~~~~~~~~
+      |               _ssize_t
+../Include/object.h:332:36: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  332 | _Py_SET_SIZE_impl(PyVarObject *ob, Py_ssize_t size)
+      |                                    ^~~~~~~~~~
+      |                                    _ssize_t
+../Include/object.h:365:21: error: expected declaration specifiers or '...' before '*' token
+  365 | typedef Py_ssize_t (*lenfunc)(PyObject *);
+      |                     ^
+../Include/object.h:366:47: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  366 | typedef PyObject *(*ssizeargfunc)(PyObject *, Py_ssize_t);
+      |                                               ^~~~~~~~~~
+      |                                               _ssize_t
+../Include/object.h:367:52: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  367 | typedef PyObject *(*ssizessizeargfunc)(PyObject *, Py_ssize_t, Py_ssize_t);
+      |                                                    ^~~~~~~~~~
+      |                                                    _ssize_t
+../Include/object.h:367:64: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  367 | typedef PyObject *(*ssizessizeargfunc)(PyObject *, Py_ssize_t, Py_ssize_t);
+      |                                                                ^~~~~~~~~~
+      |                                                                _ssize_t
+../Include/object.h:368:43: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  368 | typedef int(*ssizeobjargproc)(PyObject *, Py_ssize_t, PyObject *);
+      |                                           ^~~~~~~~~~
+      |                                           _ssize_t
+../Include/object.h:369:48: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  369 | typedef int(*ssizessizeobjargproc)(PyObject *, Py_ssize_t, Py_ssize_t, PyObject *);
+      |                                                ^~~~~~~~~~
+      |                                                _ssize_t
+../Include/object.h:369:60: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  369 | typedef int(*ssizessizeobjargproc)(PyObject *, Py_ssize_t, Py_ssize_t, PyObject *);
+      |                                                            ^~~~~~~~~~
+      |                                                            _ssize_t
+../Include/object.h:392:48: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  392 | typedef PyObject *(*allocfunc)(PyTypeObject *, Py_ssize_t);
+      |                                                ^~~~~~~~~~
+      |                                                _ssize_t
+../Include/object.h:435:12: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  435 | PyAPI_FUNC(Py_ssize_t) PyType_GetTypeDataSize(PyTypeObject *cls);
+      |            ^~~~~~~~~~
+../Include/exports.h:89:53: note: in definition of macro 'PyAPI_FUNC'
+   89 | #       define PyAPI_FUNC(RTYPE) Py_EXPORTED_SYMBOL RTYPE
+      |                                                     ^~~~~
+../Include/object.h:459:60: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  459 | PyAPI_FUNC(PyObject *) PyType_GenericAlloc(PyTypeObject *, Py_ssize_t);
+      |                                                            ^~~~~~~~~~
+      |                                                            _ssize_t
+../Include/cpython/object.h:12:12: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   12 | PyAPI_FUNC(Py_ssize_t) _Py_GetGlobalRefTotal(void);
+      |            ^~~~~~~~~~
+../Include/exports.h:89:53: note: in definition of macro 'PyAPI_FUNC'
+   89 | #       define PyAPI_FUNC(RTYPE) Py_EXPORTED_SYMBOL RTYPE
+      |                                                     ^~~~~
+../Include/cpython/object.h:14:12: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   14 | PyAPI_FUNC(Py_ssize_t) _Py_GetLegacyRefTotal(void);
+      |            ^~~~~~~~~~
+../Include/exports.h:89:53: note: in definition of macro 'PyAPI_FUNC'
+   89 | #       define PyAPI_FUNC(RTYPE) Py_EXPORTED_SYMBOL RTYPE
+      |                                                     ^~~~~
+../Include/cpython/object.h:15:12: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   15 | PyAPI_FUNC(Py_ssize_t) _PyInterpreterState_GetRefTotal(PyInterpreterState *);
+      |            ^~~~~~~~~~
+../Include/exports.h:89:53: note: in definition of macro 'PyAPI_FUNC'
+   89 | #       define PyAPI_FUNC(RTYPE) Py_EXPORTED_SYMBOL RTYPE
+      |                                                     ^~~~~
+In file included from ../Include/object.h:811:
+../Include/cpython/object.h:43:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   43 |     Py_ssize_t index;
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/object.h:109:5: error: unknown type name 'lenfunc'; did you mean 'newfunc'?
+  109 |     lenfunc sq_length;
+      |     ^~~~~~~
+      |     newfunc
+../Include/cpython/object.h:111:5: error: unknown type name 'ssizeargfunc'
+  111 |     ssizeargfunc sq_repeat;
+      |     ^~~~~~~~~~~~
+../Include/cpython/object.h:112:5: error: unknown type name 'ssizeargfunc'
+  112 |     ssizeargfunc sq_item;
+      |     ^~~~~~~~~~~~
+../Include/cpython/object.h:114:5: error: unknown type name 'ssizeobjargproc'; did you mean 'objobjargproc'?
+  114 |     ssizeobjargproc sq_ass_item;
+      |     ^~~~~~~~~~~~~~~
+      |     objobjargproc
+../Include/cpython/object.h:119:5: error: unknown type name 'ssizeargfunc'
+  119 |     ssizeargfunc sq_inplace_repeat;
+      |     ^~~~~~~~~~~~
+../Include/cpython/object.h:123:5: error: unknown type name 'lenfunc'; did you mean 'newfunc'?
+  123 |     lenfunc mp_length;
+      |     ^~~~~~~
+      |     newfunc
+../Include/cpython/object.h:144:9: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  144 | typedef Py_ssize_t printfunc;
+      |         ^~~~~~~~~~
+      |         _ssize_t
+../Include/cpython/object.h:151:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  151 |     Py_ssize_t tp_basicsize, tp_itemsize; /* For allocation */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/object.h:156:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  156 |     Py_ssize_t tp_vectorcall_offset;
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/object.h:197:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  197 |     Py_ssize_t tp_weaklistoffset;
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/object.h:212:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  212 |     Py_ssize_t tp_dictoffset;
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/object.h:214:5: error: unknown type name 'allocfunc'
+  214 |     allocfunc tp_alloc;
+      |     ^~~~~~~~~
+../Include/refcount.h:96:12: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   96 | PyAPI_FUNC(Py_ssize_t) Py_REFCNT(PyObject *ob);
+      |            ^~~~~~~~~~
+../Include/exports.h:89:53: note: in definition of macro 'PyAPI_FUNC'
+   89 | #       define PyAPI_FUNC(RTYPE) Py_EXPORTED_SYMBOL RTYPE
+      |                                                     ^~~~~
+In file included from ../Include/Python.h:84:
+../Include/refcount.h:102:19: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  102 |     static inline Py_ssize_t _Py_REFCNT(PyObject *ob) {
+      |                   ^~~~~~~~~~
+      |                   _ssize_t
+../Include/refcount.h: In function '_Py_IsImmortal':
+../Include/refcount.h:65:39: error: 'Py_ssize_t' undeclared (first use in this function); did you mean '_ssize_t'?
+   65 | #define _Py_IMMORTAL_MINIMUM_REFCNT ((Py_ssize_t)(1L << 30))
+      |                                       ^~~~~~~~~~
+../Include/refcount.h:131:29: note: in expansion of macro '_Py_IMMORTAL_MINIMUM_REFCNT'
+  131 |     return op->ob_refcnt >= _Py_IMMORTAL_MINIMUM_REFCNT;
+      |                             ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+../Include/refcount.h:65:39: note: each undeclared identifier is reported only once for each function it appears in
+   65 | #define _Py_IMMORTAL_MINIMUM_REFCNT ((Py_ssize_t)(1L << 30))
+      |                                       ^~~~~~~~~~
+../Include/refcount.h:131:29: note: in expansion of macro '_Py_IMMORTAL_MINIMUM_REFCNT'
+  131 |     return op->ob_refcnt >= _Py_IMMORTAL_MINIMUM_REFCNT;
+      |                             ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+../Include/refcount.h: In function '_Py_IsStaticImmortal':
+../Include/refcount.h:67:46: error: 'Py_ssize_t' undeclared (first use in this function); did you mean '_ssize_t'?
+   67 | #define _Py_STATIC_IMMORTAL_MINIMUM_REFCNT ((Py_ssize_t)(6L << 28))
+      |                                              ^~~~~~~~~~
+../Include/refcount.h:142:29: note: in expansion of macro '_Py_STATIC_IMMORTAL_MINIMUM_REFCNT'
+  142 |     return op->ob_refcnt >= _Py_STATIC_IMMORTAL_MINIMUM_REFCNT;
+      |                             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+../Include/refcount.h: At top level:
+../Include/refcount.h:149:46: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  149 | PyAPI_FUNC(void) _Py_SetRefcnt(PyObject *ob, Py_ssize_t refcnt);
+      |                                              ^~~~~~~~~~
+      |                                              _ssize_t
+../Include/refcount.h:151:48: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  151 | static inline void Py_SET_REFCNT(PyObject *ob, Py_ssize_t refcnt) {
+      |                                                ^~~~~~~~~~
+      |                                                _ssize_t
+In file included from ../Include/Python.h:85:
+../Include/objimpl.h:119:60: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  119 |                                            PyTypeObject *, Py_ssize_t);
+      |                                                            ^~~~~~~~~~
+      |                                                            _ssize_t
+../Include/objimpl.h:128:60: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  128 | PyAPI_FUNC(PyVarObject *) _PyObject_NewVar(PyTypeObject *, Py_ssize_t);
+      |                                                            ^~~~~~~~~~
+      |                                                            _ssize_t
+../Include/objimpl.h:150:12: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  150 | PyAPI_FUNC(Py_ssize_t) PyGC_Collect(void);
+      |            ^~~~~~~~~~
+../Include/exports.h:89:53: note: in definition of macro 'PyAPI_FUNC'
+   89 | #       define PyAPI_FUNC(RTYPE) Py_EXPORTED_SYMBOL RTYPE
+      |                                                     ^~~~~
+../Include/objimpl.h:159:62: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  159 | PyAPI_FUNC(PyVarObject *) _PyObject_GC_Resize(PyVarObject *, Py_ssize_t);
+      |                                                              ^~~~~~~~~~
+      |                                                              _ssize_t
+../Include/objimpl.h:166:63: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  166 | PyAPI_FUNC(PyVarObject *) _PyObject_GC_NewVar(PyTypeObject *, Py_ssize_t);
+      |                                                               ^~~~~~~~~~
+      |                                                               _ssize_t
+In file included from ../Include/objimpl.h:204:
+../Include/cpython/objimpl.h:23:61: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   23 | static inline size_t _PyObject_VAR_SIZE(PyTypeObject *type, Py_ssize_t nitems) {
+      |                                                             ^~~~~~~~~~
+      |                                                             _ssize_t
+In file included from ../Include/pyhash.h:52,
+                 from ../Include/Python.h:87:
+../Include/cpython/pyhash.h:35:43: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   35 |     Py_hash_t (*const hash)(const void *, Py_ssize_t);
+      |                                           ^~~~~~~~~~
+      |                                           _ssize_t
+../Include/cpython/pyhash.h:54:54: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   54 | PyAPI_FUNC(Py_hash_t) Py_HashBuffer(const void *ptr, Py_ssize_t len);
+      |                                                      ^~~~~~~~~~
+      |                                                      _ssize_t
+In file included from ../Include/Python.h:89:
+../Include/bytearrayobject.h:30:68: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   30 | PyAPI_FUNC(PyObject *) PyByteArray_FromStringAndSize(const char *, Py_ssize_t);
+      |                                                                    ^~~~~~~~~~
+      |                                                                    _ssize_t
+../Include/bytearrayobject.h:31:12: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   31 | PyAPI_FUNC(Py_ssize_t) PyByteArray_Size(PyObject *);
+      |            ^~~~~~~~~~
+../Include/exports.h:89:53: note: in definition of macro 'PyAPI_FUNC'
+   89 | #       define PyAPI_FUNC(RTYPE) Py_EXPORTED_SYMBOL RTYPE
+      |                                                     ^~~~~
+../Include/bytearrayobject.h:33:48: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   33 | PyAPI_FUNC(int) PyByteArray_Resize(PyObject *, Py_ssize_t);
+      |                                                ^~~~~~~~~~
+      |                                                _ssize_t
+In file included from ../Include/bytearrayobject.h:37:
+../Include/cpython/bytearrayobject.h:13:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   13 |     Py_ssize_t ob_alloc;
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/bytearrayobject.h:16:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   16 |     Py_ssize_t ob_exports; /* How many buffer exports */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/bytearrayobject.h:30:15: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   30 | static inline Py_ssize_t PyByteArray_GET_SIZE(PyObject *op) {
+      |               ^~~~~~~~~~
+      |               _ssize_t
+In file included from ../Include/Python.h:90:
+../Include/bytesobject.h:31:64: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   31 | PyAPI_FUNC(PyObject *) PyBytes_FromStringAndSize(const char *, Py_ssize_t);
+      |                                                                ^~~~~~~~~~
+      |                                                                _ssize_t
+../Include/bytesobject.h:38:12: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   38 | PyAPI_FUNC(Py_ssize_t) PyBytes_Size(PyObject *);
+      |            ^~~~~~~~~~
+../Include/exports.h:89:53: note: in definition of macro 'PyAPI_FUNC'
+   89 | #       define PyAPI_FUNC(RTYPE) Py_EXPORTED_SYMBOL RTYPE
+      |                                                     ^~~~~
+../Include/bytesobject.h:43:59: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   43 | PyAPI_FUNC(PyObject *) PyBytes_DecodeEscape(const char *, Py_ssize_t,
+      |                                                           ^~~~~~~~~~
+      |                                                           _ssize_t
+../Include/bytesobject.h:44:59: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   44 |                                             const char *, Py_ssize_t,
+      |                                                           ^~~~~~~~~~
+      |                                                           _ssize_t
+../Include/bytesobject.h:54:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   54 |     Py_ssize_t *len     /* pointer to length variable or NULL */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+In file included from ../Include/bytesobject.h:59:
+../Include/cpython/bytesobject.h:17:46: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   17 | PyAPI_FUNC(int) _PyBytes_Resize(PyObject **, Py_ssize_t);
+      |                                              ^~~~~~~~~~
+      |                                              _ssize_t
+../Include/cpython/bytesobject.h:29:15: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   29 | static inline Py_ssize_t PyBytes_GET_SIZE(PyObject *op) {
+      |               ^~~~~~~~~~
+      |               _ssize_t
+../Include/cpython/bytesobject.h:50:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   50 |     Py_ssize_t size);
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/bytesobject.h:57:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   57 |     Py_ssize_t size);
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/bytesobject.h:64:12: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   64 | PyAPI_FUNC(Py_ssize_t) PyBytesWriter_GetSize(
+      |            ^~~~~~~~~~
+../Include/exports.h:89:53: note: in definition of macro 'PyAPI_FUNC'
+   89 | #       define PyAPI_FUNC(RTYPE) Py_EXPORTED_SYMBOL RTYPE
+      |                                                     ^~~~~
+../Include/cpython/bytesobject.h:70:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   70 |     Py_ssize_t size);
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/bytesobject.h:78:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   78 |     Py_ssize_t size);
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/bytesobject.h:81:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   81 |     Py_ssize_t size);
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/bytesobject.h:84:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   84 |     Py_ssize_t size,
+      |     ^~~~~~~~~~
+      |     _ssize_t
+In file included from ../Include/Python.h:91:
+../Include/unicodeobject.h:64:2: error: #error Must define SIZEOF_WCHAR_T
+   64 | #error Must define SIZEOF_WCHAR_T
+      |  ^~~~~
+../Include/unicodeobject.h:124:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  124 |     Py_ssize_t size            /* size of buffer */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/unicodeobject.h:136:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  136 |     Py_ssize_t start,
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/unicodeobject.h:137:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  137 |     Py_ssize_t end);
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/unicodeobject.h:149:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  149 |     Py_ssize_t buflen,
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/unicodeobject.h:161:12: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  161 | PyAPI_FUNC(Py_ssize_t) PyUnicode_GetLength(
+      |            ^~~~~~~~~~
+../Include/exports.h:89:53: note: in definition of macro 'PyAPI_FUNC'
+   89 | #       define PyAPI_FUNC(RTYPE) Py_EXPORTED_SYMBOL RTYPE
+      |                                                     ^~~~~
+../Include/unicodeobject.h:171:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  171 |     Py_ssize_t index
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/unicodeobject.h:181:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  181 |     Py_ssize_t index,
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/unicodeobject.h:202:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  202 |     Py_ssize_t length           /* New length */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/unicodeobject.h:339:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  339 |     Py_ssize_t size,            /* size of buffer */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/unicodeobject.h:363:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  363 |     Py_ssize_t length,          /* size of string */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/unicodeobject.h:369:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  369 |     Py_ssize_t length,          /* size of string */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/unicodeobject.h:371:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  371 |     Py_ssize_t *consumed        /* bytes consumed */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/unicodeobject.h:378:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  378 |     Py_ssize_t length,          /* size of string */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/unicodeobject.h:384:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  384 |     Py_ssize_t length,          /* size of string */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/unicodeobject.h:386:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  386 |     Py_ssize_t *consumed        /* bytes consumed */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/unicodeobject.h:407:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  407 |     Py_ssize_t *size);
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/unicodeobject.h:437:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  437 |     Py_ssize_t length,          /* size of string */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/unicodeobject.h:446:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  446 |     Py_ssize_t length,          /* size of string */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/unicodeobject.h:451:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  451 |     Py_ssize_t *consumed        /* bytes consumed */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/unicodeobject.h:504:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  504 |     Py_ssize_t length,          /* size of string */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/unicodeobject.h:513:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  513 |     Py_ssize_t length,          /* size of string */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/unicodeobject.h:518:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  518 |     Py_ssize_t *consumed        /* bytes consumed */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/unicodeobject.h:532:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  532 |     Py_ssize_t length,          /* size of string */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/unicodeobject.h:544:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  544 |     Py_ssize_t length,          /* size of string */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/unicodeobject.h:558:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  558 |     Py_ssize_t length,          /* size of string */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/unicodeobject.h:574:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  574 |     Py_ssize_t length,          /* size of string */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/unicodeobject.h:601:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  601 |     Py_ssize_t length,          /* size of string */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/unicodeobject.h:664:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  664 |     Py_ssize_t len,
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/unicodeobject.h:708:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  708 |     Py_ssize_t size              /* size */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/unicodeobject.h:760:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  760 |     Py_ssize_t maxsplit         /* Maxsplit count */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/unicodeobject.h:804:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  804 |     Py_ssize_t maxsplit         /* Maxsplit count */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/unicodeobject.h:836:12: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  836 | PyAPI_FUNC(Py_ssize_t) PyUnicode_Tailmatch(
+      |            ^~~~~~~~~~
+../Include/exports.h:89:53: note: in definition of macro 'PyAPI_FUNC'
+   89 | #       define PyAPI_FUNC(RTYPE) Py_EXPORTED_SYMBOL RTYPE
+      |                                                     ^~~~~
+../Include/unicodeobject.h:839:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  839 |     Py_ssize_t start,           /* Start index */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/unicodeobject.h:840:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  840 |     Py_ssize_t end,             /* Stop index */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/unicodeobject.h:848:12: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  848 | PyAPI_FUNC(Py_ssize_t) PyUnicode_Find(
+      |            ^~~~~~~~~~
+../Include/exports.h:89:53: note: in definition of macro 'PyAPI_FUNC'
+   89 | #       define PyAPI_FUNC(RTYPE) Py_EXPORTED_SYMBOL RTYPE
+      |                                                     ^~~~~
+../Include/unicodeobject.h:851:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  851 |     Py_ssize_t start,           /* Start index */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/unicodeobject.h:852:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  852 |     Py_ssize_t end,             /* Stop index */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/unicodeobject.h:858:12: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  858 | PyAPI_FUNC(Py_ssize_t) PyUnicode_FindChar(
+      |            ^~~~~~~~~~
+../Include/exports.h:89:53: note: in definition of macro 'PyAPI_FUNC'
+   89 | #       define PyAPI_FUNC(RTYPE) Py_EXPORTED_SYMBOL RTYPE
+      |                                                     ^~~~~
+../Include/unicodeobject.h:861:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  861 |     Py_ssize_t start,
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/unicodeobject.h:862:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  862 |     Py_ssize_t end,
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/unicodeobject.h:869:12: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  869 | PyAPI_FUNC(Py_ssize_t) PyUnicode_Count(
+      |            ^~~~~~~~~~
+../Include/exports.h:89:53: note: in definition of macro 'PyAPI_FUNC'
+   89 | #       define PyAPI_FUNC(RTYPE) Py_EXPORTED_SYMBOL RTYPE
+      |                                                     ^~~~~
+../Include/unicodeobject.h:872:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  872 |     Py_ssize_t start,           /* Start index */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/unicodeobject.h:873:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  873 |     Py_ssize_t end              /* Stop index */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/unicodeobject.h:883:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  883 |     Py_ssize_t maxcount         /* Max. number of replacements to apply;
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/unicodeobject.h:913:72: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  913 | PyAPI_FUNC(int) PyUnicode_EqualToUTF8AndSize(PyObject *, const char *, Py_ssize_t);
+      |                                                                        ^~~~~~~~~~
+      |                                                                        _ssize_t
+In file included from ../Include/unicodeobject.h:965:
+../Include/cpython/unicodeobject.h:157:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  157 |     Py_ssize_t length;          /* Number of code points in the string */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/unicodeobject.h:168:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  168 |     Py_ssize_t utf8_length;     /* Number of bytes in utf8, excluding the
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/unicodeobject.h:296:15: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  296 | static inline Py_ssize_t PyUnicode_GET_LENGTH(PyObject *op) {
+      |               ^~~~~~~~~~
+      |               _ssize_t
+../Include/cpython/unicodeobject.h:317:36: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  317 |                                    Py_ssize_t index, Py_UCS4 value)
+      |                                    ^~~~~~~~~~
+      |                                    _ssize_t
+../Include/cpython/unicodeobject.h:341:56: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  341 |                                      const void *data, Py_ssize_t index)
+      |                                                        ^~~~~~~~~~
+      |                                                        _ssize_t
+../Include/cpython/unicodeobject.h:362:62: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  362 | static inline Py_UCS4 PyUnicode_READ_CHAR(PyObject *unicode, Py_ssize_t index)
+      |                                                              ^~~~~~~~~~
+      |                                                              _ssize_t
+../Include/cpython/unicodeobject.h:414:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  414 |     Py_ssize_t size,            /* Number of code points in the new string */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/unicodeobject.h:443:12: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  443 | PyAPI_FUNC(Py_ssize_t) PyUnicode_CopyCharacters(
+      |            ^~~~~~~~~~
+../Include/exports.h:89:53: note: in definition of macro 'PyAPI_FUNC'
+   89 | #       define PyAPI_FUNC(RTYPE) Py_EXPORTED_SYMBOL RTYPE
+      |                                                     ^~~~~
+../Include/cpython/unicodeobject.h:445:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  445 |     Py_ssize_t to_start,
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/unicodeobject.h:447:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  447 |     Py_ssize_t from_start,
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/unicodeobject.h:448:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  448 |     Py_ssize_t how_many
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/unicodeobject.h:459:12: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  459 | PyAPI_FUNC(Py_ssize_t) PyUnicode_Fill(
+      |            ^~~~~~~~~~
+../Include/exports.h:89:53: note: in definition of macro 'PyAPI_FUNC'
+   89 | #       define PyAPI_FUNC(RTYPE) Py_EXPORTED_SYMBOL RTYPE
+      |                                                     ^~~~~
+../Include/cpython/unicodeobject.h:461:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  461 |     Py_ssize_t start,
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/unicodeobject.h:462:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  462 |     Py_ssize_t length,
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/unicodeobject.h:471:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  471 |     Py_ssize_t size);
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/unicodeobject.h:478:53: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  478 | PyAPI_FUNC(PyUnicodeWriter*) PyUnicodeWriter_Create(Py_ssize_t length);
+      |                                                     ^~~~~~~~~~
+      |                                                     _ssize_t
+../Include/cpython/unicodeobject.h:488:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  488 |     Py_ssize_t size);
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/unicodeobject.h:492:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  492 |     Py_ssize_t size);
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/unicodeobject.h:496:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  496 |     Py_ssize_t size);
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/unicodeobject.h:500:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  500 |     Py_ssize_t size);
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/unicodeobject.h:511:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  511 |     Py_ssize_t start,
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/unicodeobject.h:512:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  512 |     Py_ssize_t end);
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/unicodeobject.h:520:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  520 |     Py_ssize_t length,          /* size of string */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/unicodeobject.h:522:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  522 |     Py_ssize_t *consumed);      /* bytes consumed */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/unicodeobject.h:532:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  532 |     Py_ssize_t size;
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/unicodeobject.h:533:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  533 |     Py_ssize_t pos;
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/unicodeobject.h:536:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  536 |     Py_ssize_t min_length;
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/unicodeobject.h:573:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  573 |     Py_ssize_t length,
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/unicodeobject.h:609:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  609 |     Py_ssize_t start,
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/unicodeobject.h:610:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  610 |     Py_ssize_t end);
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/unicodeobject.h:617:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  617 |     Py_ssize_t len);           /* number of bytes, or -1 if unknown */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/unicodeobject.h:624:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  624 |     Py_ssize_t len);           /* length in bytes */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+In file included from ../Include/Python.h:92:
+../Include/pyerrors.h:265:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  265 |     Py_ssize_t length,
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/pyerrors.h:266:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  266 |     Py_ssize_t start,
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/pyerrors.h:267:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  267 |     Py_ssize_t end,
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/pyerrors.h:282:59: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  282 | PyAPI_FUNC(int) PyUnicodeEncodeError_GetStart(PyObject *, Py_ssize_t *);
+      |                                                           ^~~~~~~~~~
+      |                                                           _ssize_t
+../Include/pyerrors.h:283:59: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  283 | PyAPI_FUNC(int) PyUnicodeDecodeError_GetStart(PyObject *, Py_ssize_t *);
+      |                                                           ^~~~~~~~~~
+      |                                                           _ssize_t
+../Include/pyerrors.h:284:62: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  284 | PyAPI_FUNC(int) PyUnicodeTranslateError_GetStart(PyObject *, Py_ssize_t *);
+      |                                                              ^~~~~~~~~~
+      |                                                              _ssize_t
+../Include/pyerrors.h:288:59: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  288 | PyAPI_FUNC(int) PyUnicodeEncodeError_SetStart(PyObject *, Py_ssize_t);
+      |                                                           ^~~~~~~~~~
+      |                                                           _ssize_t
+../Include/pyerrors.h:289:59: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  289 | PyAPI_FUNC(int) PyUnicodeDecodeError_SetStart(PyObject *, Py_ssize_t);
+      |                                                           ^~~~~~~~~~
+      |                                                           _ssize_t
+../Include/pyerrors.h:290:62: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  290 | PyAPI_FUNC(int) PyUnicodeTranslateError_SetStart(PyObject *, Py_ssize_t);
+      |                                                              ^~~~~~~~~~
+      |                                                              _ssize_t
+../Include/pyerrors.h:294:57: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  294 | PyAPI_FUNC(int) PyUnicodeEncodeError_GetEnd(PyObject *, Py_ssize_t *);
+      |                                                         ^~~~~~~~~~
+      |                                                         _ssize_t
+../Include/pyerrors.h:295:57: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  295 | PyAPI_FUNC(int) PyUnicodeDecodeError_GetEnd(PyObject *, Py_ssize_t *);
+      |                                                         ^~~~~~~~~~
+      |                                                         _ssize_t
+../Include/pyerrors.h:296:60: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  296 | PyAPI_FUNC(int) PyUnicodeTranslateError_GetEnd(PyObject *, Py_ssize_t *);
+      |                                                            ^~~~~~~~~~
+      |                                                            _ssize_t
+../Include/pyerrors.h:300:57: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  300 | PyAPI_FUNC(int) PyUnicodeEncodeError_SetEnd(PyObject *, Py_ssize_t);
+      |                                                         ^~~~~~~~~~
+      |                                                         _ssize_t
+../Include/pyerrors.h:301:57: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  301 | PyAPI_FUNC(int) PyUnicodeDecodeError_SetEnd(PyObject *, Py_ssize_t);
+      |                                                         ^~~~~~~~~~
+      |                                                         _ssize_t
+../Include/pyerrors.h:302:60: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  302 | PyAPI_FUNC(int) PyUnicodeTranslateError_SetEnd(PyObject *, Py_ssize_t);
+      |                                                            ^~~~~~~~~~
+      |                                                            _ssize_t
+In file included from ../Include/pyerrors.h:331:
+../Include/cpython/pyerrors.h:49:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   49 |     Py_ssize_t start;
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/pyerrors.h:50:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   50 |     Py_ssize_t end;
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/pyerrors.h:68:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   68 |     Py_ssize_t written;   /* only for BlockingIOError, -1 otherwise */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+In file included from ../Include/Python.h:93:
+../Include/longobject.h:19:1: error: parameter names (without types) in function declaration [-Wdeclaration-missing-parameter-type]
+   19 | PyAPI_FUNC(PyObject *) PyLong_FromSsize_t(Py_ssize_t);
+      | ^~~~~~~~~~
+../Include/longobject.h:24:12: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   24 | PyAPI_FUNC(Py_ssize_t) PyLong_AsSsize_t(PyObject *);
+      |            ^~~~~~~~~~
+../Include/exports.h:89:53: note: in definition of macro 'PyAPI_FUNC'
+   89 | #       define PyAPI_FUNC(RTYPE) Py_EXPORTED_SYMBOL RTYPE
+      |                                                     ^~~~~
+../Include/longobject.h:79:12: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   79 | PyAPI_FUNC(Py_ssize_t) PyLong_AsNativeBytes(PyObject* v, void* buffer,
+      |            ^~~~~~~~~~
+../Include/exports.h:89:53: note: in definition of macro 'PyAPI_FUNC'
+   89 | #       define PyAPI_FUNC(RTYPE) Py_EXPORTED_SYMBOL RTYPE
+      |                                                     ^~~~~
+../Include/longobject.h:80:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   80 |     Py_ssize_t n_bytes, int flags);
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/longobject.h:183:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  183 |     Py_ssize_t ndigits;
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/longobject.h:202:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  202 |     Py_ssize_t ndigits,
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/longobject.h:11:12: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   11 | PyAPI_FUNC(Py_ssize_t) PyUnstable_Long_CompactValue(const PyLongObject* op);
+      |            ^~~~~~~~~~
+../Include/exports.h:89:53: note: in definition of macro 'PyAPI_FUNC'
+   89 | #       define PyAPI_FUNC(RTYPE) Py_EXPORTED_SYMBOL RTYPE
+      |                                                     ^~~~~
+In file included from ../Include/Python.h:94:
+../Include/cpython/longintrepr.h:103:1: error: parameter names (without types) in function declaration [-Wdeclaration-missing-parameter-type]
+  103 | Py_DEPRECATED(3.14) PyAPI_FUNC(PyLongObject*) _PyLong_New(Py_ssize_t);
+      | ^~~~~~~~~~~~~
+../Include/cpython/longintrepr.h:110:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  110 |     Py_ssize_t digit_count,
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/longintrepr.h:129:15: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  129 | static inline Py_ssize_t
+      |               ^~~~~~~~~~
+      |               _ssize_t
+../Include/cpython/longintrepr.h: In function '_PyLong_CompactValue':
+../Include/cpython/longintrepr.h:132:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  132 |     Py_ssize_t sign;
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/longintrepr.h:136:20: error: 'Py_ssize_t' undeclared (first use in this function); did you mean '_ssize_t'?
+  136 |     return sign * (Py_ssize_t)op->long_value.ob_digit[0];
+      |                    ^~~~~~~~~~
+      |                    _ssize_t
+../Include/cpython/longintrepr.h:136:31: error: expected ';' before 'op'
+  136 |     return sign * (Py_ssize_t)op->long_value.ob_digit[0];
+      |                               ^~
+      |                               ;
+In file included from ../Include/Python.h:99:
+../Include/memoryobject.h: At top level:
+../Include/memoryobject.h:15:59: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   15 | PyAPI_FUNC(PyObject *) PyMemoryView_FromMemory(char *mem, Py_ssize_t size,
+      |                                                           ^~~~~~~~~~
+      |                                                           _ssize_t
+In file included from ../Include/memoryobject.h:27:
+../Include/cpython/memoryobject.h:14:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   14 |     Py_ssize_t exports; /* number of direct memoryview exports */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/memoryobject.h:32:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   32 |     Py_ssize_t exports;           /* number of buffer re-exports */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/memoryobject.h:35:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   35 |     Py_ssize_t ob_array[1];       /* shape, strides, suboffsets */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+In file included from ../Include/Python.h:100:
+../Include/tupleobject.h:30:36: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   30 | PyAPI_FUNC(PyObject *) PyTuple_New(Py_ssize_t size);
+      |                                    ^~~~~~~~~~
+      |                                    _ssize_t
+../Include/tupleobject.h:31:12: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   31 | PyAPI_FUNC(Py_ssize_t) PyTuple_Size(PyObject *);
+      |            ^~~~~~~~~~
+../Include/exports.h:89:53: note: in definition of macro 'PyAPI_FUNC'
+   89 | #       define PyAPI_FUNC(RTYPE) Py_EXPORTED_SYMBOL RTYPE
+      |                                                     ^~~~~
+../Include/tupleobject.h:32:52: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   32 | PyAPI_FUNC(PyObject *) PyTuple_GetItem(PyObject *, Py_ssize_t);
+      |                                                    ^~~~~~~~~~
+      |                                                    _ssize_t
+../Include/tupleobject.h:33:45: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   33 | PyAPI_FUNC(int) PyTuple_SetItem(PyObject *, Py_ssize_t, PyObject *);
+      |                                             ^~~~~~~~~~
+      |                                             _ssize_t
+../Include/tupleobject.h:34:53: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   34 | PyAPI_FUNC(PyObject *) PyTuple_GetSlice(PyObject *, Py_ssize_t, Py_ssize_t);
+      |                                                     ^~~~~~~~~~
+      |                                                     _ssize_t
+../Include/tupleobject.h:34:65: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   34 | PyAPI_FUNC(PyObject *) PyTuple_GetSlice(PyObject *, Py_ssize_t, Py_ssize_t);
+      |                                                                 ^~~~~~~~~~
+      |                                                                 _ssize_t
+../Include/tupleobject.h:35:48: error: expected ')' before '...' token
+   35 | PyAPI_FUNC(PyObject *) PyTuple_Pack(Py_ssize_t, ...);
+      |                                                ^~~~
+      |                                                )
+In file included from ../Include/tupleobject.h:39:
+../Include/cpython/tupleobject.h:15:46: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   15 | PyAPI_FUNC(int) _PyTuple_Resize(PyObject **, Py_ssize_t);
+      |                                              ^~~~~~~~~~
+      |                                              _ssize_t
+../Include/cpython/tupleobject.h:23:15: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   23 | static inline Py_ssize_t PyTuple_GET_SIZE(PyObject *op) {
+      |               ^~~~~~~~~~
+      |               _ssize_t
+../Include/cpython/tupleobject.h:33:32: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   33 | PyTuple_SET_ITEM(PyObject *op, Py_ssize_t index, PyObject *value) {
+      |                                ^~~~~~~~~~
+      |                                _ssize_t
+../Include/cpython/tupleobject.h:44:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   44 |     Py_ssize_t size);
+      |     ^~~~~~~~~~
+      |     _ssize_t
+In file included from ../Include/Python.h:101:
+../Include/listobject.h:28:35: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   28 | PyAPI_FUNC(PyObject *) PyList_New(Py_ssize_t size);
+      |                                   ^~~~~~~~~~
+      |                                   _ssize_t
+../Include/listobject.h:29:12: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   29 | PyAPI_FUNC(Py_ssize_t) PyList_Size(PyObject *);
+      |            ^~~~~~~~~~
+../Include/exports.h:89:53: note: in definition of macro 'PyAPI_FUNC'
+   89 | #       define PyAPI_FUNC(RTYPE) Py_EXPORTED_SYMBOL RTYPE
+      |                                                     ^~~~~
+../Include/listobject.h:31:51: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   31 | PyAPI_FUNC(PyObject *) PyList_GetItem(PyObject *, Py_ssize_t);
+      |                                                   ^~~~~~~~~~
+      |                                                   _ssize_t
+../Include/listobject.h:33:54: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   33 | PyAPI_FUNC(PyObject *) PyList_GetItemRef(PyObject *, Py_ssize_t);
+      |                                                      ^~~~~~~~~~
+      |                                                      _ssize_t
+../Include/listobject.h:35:44: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   35 | PyAPI_FUNC(int) PyList_SetItem(PyObject *, Py_ssize_t, PyObject *);
+      |                                            ^~~~~~~~~~
+      |                                            _ssize_t
+../Include/listobject.h:36:43: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   36 | PyAPI_FUNC(int) PyList_Insert(PyObject *, Py_ssize_t, PyObject *);
+      |                                           ^~~~~~~~~~
+      |                                           _ssize_t
+../Include/listobject.h:39:52: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   39 | PyAPI_FUNC(PyObject *) PyList_GetSlice(PyObject *, Py_ssize_t, Py_ssize_t);
+      |                                                    ^~~~~~~~~~
+      |                                                    _ssize_t
+../Include/listobject.h:39:64: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   39 | PyAPI_FUNC(PyObject *) PyList_GetSlice(PyObject *, Py_ssize_t, Py_ssize_t);
+      |                                                                ^~~~~~~~~~
+      |                                                                _ssize_t
+../Include/listobject.h:40:45: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   40 | PyAPI_FUNC(int) PyList_SetSlice(PyObject *, Py_ssize_t, Py_ssize_t, PyObject *);
+      |                                             ^~~~~~~~~~
+      |                                             _ssize_t
+../Include/listobject.h:40:57: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   40 | PyAPI_FUNC(int) PyList_SetSlice(PyObject *, Py_ssize_t, Py_ssize_t, PyObject *);
+      |                                                         ^~~~~~~~~~
+      |                                                         _ssize_t
+In file included from ../Include/listobject.h:48:
+../Include/cpython/listobject.h:21:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   21 |     Py_ssize_t allocated;
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/listobject.h:30:15: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   30 | static inline Py_ssize_t PyList_GET_SIZE(PyObject *op) {
+      |               ^~~~~~~~~~
+      |               _ssize_t
+../Include/cpython/listobject.h:43:31: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   43 | PyList_SET_ITEM(PyObject *op, Py_ssize_t index, PyObject *value) {
+      |                               ^~~~~~~~~~
+      |                               _ssize_t
+In file included from ../Include/Python.h:102:
+../Include/dictobject.h:28:19: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   28 |     PyObject *mp, Py_ssize_t *pos, PyObject **key, PyObject **value);
+      |                   ^~~~~~~~~~
+      |                   _ssize_t
+../Include/dictobject.h:32:12: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   32 | PyAPI_FUNC(Py_ssize_t) PyDict_Size(PyObject *mp);
+      |            ^~~~~~~~~~
+../Include/exports.h:89:53: note: in definition of macro 'PyAPI_FUNC'
+   89 | #       define PyAPI_FUNC(RTYPE) Py_EXPORTED_SYMBOL RTYPE
+      |                                                     ^~~~~
+In file included from ../Include/dictobject.h:113:
+../Include/cpython/dictobject.h:15:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   15 |     Py_ssize_t ma_used;
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/dictobject.h:53:15: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   53 | static inline Py_ssize_t PyDict_GET_SIZE(PyObject *op) {
+      |               ^~~~~~~~~~
+      |               _ssize_t
+../Include/cpython/dictobject.h:67:44: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   67 | PyAPI_FUNC(PyObject *) _PyDict_NewPresized(Py_ssize_t minused);
+      |                                            ^~~~~~~~~~
+      |                                            _ssize_t
+../Include/setobject.h:21:12: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   21 | PyAPI_FUNC(Py_ssize_t) PySet_Size(PyObject *anyset);
+      |            ^~~~~~~~~~
+../Include/exports.h:89:53: note: in definition of macro 'PyAPI_FUNC'
+   89 | #       define PyAPI_FUNC(RTYPE) Py_EXPORTED_SYMBOL RTYPE
+      |                                                     ^~~~~
+In file included from ../Include/setobject.h:42,
+                 from ../Include/Python.h:105:
+../Include/cpython/setobject.h:39:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   39 |     Py_ssize_t fill;            /* Number active and dummy entries*/
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/setobject.h:40:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   40 |     Py_ssize_t used;            /* Number active entries */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/setobject.h:46:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   46 |     Py_ssize_t mask;
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/setobject.h:55:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   55 |     Py_ssize_t finger;          /* Search finger for pop() */
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/setobject.h:64:15: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   64 | static inline Py_ssize_t PySet_GET_SIZE(PyObject *so) {
+      |               ^~~~~~~~~~
+      |               _ssize_t
+In file included from ../Include/Python.h:106:
+../Include/methodobject.h:20:70: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   20 | typedef PyObject *(*PyCFunctionFast) (PyObject *, PyObject *const *, Py_ssize_t);
+      |                                                                      ^~~~~~~~~~
+      |                                                                      _ssize_t
+../Include/methodobject.h:24:70: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   24 |                                                   PyObject *const *, Py_ssize_t,
+      |                                                                      ^~~~~~~~~~
+      |                                                                      _ssize_t
+../Include/methodobject.h:27:32: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   27 |                                Py_ssize_t, PyObject *);
+      |                                ^~~~~~~~~~
+      |                                _ssize_t
+../Include/methodobject.h:33:9: error: unknown type name 'PyCFunctionFast'; did you mean 'PyCFunction'?
+   33 | typedef PyCFunctionFast _PyCFunctionFast;
+      |         ^~~~~~~~~~~~~~~
+      |         PyCFunction
+../Include/methodobject.h:34:9: error: unknown type name 'PyCFunctionFastWithKeywords'; did you mean 'PyCFunctionWithKeywords'?
+   34 | typedef PyCFunctionFastWithKeywords _PyCFunctionFastWithKeywords;
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |         PyCFunctionWithKeywords
+In file included from ../Include/Python.h:107:
+../Include/moduleobject.h:53:3: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   53 |   Py_ssize_t m_index;
+      |   ^~~~~~~~~~
+      |   _ssize_t
+../Include/moduleobject.h:124:57: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  124 | PyAPI_FUNC(int) PyModule_GetStateSize(PyObject *module, Py_ssize_t *result);
+      |                                                         ^~~~~~~~~~
+      |                                                         _ssize_t
+../Include/moduleobject.h:133:3: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  133 |   Py_ssize_t m_size;
+      |   ^~~~~~~~~~
+      |   _ssize_t
+In file included from ../Include/Python.h:108:
+../Include/cpython/monitoring.h:53:54: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   53 |                          const uint8_t *event_types, Py_ssize_t length);
+      |                                                      ^~~~~~~~~~
+      |                                                      _ssize_t
+In file included from ../Include/Python.h:113:
+../Include/cpython/code.h:104:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  104 |     Py_ssize_t _co_unique_id;     /* ID used for per-thread refcounting */   \
+      |     ^~~~~~~~~~
+../Include/cpython/code.h:115:21: note: in expansion of macro '_PyCode_DEF'
+  115 | struct PyCodeObject _PyCode_DEF(1);
+      |                     ^~~~~~~~~~~
+../Include/cpython/code.h:160:9: warning: 'CO_MAXBLOCKS' redefined
+  160 | #define CO_MAXBLOCKS 21 /* Max static block nesting within a function */
+      |         ^~~~~~~~~~~~
+../pyconfig.h:19:9: note: this is the location of the previous definition
+   19 | #define CO_MAXBLOCKS 80
+      |         ^~~~~~~~~~~~
+../Include/cpython/code.h:166:15: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  166 | static inline Py_ssize_t PyCode_GetNumFree(PyCodeObject *op) {
+      |               ^~~~~~~~~~
+      |               _ssize_t
+../Include/cpython/code.h:289:21: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  289 |     PyObject *code, Py_ssize_t index, void **extra);
+      |                     ^~~~~~~~~~
+      |                     _ssize_t
+../Include/cpython/code.h:291:21: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  291 |     PyObject *code, Py_ssize_t index, void *extra);
+      |                     ^~~~~~~~~~
+      |                     _ssize_t
+../Include/cpython/code.h:294:34: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  294 | _PyCode_GetExtra(PyObject *code, Py_ssize_t index, void **extra)
+      |                                  ^~~~~~~~~~
+      |                                  _ssize_t
+../Include/cpython/code.h:299:34: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  299 | _PyCode_SetExtra(PyObject *code, Py_ssize_t index, void *extra)
+      |                                  ^~~~~~~~~~
+      |                                  _ssize_t
+In file included from ../Include/Python.h:116:
+../Include/sliceobject.h:26:49: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   26 | PyAPI_FUNC(int) PySlice_GetIndices(PyObject *r, Py_ssize_t length,
+      |                                                 ^~~~~~~~~~
+      |                                                 _ssize_t
+../Include/sliceobject.h:27:35: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   27 |                                   Py_ssize_t *start, Py_ssize_t *stop, Py_ssize_t *step);
+      |                                   ^~~~~~~~~~
+      |                                   _ssize_t
+../Include/sliceobject.h:27:54: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   27 |                                   Py_ssize_t *start, Py_ssize_t *stop, Py_ssize_t *step);
+      |                                                      ^~~~~~~~~~
+      |                                                      _ssize_t
+../Include/sliceobject.h:27:72: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   27 |                                   Py_ssize_t *start, Py_ssize_t *stop, Py_ssize_t *step);
+      |                                                                        ^~~~~~~~~~
+      |                                                                        _ssize_t
+../Include/sliceobject.h:29:51: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   29 | PyAPI_FUNC(int) PySlice_GetIndicesEx(PyObject *r, Py_ssize_t length,
+      |                                                   ^~~~~~~~~~
+      |                                                   _ssize_t
+../Include/sliceobject.h:30:38: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   30 |                                      Py_ssize_t *start, Py_ssize_t *stop,
+      |                                      ^~~~~~~~~~
+      |                                      _ssize_t
+../Include/sliceobject.h:30:57: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   30 |                                      Py_ssize_t *start, Py_ssize_t *stop,
+      |                                                         ^~~~~~~~~~
+      |                                                         _ssize_t
+../Include/sliceobject.h:31:38: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   31 |                                      Py_ssize_t *step,
+      |                                      ^~~~~~~~~~
+      |                                      _ssize_t
+../Include/sliceobject.h:32:38: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   32 |                                      Py_ssize_t *slicelength);
+      |                                      ^~~~~~~~~~
+      |                                      _ssize_t
+../Include/sliceobject.h:41:32: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   41 |                                Py_ssize_t *start, Py_ssize_t *stop, Py_ssize_t *step);
+      |                                ^~~~~~~~~~
+      |                                _ssize_t
+../Include/sliceobject.h:41:51: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   41 |                                Py_ssize_t *start, Py_ssize_t *stop, Py_ssize_t *step);
+      |                                                   ^~~~~~~~~~
+      |                                                   _ssize_t
+../Include/sliceobject.h:41:69: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   41 |                                Py_ssize_t *start, Py_ssize_t *stop, Py_ssize_t *step);
+      |                                                                     ^~~~~~~~~~
+      |                                                                     _ssize_t
+../Include/sliceobject.h:42:12: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   42 | PyAPI_FUNC(Py_ssize_t) PySlice_AdjustIndices(Py_ssize_t length,
+      |            ^~~~~~~~~~
+../Include/exports.h:89:53: note: in definition of macro 'PyAPI_FUNC'
+   89 | #       define PyAPI_FUNC(RTYPE) Py_EXPORTED_SYMBOL RTYPE
+      |                                                     ^~~~~
+../Include/sliceobject.h:42:46: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   42 | PyAPI_FUNC(Py_ssize_t) PySlice_AdjustIndices(Py_ssize_t length,
+      |                                              ^~~~~~~~~~
+      |                                              _ssize_t
+../Include/sliceobject.h:43:46: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   43 |                                              Py_ssize_t *start, Py_ssize_t *stop,
+      |                                              ^~~~~~~~~~
+      |                                              _ssize_t
+../Include/sliceobject.h:43:65: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   43 |                                              Py_ssize_t *start, Py_ssize_t *stop,
+      |                                                                 ^~~~~~~~~~
+      |                                                                 _ssize_t
+../Include/sliceobject.h:44:46: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   44 |                                              Py_ssize_t step);
+      |                                              ^~~~~~~~~~
+      |                                              _ssize_t
+In file included from ../Include/sliceobject.h:49:
+../Include/cpython/sliceobject.h:17:45: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   17 | PyAPI_FUNC(PyObject *) _PySlice_FromIndices(Py_ssize_t start, Py_ssize_t stop);
+      |                                             ^~~~~~~~~~
+      |                                             _ssize_t
+../Include/cpython/sliceobject.h:17:63: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   17 | PyAPI_FUNC(PyObject *) _PySlice_FromIndices(Py_ssize_t start, Py_ssize_t stop);
+      |                                                               ^~~~~~~~~~
+      |                                                               _ssize_t
+In file included from ../Include/Python.h:119:
+../Include/cpython/initconfig.h:34:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   34 |     Py_ssize_t length;
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/initconfig.h:41:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   41 |     Py_ssize_t index,
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/initconfig.h:261:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  261 |     Py_ssize_t argc,
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/initconfig.h:264:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  264 |     Py_ssize_t argc,
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/initconfig.h:268:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  268 |     Py_ssize_t length, wchar_t **items);
+      |     ^~~~~~~~~~
+      |     _ssize_t
+In file included from ../Include/Python.h:122:
+../Include/descrobject.h:44:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   44 |     Py_ssize_t offset;
+      |     ^~~~~~~~~~
+      |     _ssize_t
+In file included from ../Include/Python.h:124:
+../Include/warnings.h:10:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   10 |     Py_ssize_t stack_level);
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/warnings.h:14:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   14 |     Py_ssize_t stack_level,
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/warnings.h:22:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   22 |     Py_ssize_t stack_level,
+      |     ^~~~~~~~~~
+      |     _ssize_t
+In file included from ../Include/Python.h:126:
+../Include/structseq.h:28:54: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   28 | PyAPI_FUNC(void) PyStructSequence_SetItem(PyObject*, Py_ssize_t, PyObject*);
+      |                                                      ^~~~~~~~~~
+      |                                                      _ssize_t
+../Include/structseq.h:29:59: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   29 | PyAPI_FUNC(PyObject*) PyStructSequence_GetItem(PyObject*, Py_ssize_t);
+      |                                                           ^~~~~~~~~~
+      |                                                           _ssize_t
+In file included from ../Include/pythread.h:125,
+                 from ../Include/Python.h:130:
+../Include/cpython/pythread.h:28:5: error: #error "Require native threads. See https://bugs.python.org/issue31370"
+   28 | #   error "Require native threads. See https://bugs.python.org/issue31370"
+      |     ^~~~~
+../Include/cpython/pythread.h:37:5: error: unknown type name 'NATIVE_TSS_KEY_T'
+   37 |     NATIVE_TSS_KEY_T _key;
+      |     ^~~~~~~~~~~~~~~~
+In file included from ../Include/Python.h:132:
+../Include/modsupport.h:18:61: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   18 | PyAPI_FUNC(int) PyArg_UnpackTuple(PyObject *, const char *, Py_ssize_t, Py_ssize_t, ...);
+      |                                                             ^~~~~~~~~~
+      |                                                             _ssize_t
+../Include/modsupport.h:18:73: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   18 | PyAPI_FUNC(int) PyArg_UnpackTuple(PyObject *, const char *, Py_ssize_t, Py_ssize_t, ...);
+      |                                                                         ^~~~~~~~~~
+      |                                                                         _ssize_t
+In file included from ../Include/modsupport.h:153:
+../Include/cpython/modsupport.h:7:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+    7 |     Py_ssize_t nargs,
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/modsupport.h:12:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   12 |     Py_ssize_t nargs,
+      |     ^~~~~~~~~~
+      |     _ssize_t
+In file included from ../Include/pylifecycle.h:66,
+                 from ../Include/Python.h:135:
+../Include/cpython/pylifecycle.h:15:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   15 |     Py_ssize_t argc,
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/pylifecycle.h:19:5: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   19 |     Py_ssize_t argc,
+      |     ^~~~~~~~~~
+      |     _ssize_t
+../Include/cpython/ceval.h:17:12: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   17 | PyAPI_FUNC(Py_ssize_t) PyUnstable_Eval_RequestCodeExtraIndex(freefunc);
+      |            ^~~~~~~~~~
+../Include/exports.h:89:53: note: in definition of macro 'PyAPI_FUNC'
+   89 | #       define PyAPI_FUNC(RTYPE) Py_EXPORTED_SYMBOL RTYPE
+      |                                                     ^~~~~
+In file included from ../Include/ceval.h:138,
+                 from ../Include/Python.h:136:
+../Include/cpython/ceval.h:19:47: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   19 | _Py_DEPRECATED_EXTERNALLY(3.12) static inline Py_ssize_t
+      |                                               ^~~~~~~~~~
+      |                                               _ssize_t
+../Include/cpython/ceval.h:24:48: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   24 | PyAPI_FUNC(int) _PyEval_SliceIndex(PyObject *, Py_ssize_t *);
+      |                                                ^~~~~~~~~~
+      |                                                _ssize_t
+../Include/cpython/ceval.h:25:55: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   25 | PyAPI_FUNC(int) _PyEval_SliceIndexNotNone(PyObject *, Py_ssize_t *);
+      |                                                       ^~~~~~~~~~
+      |                                                       _ssize_t
+../Include/cpython/ceval.h:27:39: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   27 |                                       Py_ssize_t,
+      |                                       ^~~~~~~~~~
+      |                                       _ssize_t
+../Include/cpython/ceval.h:28:39: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   28 |                                       Py_ssize_t *, Py_ssize_t *);
+      |                                       ^~~~~~~~~~
+      |                                       _ssize_t
+../Include/cpython/ceval.h:28:53: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   28 |                                       Py_ssize_t *, Py_ssize_t *);
+      |                                                     ^~~~~~~~~~
+      |                                                     _ssize_t
+../Include/abstract.h:279:12: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  279 | PyAPI_FUNC(Py_ssize_t) PyVectorcall_NARGS(size_t nargsf);
+      |            ^~~~~~~~~~
+../Include/exports.h:89:53: note: in definition of macro 'PyAPI_FUNC'
+   89 | #       define PyAPI_FUNC(RTYPE) Py_EXPORTED_SYMBOL RTYPE
+      |                                                     ^~~~~
+../Include/abstract.h:347:12: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  347 | PyAPI_FUNC(Py_ssize_t) PyObject_Size(PyObject *o);
+      |            ^~~~~~~~~~
+../Include/exports.h:89:53: note: in definition of macro 'PyAPI_FUNC'
+   89 | #       define PyAPI_FUNC(RTYPE) Py_EXPORTED_SYMBOL RTYPE
+      |                                                     ^~~~~
+../Include/abstract.h:352:12: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  352 | PyAPI_FUNC(Py_ssize_t) PyObject_Length(PyObject *o);
+      |            ^~~~~~~~~~
+../Include/exports.h:89:53: note: in definition of macro 'PyAPI_FUNC'
+   89 | #       define PyAPI_FUNC(RTYPE) Py_EXPORTED_SYMBOL RTYPE
+      |                                                     ^~~~~
+../Include/abstract.h:563:12: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  563 | PyAPI_FUNC(Py_ssize_t) PyNumber_AsSsize_t(PyObject *o, PyObject *exc);
+      |            ^~~~~~~~~~
+../Include/exports.h:89:53: note: in definition of macro 'PyAPI_FUNC'
+   89 | #       define PyAPI_FUNC(RTYPE) Py_EXPORTED_SYMBOL RTYPE
+      |                                                     ^~~~~
+../Include/abstract.h:677:12: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  677 | PyAPI_FUNC(Py_ssize_t) PySequence_Size(PyObject *o);
+      |            ^~~~~~~~~~
+../Include/exports.h:89:53: note: in definition of macro 'PyAPI_FUNC'
+   89 | #       define PyAPI_FUNC(RTYPE) Py_EXPORTED_SYMBOL RTYPE
+      |                                                     ^~~~~
+../Include/abstract.h:681:12: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  681 | PyAPI_FUNC(Py_ssize_t) PySequence_Length(PyObject *o);
+      |            ^~~~~~~~~~
+../Include/exports.h:89:53: note: in definition of macro 'PyAPI_FUNC'
+   89 | #       define PyAPI_FUNC(RTYPE) Py_EXPORTED_SYMBOL RTYPE
+      |                                                     ^~~~~
+In file included from ../Include/Python.h:142:
+../Include/abstract.h:694:55: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  694 | PyAPI_FUNC(PyObject *) PySequence_Repeat(PyObject *o, Py_ssize_t count);
+      |                                                       ^~~~~~~~~~
+      |                                                       _ssize_t
+../Include/abstract.h:699:56: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  699 | PyAPI_FUNC(PyObject *) PySequence_GetItem(PyObject *o, Py_ssize_t i);
+      |                                                        ^~~~~~~~~~
+      |                                                        _ssize_t
+../Include/abstract.h:704:57: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  704 | PyAPI_FUNC(PyObject *) PySequence_GetSlice(PyObject *o, Py_ssize_t i1, Py_ssize_t i2);
+      |                                                         ^~~~~~~~~~
+      |                                                         _ssize_t
+../Include/abstract.h:704:72: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  704 | PyAPI_FUNC(PyObject *) PySequence_GetSlice(PyObject *o, Py_ssize_t i1, Py_ssize_t i2);
+      |                                                                        ^~~~~~~~~~
+      |                                                                        _ssize_t
+../Include/abstract.h:710:49: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  710 | PyAPI_FUNC(int) PySequence_SetItem(PyObject *o, Py_ssize_t i, PyObject *v);
+      |                                                 ^~~~~~~~~~
+      |                                                 _ssize_t
+../Include/abstract.h:715:49: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  715 | PyAPI_FUNC(int) PySequence_DelItem(PyObject *o, Py_ssize_t i);
+      |                                                 ^~~~~~~~~~
+      |                                                 _ssize_t
+../Include/abstract.h:721:50: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  721 | PyAPI_FUNC(int) PySequence_SetSlice(PyObject *o, Py_ssize_t i1, Py_ssize_t i2,
+      |                                                  ^~~~~~~~~~
+      |                                                  _ssize_t
+../Include/abstract.h:721:65: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  721 | PyAPI_FUNC(int) PySequence_SetSlice(PyObject *o, Py_ssize_t i1, Py_ssize_t i2,
+      |                                                                 ^~~~~~~~~~
+      |                                                                 _ssize_t
+../Include/abstract.h:728:50: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  728 | PyAPI_FUNC(int) PySequence_DelSlice(PyObject *o, Py_ssize_t i1, Py_ssize_t i2);
+      |                                                  ^~~~~~~~~~
+      |                                                  _ssize_t
+../Include/abstract.h:728:65: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  728 | PyAPI_FUNC(int) PySequence_DelSlice(PyObject *o, Py_ssize_t i1, Py_ssize_t i2);
+      |                                                                 ^~~~~~~~~~
+      |                                                                 _ssize_t
+../Include/abstract.h:753:12: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  753 | PyAPI_FUNC(Py_ssize_t) PySequence_Count(PyObject *o, PyObject *value);
+      |            ^~~~~~~~~~
+../Include/exports.h:89:53: note: in definition of macro 'PyAPI_FUNC'
+   89 | #       define PyAPI_FUNC(RTYPE) Py_EXPORTED_SYMBOL RTYPE
+      |                                                     ^~~~~
+../Include/abstract.h:777:12: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  777 | PyAPI_FUNC(Py_ssize_t) PySequence_Index(PyObject *o, PyObject *value);
+      |            ^~~~~~~~~~
+../Include/exports.h:89:53: note: in definition of macro 'PyAPI_FUNC'
+   89 | #       define PyAPI_FUNC(RTYPE) Py_EXPORTED_SYMBOL RTYPE
+      |                                                     ^~~~~
+../Include/abstract.h:792:62: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  792 | PyAPI_FUNC(PyObject *) PySequence_InPlaceRepeat(PyObject *o, Py_ssize_t count);
+      |                                                              ^~~~~~~~~~
+      |                                                              _ssize_t
+../Include/abstract.h:804:12: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  804 | PyAPI_FUNC(Py_ssize_t) PyMapping_Size(PyObject *o);
+      |            ^~~~~~~~~~
+../Include/exports.h:89:53: note: in definition of macro 'PyAPI_FUNC'
+   89 | #       define PyAPI_FUNC(RTYPE) Py_EXPORTED_SYMBOL RTYPE
+      |                                                     ^~~~~
+../Include/abstract.h:808:12: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+  808 | PyAPI_FUNC(Py_ssize_t) PyMapping_Length(PyObject *o);
+      |            ^~~~~~~~~~
+../Include/exports.h:89:53: note: in definition of macro 'PyAPI_FUNC'
+   89 | #       define PyAPI_FUNC(RTYPE) Py_EXPORTED_SYMBOL RTYPE
+      |                                                     ^~~~~
+In file included from ../Include/abstract.h:908:
+../Include/cpython/abstract.h:32:15: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   32 | static inline Py_ssize_t
+      |               ^~~~~~~~~~
+      |               _ssize_t
+../Include/cpython/abstract.h:80:12: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   80 | PyAPI_FUNC(Py_ssize_t) PyObject_LengthHint(PyObject *o, Py_ssize_t);
+      |            ^~~~~~~~~~
+../Include/exports.h:89:53: note: in definition of macro 'PyAPI_FUNC'
+   89 | #       define PyAPI_FUNC(RTYPE) Py_EXPORTED_SYMBOL RTYPE
+      |                                                     ^~~~~
+../Include/cpython/abstract.h:80:57: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+   80 | PyAPI_FUNC(Py_ssize_t) PyObject_LengthHint(PyObject *o, Py_ssize_t);
+      |                                                         ^~~~~~~~~~
+      |                                                         _ssize_t
+In file included from ../Include/Python.h:146:
+../Include/pystrcmp.h:8:61: error: unknown type name 'Py_ssize_t'; did you mean '_ssize_t'?
+    8 | PyAPI_FUNC(int) PyOS_mystrnicmp(const char *, const char *, Py_ssize_t);
+      |                                                             ^~~~~~~~~~
+      |                                                             _ssize_t
+action_helpers.c:2:10: fatal error: pycore_pystate.h: No such file or directory
+    2 | #include "pycore_pystate.h"         // _PyInterpreterState_GET()
+      |          ^~~~~~~~~~~~~~~~~~
+compilation terminated.
+make[1]: *** [Makefile:20: action_helpers.o] Fehler 1
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Parser“ wird verlassen
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Parser“ wird betreten
+make[1]: *** Keine Regel, um „libParser.a“ zu erstellen.  Schluss.
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Parser“ wird verlassen
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Grammar“ wird betreten
+make[1]: *** Keine Regel vorhanden, um das Ziel „grammar1.o“, 
+  benötigt von „libgrammar.a“, zu erstellen.  Schluss.
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Grammar“ wird verlassen
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Grammar“ wird betreten
+make[1]: *** Keine Regel, um „libGrammar.a“ zu erstellen.  Schluss.
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Grammar“ wird verlassen
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Objects“ wird betreten
+make[1]: Für das Ziel „all“ ist nichts zu tun.
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Objects“ wird verlassen
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Objects“ wird betreten
+make[1]: *** Keine Regel, um „libObjects.a“ zu erstellen.  Schluss.
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Objects“ wird verlassen
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Python“ wird betreten
+make[1]: Für das Ziel „all“ ist nichts zu tun.
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Python“ wird verlassen
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Python“ wird betreten
+make[1]: *** Keine Regel, um „libPython.a“ zu erstellen.  Schluss.
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Python“ wird verlassen
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Modules“ wird betreten
+make[1]: Für das Ziel „all“ ist nichts zu tun.
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Modules“ wird verlassen
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Modules“ wird betreten
+make[1]: *** Keine Regel, um „libModules.a“ zu erstellen.  Schluss.
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Modules“ wird verlassen
+make: *** [Makefile:73: libpython3.15.a] Fehler 2

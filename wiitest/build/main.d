@@ -92,6 +92,7 @@ main.o: /opt/devkitpro/extras/cpython/3.15.0a7/wiitest/source/main.c \
  /opt/devkitpro/extras/cpython/3.15.0a7/Include/codecs.h \
  /opt/devkitpro/extras/cpython/3.15.0a7/Include/pythread.h \
  /opt/devkitpro/extras/cpython/3.15.0a7/Include/cpython/pythread.h \
+ /opt/devkitpro/extras/cpython/3.15.0a7/Include/cpython/pthread_stubs.h \
  /opt/devkitpro/extras/cpython/3.15.0a7/Include/cpython/context.h \
  /opt/devkitpro/extras/cpython/3.15.0a7/Include/modsupport.h \
  /opt/devkitpro/extras/cpython/3.15.0a7/Include/cpython/modsupport.h \
@@ -161,7 +162,9 @@ main.o: /opt/devkitpro/extras/cpython/3.15.0a7/wiitest/source/main.c \
  /opt/devkitpro/libogc/include/ogc/video_types.h \
  /opt/devkitpro/libogc/include/ogc/usbgecko.h \
  /opt/devkitpro/libogc/include/ogc/video_types.h \
- /opt/devkitpro/libogc/include/ogc/texconv.h
+ /opt/devkitpro/libogc/include/ogc/texconv.h \
+ /opt/devkitpro/extras/mysd_sdkarte_mounten/include/fat2.h \
+ /opt/devkitpro/extras/mysd_sdkarte_mounten/include/libfatversion.h
 /opt/devkitpro/extras/cpython/3.15.0a7/Include/Python.h:
 /opt/devkitpro/extras/cpython/3.15.0a7/Include/patchlevel.h:
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/pyconfig.h:
@@ -255,6 +258,7 @@ main.o: /opt/devkitpro/extras/cpython/3.15.0a7/wiitest/source/main.c \
 /opt/devkitpro/extras/cpython/3.15.0a7/Include/codecs.h:
 /opt/devkitpro/extras/cpython/3.15.0a7/Include/pythread.h:
 /opt/devkitpro/extras/cpython/3.15.0a7/Include/cpython/pythread.h:
+/opt/devkitpro/extras/cpython/3.15.0a7/Include/cpython/pthread_stubs.h:
 /opt/devkitpro/extras/cpython/3.15.0a7/Include/cpython/context.h:
 /opt/devkitpro/extras/cpython/3.15.0a7/Include/modsupport.h:
 /opt/devkitpro/extras/cpython/3.15.0a7/Include/cpython/modsupport.h:
@@ -325,3 +329,5 @@ main.o: /opt/devkitpro/extras/cpython/3.15.0a7/wiitest/source/main.c \
 /opt/devkitpro/libogc/include/ogc/usbgecko.h:
 /opt/devkitpro/libogc/include/ogc/video_types.h:
 /opt/devkitpro/libogc/include/ogc/texconv.h:
+/opt/devkitpro/extras/mysd_sdkarte_mounten/include/fat2.h:
+/opt/devkitpro/extras/mysd_sdkarte_mounten/include/libfatversion.h:

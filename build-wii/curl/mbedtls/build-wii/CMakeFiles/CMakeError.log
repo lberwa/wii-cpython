@@ -1,0 +1,118 @@
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-y2q1uA
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_b891d/fast && make[2]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-y2q1uA“ wird betreten
+/usr/bin/make  -f CMakeFiles/cmTC_b891d.dir/build.make CMakeFiles/cmTC_b891d.dir/build
+make[3]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-y2q1uA“ wird betreten
+Building C object CMakeFiles/cmTC_b891d.dir/src.c.obj
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -DCMAKE_HAVE_LIBC_PTHREAD  -DNDEBUG -g -O3 -Wall -I/opt/devkitpro/libogc/include -I/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../curl/mbedtls/wii/include -DMBEDTLS_USER_CONFIG_FILE=\"mbedtls_wii_user_config.h\" -DTF_PSA_CRYPTO_USER_CONFIG_FILE=\"mbedtls_wii_user_config.h\"  -o CMakeFiles/cmTC_b891d.dir/src.c.obj -c /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-y2q1uA/src.c
+/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-y2q1uA/src.c: In function 'main':
+/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-y2q1uA/src.c:11:3: error: implicit declaration of function 'pthread_create' [-Wimplicit-function-declaration]
+   11 |   pthread_create(&thread, NULL, test_func, NULL);
+      |   ^~~~~~~~~~~~~~
+/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-y2q1uA/src.c:12:3: error: implicit declaration of function 'pthread_detach' [-Wimplicit-function-declaration]
+   12 |   pthread_detach(thread);
+      |   ^~~~~~~~~~~~~~
+/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-y2q1uA/src.c:13:3: error: implicit declaration of function 'pthread_cancel' [-Wimplicit-function-declaration]
+   13 |   pthread_cancel(thread);
+      |   ^~~~~~~~~~~~~~
+/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-y2q1uA/src.c:14:3: error: implicit declaration of function 'pthread_join'; did you mean 'pthread_atfork'? [-Wimplicit-function-declaration]
+   14 |   pthread_join(thread, NULL);
+      |   ^~~~~~~~~~~~
+      |   pthread_atfork
+/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-y2q1uA/src.c:16:3: error: implicit declaration of function 'pthread_exit' [-Wimplicit-function-declaration]
+   16 |   pthread_exit(NULL);
+      |   ^~~~~~~~~~~~
+make[3]: *** [CMakeFiles/cmTC_b891d.dir/build.make:78: CMakeFiles/cmTC_b891d.dir/src.c.obj] Fehler 1
+make[3]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-y2q1uA“ wird verlassen
+make[2]: *** [Makefile:127: cmTC_b891d/fast] Fehler 2
+make[2]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-y2q1uA“ wird verlassen
+
+
+Source file was:
+#include <pthread.h>
+
+static void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_cancel(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-U6vRsh
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_b18d1/fast && make[2]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-U6vRsh“ wird betreten
+/usr/bin/make  -f CMakeFiles/cmTC_b18d1.dir/build.make CMakeFiles/cmTC_b18d1.dir/build
+make[3]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-U6vRsh“ wird betreten
+Building C object CMakeFiles/cmTC_b18d1.dir/CheckFunctionExists.c.obj
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc   -DNDEBUG -g -O3 -Wall -I/opt/devkitpro/libogc/include -I/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../curl/mbedtls/wii/include -DMBEDTLS_USER_CONFIG_FILE=\"mbedtls_wii_user_config.h\" -DTF_PSA_CRYPTO_USER_CONFIG_FILE=\"mbedtls_wii_user_config.h\" -DCHECK_FUNCTION_EXISTS=pthread_create -o CMakeFiles/cmTC_b18d1.dir/CheckFunctionExists.c.obj -c /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-U6vRsh/CheckFunctionExists.c
+Linking C executable cmTC_b18d1
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b18d1.dir/link.txt --verbose=1
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -DNDEBUG -g -O3 -Wall -I/opt/devkitpro/libogc/include -I/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../curl/mbedtls/wii/include -DMBEDTLS_USER_CONFIG_FILE=\"mbedtls_wii_user_config.h\" -DTF_PSA_CRYPTO_USER_CONFIG_FILE=\"mbedtls_wii_user_config.h\" -DCHECK_FUNCTION_EXISTS=pthread_create CMakeFiles/cmTC_b18d1.dir/CheckFunctionExists.c.obj -o cmTC_b18d1  -lpthreads 
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: cannot find -lpthreads: Datei oder Verzeichnis nicht gefunden
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: have you installed the static version of the pthreads library ?
+collect2: error: ld returned 1 exit status
+make[3]: *** [CMakeFiles/cmTC_b18d1.dir/build.make:99: cmTC_b18d1] Fehler 1
+make[3]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-U6vRsh“ wird verlassen
+make[2]: *** [Makefile:127: cmTC_b18d1/fast] Fehler 2
+make[2]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-U6vRsh“ wird verlassen
+
+
+
+Determining if the function pthread_create exists in the pthread failed with the following output:
+Change Dir: /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-j5gU8T
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_e395c/fast && make[2]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-j5gU8T“ wird betreten
+/usr/bin/make  -f CMakeFiles/cmTC_e395c.dir/build.make CMakeFiles/cmTC_e395c.dir/build
+make[3]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-j5gU8T“ wird betreten
+Building C object CMakeFiles/cmTC_e395c.dir/CheckFunctionExists.c.obj
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc   -DNDEBUG -g -O3 -Wall -I/opt/devkitpro/libogc/include -I/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../curl/mbedtls/wii/include -DMBEDTLS_USER_CONFIG_FILE=\"mbedtls_wii_user_config.h\" -DTF_PSA_CRYPTO_USER_CONFIG_FILE=\"mbedtls_wii_user_config.h\" -DCHECK_FUNCTION_EXISTS=pthread_create -o CMakeFiles/cmTC_e395c.dir/CheckFunctionExists.c.obj -c /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-j5gU8T/CheckFunctionExists.c
+Linking C executable cmTC_e395c
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_e395c.dir/link.txt --verbose=1
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -DNDEBUG -g -O3 -Wall -I/opt/devkitpro/libogc/include -I/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../curl/mbedtls/wii/include -DMBEDTLS_USER_CONFIG_FILE=\"mbedtls_wii_user_config.h\" -DTF_PSA_CRYPTO_USER_CONFIG_FILE=\"mbedtls_wii_user_config.h\" -DCHECK_FUNCTION_EXISTS=pthread_create CMakeFiles/cmTC_e395c.dir/CheckFunctionExists.c.obj -o cmTC_e395c  -lpthread 
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: cannot find -lpthread: Datei oder Verzeichnis nicht gefunden
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: have you installed the static version of the pthread library ?
+collect2: error: ld returned 1 exit status
+make[3]: *** [CMakeFiles/cmTC_e395c.dir/build.make:99: cmTC_e395c] Fehler 1
+make[3]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-j5gU8T“ wird verlassen
+make[2]: *** [Makefile:127: cmTC_e395c/fast] Fehler 2
+make[2]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-j5gU8T“ wird verlassen
+
+
+
+Determining if compiler accepts -pthread failed with the following output:
+Change Dir: /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-JqTP1D
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_079cb/fast && make[2]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-JqTP1D“ wird betreten
+/usr/bin/make  -f CMakeFiles/cmTC_079cb.dir/build.make CMakeFiles/cmTC_079cb.dir/build
+make[3]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-JqTP1D“ wird betreten
+Building C object CMakeFiles/cmTC_079cb.dir/CheckForPthreads.c.obj
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc   -DNDEBUG -g -O3 -Wall -I/opt/devkitpro/libogc/include -I/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../curl/mbedtls/wii/include -DMBEDTLS_USER_CONFIG_FILE=\"mbedtls_wii_user_config.h\" -DTF_PSA_CRYPTO_USER_CONFIG_FILE=\"mbedtls_wii_user_config.h\"  -o CMakeFiles/cmTC_079cb.dir/CheckForPthreads.c.obj -c /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-JqTP1D/CheckForPthreads.c
+/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-JqTP1D/CheckForPthreads.c: In function 'main':
+/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-JqTP1D/CheckForPthreads.c:12:3: error: implicit declaration of function 'pthread_create' [-Wimplicit-function-declaration]
+   12 |   pthread_create(&thread, 0, start_routine, 0);
+      |   ^~~~~~~~~~~~~~
+/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-JqTP1D/CheckForPthreads.c:13:3: error: implicit declaration of function 'pthread_join'; did you mean 'pthread_atfork'? [-Wimplicit-function-declaration]
+   13 |   pthread_join(thread, 0);
+      |   ^~~~~~~~~~~~
+      |   pthread_atfork
+make[3]: *** [CMakeFiles/cmTC_079cb.dir/build.make:78: CMakeFiles/cmTC_079cb.dir/CheckForPthreads.c.obj] Fehler 1
+make[3]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-JqTP1D“ wird verlassen
+make[2]: *** [Makefile:127: cmTC_079cb/fast] Fehler 2
+make[2]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-JqTP1D“ wird verlassen
+
+
+

@@ -88,7 +88,7 @@ CONFIGURE_CFLAGS=	@CFLAGS@
 # CFLAGS_NODIST is used for building the interpreter and stdlib C extensions.
 # Use it when a compiler flag should _not_ be part of the distutils CFLAGS
 # once Python is installed (Issue #21121).
-CONFIGURE_CFLAGS_NODIST=@CFLAGS_NODIST@
+CONFIGURE_CFLAGS_NODIST=@CFLAGS_NODIST@ -I/opt/devkitpro/extras/bitmap/include -I/opt/devkitpro/libogc/gc/
 # LDFLAGS_NODIST is used in the same manner as CFLAGS_NODIST.
 # Use it when a linker flag should _not_ be part of the distutils LDFLAGS
 # once Python is installed (bpo-35257)
@@ -324,10 +324,10 @@ MBEDTLS_WII_CMAKE_FLAGS ?= \
 	-DCMAKE_AR=$(CURL_WII_AR) \
 	-DCMAKE_RANLIB=$(CURL_WII_RANLIB) \
 	-DCMAKE_MAKE_PROGRAM=$(CURL_WII_MAKE) \
-	-DPython3_EXECUTABLE=$(srcdir)/tools/venv-python.sh \
-	-DPYTHON_EXECUTABLE=$(srcdir)/tools/venv-python.sh \
-	-DMBEDTLS_PYTHON_EXECUTABLE=$(srcdir)/tools/venv-python.sh \
-	-DTF_PSA_CRYPTO_PYTHON_EXECUTABLE=$(srcdir)/tools/venv-python.sh \
+	-DPython3_EXECUTABLE=$(abs_srcdir)/tools/venv-python.sh \
+	-DPYTHON_EXECUTABLE=$(abs_srcdir)/tools/venv-python.sh \
+	-DMBEDTLS_PYTHON_EXECUTABLE=$(abs_srcdir)/tools/venv-python.sh \
+	-DTF_PSA_CRYPTO_PYTHON_EXECUTABLE=$(abs_srcdir)/tools/venv-python.sh \
 	-DCMAKE_C_FLAGS='$(OPT) -I$(DEVKITPRO)/libogc/include -I$(MBEDTLS_WII_COMPAT_DIR) -DMBEDTLS_USER_CONFIG_FILE=\"mbedtls_wii_user_config.h\" -DTF_PSA_CRYPTO_USER_CONFIG_FILE=\"mbedtls_wii_user_config.h\"' \
 	-DCMAKE_INSTALL_PREFIX=$(MBEDTLS_WII_INSTALL_DIR) \
 	-DENABLE_PROGRAMS=OFF \

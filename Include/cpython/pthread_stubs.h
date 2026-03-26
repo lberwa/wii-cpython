@@ -18,6 +18,10 @@
  * - all other functions do nothing and return 0.
  */
 
+#ifdef HAVE_PTHREAD_H
+#  include <pthread.h>
+#endif
+
 #ifdef __wasi__
 // WASI's bits/alltypes.h provides type definitions when __NEED_ is set.
 // The header file can be included multiple times.
@@ -89,7 +93,7 @@ PyAPI_FUNC(int) pthread_create(pthread_t *restrict thread,
 PyAPI_FUNC(int) pthread_detach(pthread_t thread);
 PyAPI_FUNC(int) pthread_join(pthread_t thread, void** value_ptr);
 PyAPI_FUNC(pthread_t) pthread_self(void);
-PyAPI_FUNC(int) pthread_exit(void *retval) __attribute__ ((__noreturn__));
+PyAPI_FUNC(void) pthread_exit(void *retval) __attribute__ ((__noreturn__));
 PyAPI_FUNC(int) pthread_attr_init(pthread_attr_t *attr);
 PyAPI_FUNC(int) pthread_attr_setstacksize(pthread_attr_t *attr, size_t stacksize);
 PyAPI_FUNC(int) pthread_attr_destroy(pthread_attr_t *attr);

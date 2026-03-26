@@ -112,7 +112,7 @@ PyAPI_FUNC(pthread_t) pthread_self(void)
     return (pthread_t)(uintptr_t)&py_tls_entries;
 }
 
-int
+void
 pthread_exit(void *retval)
 {
     exit(0);

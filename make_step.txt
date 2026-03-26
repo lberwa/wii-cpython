@@ -1,0 +1,179 @@
+rm -f *.o *.a python buildno*
+for i in Parser Grammar Objects Python Modules; do cd $i && make clean; done || true
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Parser“ wird betreten
+rm -f *.o *.a lexer/*.o
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Parser“ wird verlassen
+/bin/sh: 1: cd: can't cd to Grammar
+/bin/sh: 1: cd: can't cd to Objects
+/bin/sh: 1: cd: can't cd to Python
+/bin/sh: 1: cd: can't cd to Modules
+cd zlib && make clean || true
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/zlib“ wird betreten
+cd contrib/minizip && { make clean ; cd ../.. ; }
+make[2]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/zlib/contrib/minizip“ wird betreten
+/bin/rm -f *.o *~ minizip miniunz test.*
+make[2]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/zlib/contrib/minizip“ wird verlassen
+rm -f *.o *.lo *~ \
+   example minigzip examplesh minigzipsh \
+   example64 minigzip64 \
+   infcover \
+   libz.* foo.gz so_locations \
+   _match.s maketree contrib/infback9/*.o
+rm -rf objs
+rm -f *.gcda *.gcno *.gcov
+rm -f contrib/infback9/*.gcda contrib/infback9/*.gcno contrib/infback9/*.gcov
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/zlib“ wird verlassen
+rm -rf curl/build-wii curl/mbedtls/build-wii*
+cd ./zlib && \
+export CC=/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc AR=/opt/devkitpro/devkitPPC/bin/powerpc-eabi-ar RANLIB=/opt/devkitpro/devkitPPC/bin/powerpc-eabi-ranlib CFLAGS="-Os -Wall -msoft-float" && \
+make distclean || true && \
+./configure --static --prefix=$(pwd)/install-wii && \
+make libz.a V=1
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/zlib“ wird betreten
+cd contrib/minizip && { make clean ; cd ../.. ; }
+make[2]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/zlib/contrib/minizip“ wird betreten
+/bin/rm -f *.o *~ minizip miniunz test.*
+make[2]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/zlib/contrib/minizip“ wird verlassen
+rm -f *.o *.lo *~ \
+   example minigzip examplesh minigzipsh \
+   example64 minigzip64 \
+   infcover \
+   libz.* foo.gz so_locations \
+   _match.s maketree contrib/infback9/*.o
+rm -rf objs
+rm -f *.gcda *.gcno *.gcov
+rm -f contrib/infback9/*.gcda contrib/infback9/*.gcno contrib/infback9/*.gcov
+cp -p zconf.h.in zconf.h
+rm -f Makefile zlib.pc configure.log
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/zlib“ wird verlassen
+Building static library libz.a version 1.3.2.1-motley with /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc.
+Checking for size_t... Yes.
+Checking for off64_t... No.
+Checking for fseeko... Yes.
+Checking for strerror... Yes.
+Checking for unistd.h... Yes.
+Checking for stdarg.h... Yes.
+Checking whether to use vs[n]printf() or s[n]printf()... using vs[n]printf().
+Checking for vsnprintf() in stdio.h... No.
+  WARNING: vsnprintf() not found, falling back to vsprintf(). zlib
+  can build but will be open to possible buffer-overflow security
+  vulnerabilities.
+  The --insecure option must be provided to ./configure in order to
+  compile using the insecure vsprintf() function.
+Checking for return value of vsprintf()... Yes.
+Checking for attribute(visibility) support... Yes.
+Checking for s390x build ... No.
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/zlib“ wird betreten
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o adler32.o adler32.c
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o crc32.o crc32.c
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o deflate.o deflate.c
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o infback.o infback.c
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o inffast.o inffast.c
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o inflate.o inflate.c
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o inftrees.o inftrees.c
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o trees.o trees.c
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o zutil.o zutil.c
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o compress.o compress.c
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o uncompr.o uncompr.c
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o gzclose.o gzclose.c
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o gzlib.o gzlib.c
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o gzread.o gzread.c
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o gzwrite.o gzwrite.c
+gzwrite.c: In function 'gzvprintf':
+gzwrite.c:405:2: warning: #warning "vsnprintf() not available -- gzprintf() stub returns Z_STREAM_ERROR" [-Wcpp]
+  405 | #warning "vsnprintf() not available -- gzprintf() stub returns Z_STREAM_ERROR"
+      |  ^~~~~~~
+gzwrite.c:406:2: warning: #warning "you can recompile with ZLIB_INSECURE defined to use vsprintf()" [-Wcpp]
+  406 | #warning "you can recompile with ZLIB_INSECURE defined to use vsprintf()"
+      |  ^~~~~~~
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-ar rc libz.a adler32.o crc32.o deflate.o infback.o inffast.o inflate.o inftrees.o trees.o zutil.o compress.o uncompr.o gzclose.o gzlib.o gzread.o gzwrite.o 
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/zlib“ wird verlassen
+if test ! -f libpython3.15.a; \
+then for i in Parser Grammar Objects Python Modules; do rm -f $i/*.a; done; true; \
+else true; fi
+for i in Parser Grammar Objects Python Modules; do \
+	(cd $i; make VERSION="3.15" all); \
+	(cd $i; make lib$i.a); \
+done
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Parser“ wird betreten
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -g -O2 -Wall -Wstrict-prototypes -fPIC -Os -Wall -msoft-float -I../Include -I.. -DHAVE_CONFIG_H -c token.c
+In file included from ../Include/Python.h:14,
+                 from token.c:3:
+../pyconfig.h:6:9: warning: 'HAVE_CONFIG_H' redefined
+    6 | #define HAVE_CONFIG_H
+      |         ^~~~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+../pyconfig.h:25:18: warning: missing terminating " character
+   25 | #define MACHDEP \"wii\"
+      |                  ^
+../pyconfig.h:35:9: warning: 'Py_USING_UNICODE' redefined
+   35 | #define Py_USING_UNICODE 1
+      |         ^~~~~~~~~~~~~~~~
+../pyconfig.h:9:9: note: this is the location of the previous definition
+    9 | #define Py_USING_UNICODE
+      |         ^~~~~~~~~~~~~~~~
+../pyconfig.h:27:17: error: two or more data types in declaration specifiers
+   27 | #define ssize_t long
+      |                 ^~~~
+../pyconfig.h:26:20: error: two or more data types in declaration specifiers
+   26 | #define Py_ssize_t long
+      |                    ^~~~
+../Include/pyport.h:162:25: note: in expansion of macro 'Py_ssize_t'
+  162 | typedef Py_intptr_t     Py_ssize_t;
+      |                         ^~~~~~~~~~
+In file included from ../Include/Python.h:73:
+../Include/pyport.h:162:1: warning: useless type name in empty declaration
+  162 | typedef Py_intptr_t     Py_ssize_t;
+      | ^~~~~~~
+../Include/pyport.h:173:1: warning: useless type name in empty declaration
+  173 | typedef Py_ssize_t Py_hash_t;
+      | ^~~~~~~
+In file included from ../Include/Python.h:91:
+../Include/unicodeobject.h:61:9: warning: 'Py_USING_UNICODE' redefined
+   61 | #define Py_USING_UNICODE
+      |         ^~~~~~~~~~~~~~~~
+../pyconfig.h:35:9: note: this is the location of the previous definition
+   35 | #define Py_USING_UNICODE 1
+      |         ^~~~~~~~~~~~~~~~
+In file included from ../Include/Python.h:113:
+../Include/cpython/code.h:160:9: warning: 'CO_MAXBLOCKS' redefined
+  160 | #define CO_MAXBLOCKS 21 /* Max static block nesting within a function */
+      |         ^~~~~~~~~~~~
+../pyconfig.h:19:9: note: this is the location of the previous definition
+   19 | #define CO_MAXBLOCKS 80
+      |         ^~~~~~~~~~~~
+token.c:4:10: fatal error: pycore_token.h: No such file or directory
+    4 | #include "pycore_token.h"
+      |          ^~~~~~~~~~~~~~~~
+compilation terminated.
+make[1]: *** [Makefile:21: token.o] Fehler 1
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Parser“ wird verlassen
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Parser“ wird betreten
+make[1]: *** Keine Regel, um „libParser.a“ zu erstellen.  Schluss.
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Parser“ wird verlassen
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Grammar“ wird betreten
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-ar rc libgrammar.a 
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-ranlib libgrammar.a
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Grammar“ wird verlassen
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Grammar“ wird betreten
+make[1]: *** Keine Regel, um „libGrammar.a“ zu erstellen.  Schluss.
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Grammar“ wird verlassen
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Objects“ wird betreten
+make[1]: Für das Ziel „all“ ist nichts zu tun.
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Objects“ wird verlassen
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Objects“ wird betreten
+make[1]: *** Keine Regel, um „libObjects.a“ zu erstellen.  Schluss.
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Objects“ wird verlassen
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Python“ wird betreten
+make[1]: Für das Ziel „all“ ist nichts zu tun.
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Python“ wird verlassen
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Python“ wird betreten
+make[1]: *** Keine Regel, um „libPython.a“ zu erstellen.  Schluss.
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Python“ wird verlassen
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Modules“ wird betreten
+make[1]: Für das Ziel „all“ ist nichts zu tun.
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Modules“ wird verlassen
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Modules“ wird betreten
+make[1]: *** Keine Regel, um „libModules.a“ zu erstellen.  Schluss.
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Modules“ wird verlassen
+make: *** [Makefile:73: libpython3.15.a] Fehler 2

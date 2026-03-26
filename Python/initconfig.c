@@ -17,6 +17,7 @@
 
 #include <locale.h>               // setlocale()
 #include <stdlib.h>               // getenv()
+#define TP(msg) ((void)0)
 #if defined(MS_WINDOWS) || defined(__CYGWIN__)
 #  ifdef HAVE_IO_H
 #    include <io.h>
@@ -238,6 +239,8 @@ static const PyConfigSpec PYPRECONFIG_SPEC[] = {
 #undef SYS_FLAG_SETTER
 #undef SYS_FLAG
 #undef NO_SYS
+
+#include <my_text_renderer.h>
 
 
 // Forward declarations
@@ -2690,12 +2693,14 @@ config_init_fs_encoding(PyConfig *config, const PyPreConfig *preconfig)
 static PyStatus
 config_init_import(PyConfig *config, int compute_path_config)
 {
+    TP("36.1");
     PyStatus status;
 
     status = _PyConfig_InitPathConfig(config, compute_path_config);
     if (_PyStatus_EXCEPTION(status)) {
         return status;
     }
+    TP("36.2");
 
     const char *env = config_get_env(config, "PYTHON_FROZEN_MODULES");
     if (env == NULL) {
@@ -2709,6 +2714,7 @@ config_init_import(PyConfig *config, int compute_path_config)
         return PyStatus_Error("bad value for PYTHON_FROZEN_MODULES "
                               "(expected \"on\" or \"off\")");
     }
+    TP("36.3");
 
     /* -X frozen_modules=[on|off] */
     const wchar_t *value = config_get_xoption_value(config, L"frozen_modules");
@@ -2728,8 +2734,10 @@ config_init_import(PyConfig *config, int compute_path_config)
         return PyStatus_Error("bad value for option -X frozen_modules "
                               "(expected \"on\" or \"off\")");
     }
+    TP("36.4");
 
     assert(config->use_frozen_modules >= 0);
+    TP("36.5");
     return _PyStatus_OK();
 }
 

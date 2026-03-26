@@ -373,7 +373,8 @@ class _ModuleLock:
         tid = _thread.get_ident()
         with self.lock:
             if self.owner != tid:
-                raise RuntimeError('cannot release un-acquired lock')
+                # Wii single-thread workaround: ignore stale ownership
+                return
             assert len(self.count) > 0
             self.count.pop()
             if not len(self.count):
@@ -403,7 +404,8 @@ class _DummyModuleLock:
 
     def release(self):
         if self.count == 0:
-            raise RuntimeError('cannot release un-acquired lock')
+            # Wii single-thread workaround: ignore stale release
+            return
         self.count -= 1
 
     def __repr__(self):

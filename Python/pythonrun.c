@@ -761,6 +761,11 @@ done:
 void
 _PyErr_Print(PyThreadState *tstate)
 {
+#if defined(__powerpc__) || defined(__PPC__)
+    // Wii: avoid hanging in error printing
+    PyErr_Clear();
+    return;
+#endif
     _PyErr_PrintEx(tstate, 1);
 }
 

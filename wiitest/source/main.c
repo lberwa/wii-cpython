@@ -10,9 +10,9 @@ extern const unsigned char test_py[];
 extern const unsigned char test_py_end[];
 
 //#define PNG
-
-#ifdef PNG
 #include <fat2.h>
+#ifdef PNG
+
 #include <stdio.h>
 
 /* Symbole vom bin2o/bin2s für data/test.png */
@@ -135,6 +135,7 @@ int main(void) {
 
     video_init_custom();
     terminal_print("start");
+    fatInitDefault();
     //wait(100);
 
     #ifdef PNG
@@ -162,17 +163,49 @@ int main(void) {
     terminal_print("initalise ...");
     wait(100);
     PyConfig config;
-    PyConfig_InitPythonConfig(&config);
+    PyConfig_InitIsolatedConfig(&config);
+    config.use_environment = 0;
     config.site_import = 0;
+    config.user_site_directory = 0;
     config.install_signal_handlers = 0;
+    config.use_hash_seed = 1;
+    config.hash_seed = 0;
+    //config.utf8_mode = 1;
+
+    // Minimal filesystem/stdlib setup (match your SD layout)
+    PyConfig_SetString(&config, &config.program_name, L"python");
+    PyConfig_SetString(&config, &config.home, L"sd:/python");
+    config.module_search_paths_set = 1;
+    PyWideStringList_Append(&config.module_search_paths, L"sd:/python");
+    PyWideStringList_Append(&config.module_search_paths, L"sd:/python/Lib");
+    PyWideStringList_Append(&config.module_search_paths, L"sd:/python/lib/");
+    PyConfig_SetString(&config, &config.filesystem_encoding, L"utf-8");
+    PyConfig_SetString(&config, &config.filesystem_errors, L"surrogatepass");
+    terminal_print("before Py_InitializeFromConfig");
     {
+        terminal_print("1");
         PyStatus status = Py_InitializeFromConfig(&config);
+        terminal_print("2");
         if (PyStatus_Exception(status)) {
-            PyConfig_Clear(&config);
+            terminal_print("3");
             terminal_print("Py_InitializeFromConfig failed");
+            if (status.func != NULL) {
+                terminal_print("4");
+                terminal_print(status.func);
+            }
+            terminal_print("5");
+            if (status.err_msg != NULL) {
+                terminal_print("6");
+                terminal_print(status.err_msg);
+            }
+            terminal_print("7");
+            PyConfig_Clear(&config);
+            terminal_print("8");
             return 1;
         }
+        terminal_print("9");
     }
+    terminal_print("10");
     PyConfig_Clear(&config);
     terminal_print("after Py_Initialize");
     //wait(100);
@@ -211,6 +244,7 @@ int main(void) {
     terminal_print("run source_py/test.py ...");
     //wait(100);
     rc = PyRun_SimpleString(script);
+    terminal_print("after PyRun_SimpleString");
     wait(100);
     free(script);
     if (rc != 0) {
@@ -223,5 +257,8 @@ int main(void) {
     Py_Finalize();
     terminal_print("done");
     wait(100);
+    while (1) {
+        wait(500);
+    }
     return 0;
 }

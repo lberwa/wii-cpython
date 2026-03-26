@@ -13,6 +13,13 @@
 #include "pycore_lazyimportobject.h"
 #include "pycore_long.h"          // _PyLong_GetZero
 #include "pycore_magic_number.h"  // PYC_MAGIC_NUMBER_TOKEN
+
+#if defined(TERMINAL_PRINT_DEBUG)
+#  include <my_text_renderer.h>
+#  define TP(msg) terminal_print(msg)
+#else
+#  define TP(msg) ((void)0)
+#endif
 #include "pycore_moduleobject.h"  // _PyModule_GetDef()
 #include "pycore_namespace.h"     // _PyNamespace_Type
 #include "pycore_object.h"        // _Py_SetImmortal()
@@ -56,6 +63,8 @@ is_interpreter_isolated(PyInterpreterState *interp)
         && interp->ceval.own_gil;
 }
 #endif
+
+#include <my_text_renderer.h>
 
 
 /*******************************/
@@ -152,18 +161,30 @@ static struct _inittab *inittab_copy = NULL;
 void
 _PyImport_AcquireLock(PyInterpreterState *interp)
 {
+#if defined(WII_BUILD)
+    (void)interp;
+    return;
+#endif
     _PyRecursiveMutex_Lock(&IMPORT_LOCK(interp));
 }
 
 void
 _PyImport_ReleaseLock(PyInterpreterState *interp)
 {
+#if defined(WII_BUILD)
+    (void)interp;
+    return;
+#endif
     _PyRecursiveMutex_Unlock(&IMPORT_LOCK(interp));
 }
 
 void
 _PyImport_ReInitLock(PyInterpreterState *interp)
 {
+#if defined(WII_BUILD)
+    (void)interp;
+    return;
+#endif
     // gh-126688: Thread id may change after fork() on some operating systems.
     IMPORT_LOCK(interp).thread = PyThread_get_thread_ident_ex();
 }
@@ -4854,19 +4875,56 @@ init_zipimport(PyThreadState *tstate, int verbose)
 PyStatus
 _PyImport_InitExternal(PyThreadState *tstate)
 {
+    TP("32.1");
     int verbose = _PyInterpreterState_GetConfig(tstate->interp)->verbose;
-
+    TP("32.2");
     // XXX Initialize here: sys.path_hooks and sys.path_importer_cache.
-
+    TP("32.3");
     if (init_importlib_external(tstate->interp) != 0) {
+        TP("32.4");
+        #if defined(WII_BUILD)
+        {
+            PyObject *exc = NULL, *val = NULL, *tb = NULL;
+            PyErr_Fetch(&exc, &val, &tb);
+            PyErr_NormalizeException(&exc, &val, &tb);
+            if (exc) {
+                PyObject *s = PyObject_Str(exc);
+                if (s) {
+                    const char *c = PyUnicode_AsUTF8(s);
+                    if (c) TP(c);
+                    Py_DECREF(s);
+                }
+            }
+            if (val) {
+                PyObject *s = PyObject_Str(val);
+                if (s) {
+                    const char *c = PyUnicode_AsUTF8(s);
+                    if (c) TP(c);
+                    Py_DECREF(s);
+                }
+            }
+            Py_XDECREF(tb);
+            Py_XDECREF(exc);
+            Py_XDECREF(val);
+        }
+        _PyErr_Clear(tstate);
+        TP("32.5");
+        // Wii: allow startup without external importers
+        return _PyStatus_OK();
+        #else
         _PyErr_Print(tstate);
+        #endif
+        TP("32.5");
         return _PyStatus_ERR("external importer setup failed");
     }
-
+    TP("32.6");
     if (init_zipimport(tstate, verbose) != 0) {
+        TP("32.7");
         PyErr_Print();
+        TP("32.8");
         return _PyStatus_ERR("initializing zipimport failed");
     }
+    TP("32.9");
 
     return _PyStatus_OK();
 }
@@ -4993,6 +5051,11 @@ _imp_lock_held_impl(PyObject *module)
 /*[clinic end generated code: output=8b89384b5e1963fc input=9b088f9b217d9bdf]*/
 {
     PyInterpreterState *interp = _PyInterpreterState_GET();
+#if defined(WII_BUILD)
+    (void)module;
+    (void)interp;
+    Py_RETURN_FALSE;
+#endif
     return PyBool_FromLong(PyMutex_IsLocked(&IMPORT_LOCK(interp).mutex));
 }
 
@@ -5011,6 +5074,11 @@ _imp_acquire_lock_impl(PyObject *module)
 /*[clinic end generated code: output=1aff58cb0ee1b026 input=e1a4ef049d34e7dd]*/
 {
     PyInterpreterState *interp = _PyInterpreterState_GET();
+#if defined(WII_BUILD)
+    (void)module;
+    (void)interp;
+    Py_RETURN_NONE;
+#endif
     _PyImport_AcquireLock(interp);
     Py_RETURN_NONE;
 }
@@ -5028,6 +5096,11 @@ _imp_release_lock_impl(PyObject *module)
 /*[clinic end generated code: output=7faab6d0be178b0a input=934fb11516dd778b]*/
 {
     PyInterpreterState *interp = _PyInterpreterState_GET();
+#if defined(WII_BUILD)
+    (void)module;
+    (void)interp;
+    Py_RETURN_NONE;
+#endif
     if (!_PyRecursiveMutex_IsLockedByCurrentThread(&IMPORT_LOCK(interp))) {
         PyErr_SetString(PyExc_RuntimeError,
                         "not holding the import lock");

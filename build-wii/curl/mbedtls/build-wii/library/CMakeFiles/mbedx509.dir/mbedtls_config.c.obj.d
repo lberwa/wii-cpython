@@ -1,0 +1,21 @@
+library/CMakeFiles/mbedx509.dir/mbedtls_config.c.obj: \
+ /opt/devkitpro/extras/cpython/3.15.0a7/curl/mbedtls/library/mbedtls_config.c \
+ /opt/devkitpro/extras/cpython/3.15.0a7/curl/mbedtls/tf-psa-crypto/include/tf-psa-crypto/build_info.h \
+ /opt/devkitpro/extras/cpython/3.15.0a7/curl/mbedtls/tf-psa-crypto/include/psa/crypto_config.h \
+ /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../curl/mbedtls/wii/include/mbedtls_wii_user_config.h \
+ /opt/devkitpro/extras/cpython/3.15.0a7/curl/mbedtls/tf-psa-crypto/include/tf-psa-crypto/private/crypto_adjust_config_synonyms.h \
+ /opt/devkitpro/extras/cpython/3.15.0a7/curl/mbedtls/tf-psa-crypto/include/tf-psa-crypto/private/crypto_adjust_config_auto_enabled.h \
+ /opt/devkitpro/extras/cpython/3.15.0a7/curl/mbedtls/tf-psa-crypto/include/tf-psa-crypto/private/crypto_adjust_config_dependencies.h \
+ /opt/devkitpro/extras/cpython/3.15.0a7/curl/mbedtls/tf-psa-crypto/include/tf-psa-crypto/private/crypto_adjust_config_key_pair_types.h \
+ /opt/devkitpro/extras/cpython/3.15.0a7/curl/mbedtls/tf-psa-crypto/include/tf-psa-crypto/private/crypto_adjust_config_derived.h \
+ /opt/devkitpro/extras/cpython/3.15.0a7/curl/mbedtls/tf-psa-crypto/drivers/builtin/include/mbedtls/private/crypto_adjust_config_enable_builtins.h \
+ /opt/devkitpro/extras/cpython/3.15.0a7/curl/mbedtls/tf-psa-crypto/include/tf-psa-crypto/private/crypto_adjust_config_support.h \
+ /opt/devkitpro/extras/cpython/3.15.0a7/curl/mbedtls/tf-psa-crypto/drivers/builtin/include/mbedtls/private/crypto_adjust_config_tweak_builtins.h \
+ /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/library/mbedtls_config_check_before.h \
+ /opt/devkitpro/extras/cpython/3.15.0a7/curl/mbedtls/include/mbedtls/build_info.h \
+ /opt/devkitpro/extras/cpython/3.15.0a7/curl/mbedtls/include/mbedtls/mbedtls_config.h \
+ /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/library/mbedtls_config_check_user.h \
+ /opt/devkitpro/extras/cpython/3.15.0a7/curl/mbedtls/include/mbedtls/private/config_adjust_x509.h \
+ /opt/devkitpro/extras/cpython/3.15.0a7/curl/mbedtls/include/mbedtls/private/config_adjust_ssl.h \
+ /opt/devkitpro/extras/cpython/3.15.0a7/curl/mbedtls/library/mbedtls_check_config.h \
+ /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/library/mbedtls_config_check_final.h

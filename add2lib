@@ -1,0 +1,5 @@
+libparser.a
+libgrammar.a
+libobjects.a
+libpython.a
+libmodules.a

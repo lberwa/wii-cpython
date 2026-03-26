@@ -50,6 +50,13 @@
      (Note: this mechanism is enabled with FORCE_SWITCHING above)
 */
 
+#ifndef __PPC__
+#define __PPC__
+#endif
+#ifndef WII_SINGLE_THREAD
+#define WII_SINGLE_THREAD 
+#endif
+
 // Atomically copy the bits indicated by mask between two values.
 static inline void
 copy_eval_breaker_bits(uintptr_t *from, uintptr_t *to, uintptr_t mask)
@@ -107,6 +114,15 @@ update_eval_breaker_for_thread(PyInterpreterState *interp, PyThreadState *tstate
 
 #include "condvar.h"
 
+#define TP(msg) ((void)0)
+#define WII_LOG(msg) TP(msg)
+
+#if defined(WII_BUILD)
+#  define WII_SINGLE_THREAD 1
+#else
+#  define WII_SINGLE_THREAD 0
+#endif
+ 
 #define MUTEX_INIT(mut) \
     if (PyMUTEX_INIT(&(mut))) { \
         Py_FatalError("PyMUTEX_INIT(" #mut ") failed"); };
@@ -217,6 +233,16 @@ static void
 drop_gil(PyInterpreterState *interp, PyThreadState *tstate, int final_release)
 {
     struct _ceval_state *ceval = &interp->ceval;
+#if WII_SINGLE_THREAD
+    (void)final_release;
+    if (tstate != NULL) {
+        tstate->holds_gil = 0;
+    }
+    if (ceval->gil != NULL) {
+        _Py_atomic_store_int_relaxed(&ceval->gil->locked, 0);
+    }
+    return;
+#endif
     /* If final_release is true, the caller is indicating that we're releasing
        the GIL for the last time in this thread.  This is particularly
        relevant when the current thread state is finalizing or its
@@ -310,6 +336,13 @@ take_gil(PyThreadState *tstate)
     assert(_PyThreadState_CheckConsistency(tstate));
     PyInterpreterState *interp = tstate->interp;
     struct _gil_runtime_state *gil = interp->ceval.gil;
+#if WII_SINGLE_THREAD
+    (void)err;
+    _Py_atomic_store_ptr_relaxed(&gil->last_holder, tstate);
+    _Py_atomic_store_int_relaxed(&gil->locked, 1);
+    tstate->holds_gil = 1;
+    return;
+#endif
 #ifdef Py_GIL_DISABLED
     if (!_Py_atomic_load_int_relaxed(&gil->enabled)) {
         return;
@@ -502,9 +535,11 @@ init_own_gil(PyInterpreterState *interp, struct _gil_runtime_state *gil)
 void
 _PyEval_InitGIL(PyThreadState *tstate, int own_gil)
 {
+    WII_LOG("gil: enter");
     assert(tstate->interp->ceval.gil == NULL);
     if (!own_gil) {
         /* The interpreter will share the main interpreter's instead. */
+        WII_LOG("gil: shared");
         PyInterpreterState *main_interp = _PyInterpreterState_Main();
         assert(tstate->interp != main_interp);
         struct _gil_runtime_state *gil = main_interp->ceval.gil;
@@ -512,12 +547,17 @@ _PyEval_InitGIL(PyThreadState *tstate, int own_gil)
         assert(!current_thread_holds_gil(gil, tstate));
     }
     else {
+        WII_LOG("gil: before PyThread_init_thread");
         PyThread_init_thread();
+        WII_LOG("gil: before init_own_gil");
         init_own_gil(tstate->interp, &tstate->interp->_gil);
+        WII_LOG("gil: after init_own_gil");
     }
 
     // Lock the GIL and mark the current thread as attached.
+    WII_LOG("gil: before attach");
     _PyThreadState_Attach(tstate);
+    WII_LOG("gil: after attach");
 }
 
 void

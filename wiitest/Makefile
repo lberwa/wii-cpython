@@ -10,11 +10,10 @@ SOURCES    := source
 DATA       := data
 INCLUDES   :=
 
-INCLUDE    += -I/opt/devkitpro/libogc/include
-INCLUDE += -I/opt/devkitpro/extras/bitmap/include
-INCLUDE += -I/opt/devkitpro/extras/cpython/3.15.0a7/Include
-INCLUDE += -I/opt/devkitpro/extras/cpython/3.15.0a7/
 INCLUDE += -I/opt/devkitpro/extras/cpython/3.15.0a7/build-wii
+INCLUDE += -I/opt/devkitpro/extras/cpython/3.15.0a7/Include
+INCLUDE += -I/opt/devkitpro/libogc/include
+INCLUDE += -I/opt/devkitpro/extras/bitmap/include
 INCLUDE += -I/opt/devkitpro/extras/mysd_sdkarte_mounten/include
 
 CFLAGS     += -O0 -g -std=c99 -Wall -Wextra
@@ -31,8 +30,8 @@ LDFLAGS    += -L/opt/devkitpro/libogc/lib/wii
 LDFLAGS    += -L/opt/devkitpro/extras/bitmap/lib
 LDFLAGS	   += -L/opt/devkitpro/libogc/lib/wii
 LDFLAGS    += -L/opt/devkitpro/extras/mysd_sdkarte_mounten/lib
-LDFLAGS    += -L/opt/devkitpro/extras/cpython/3.15.0a7/curl/build-wii/lib/
-LDFLAGS    += -L/opt/devkitpro/extras/cpython/3.15.0a7/curl/mbedtls/install-wii/lib
+LDFLAGS    += -L/opt/devkitpro/extras/cpython/3.15.0a7/libs
+LDFLAGS    += -L/opt/devkitpro/extras/cpython/3.15.0a7/
 CPYTHON_DIR := /opt/devkitpro/extras/cpython/3.15.0a7
 CPYTHON_BUILD := /opt/devkitpro/extras/cpython/3.15.0a7/build-wii
 

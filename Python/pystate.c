@@ -46,6 +46,8 @@ to avoid the expense of doing their own locking).
 #  endif
 #endif
 
+#define TP(msg) ((void)0)
+
 
 /****************************************/
 /* helpers for the current thread state */
@@ -83,6 +85,7 @@ _Py_thread_local PyInterpreterState *_Py_tss_interp = NULL;
 static inline PyThreadState *
 current_fast_get(void)
 {
+    //TP("current_fast_get");
     return _Py_tss_tstate;
 }
 
@@ -2204,27 +2207,39 @@ _PyThreadState_Attach(PyThreadState *tstate)
     // to it, we need to ensure errno doesn't change.
     int err = errno;
 #endif
+    //TP("20.1");
 
     _Py_EnsureTstateNotNULL(tstate);
+    //TP("20.1.1");
     if (current_fast_get() != NULL) {
+        //TP("20.1.2");
+        #if defined(WII_BUILD)
+        // Wii single-thread workaround: clear stale TLS instead of aborting
+        current_fast_clear(&_PyRuntime);
+        #else
         Py_FatalError("non-NULL old thread state");
+        #endif
+        //TP("20.1.3");
     }
+    //TP("20.2");
     _PyThreadStateImpl *_tstate = (_PyThreadStateImpl *)tstate;
     if (_tstate->c_stack_hard_limit == 0) {
         _Py_InitializeRecursionLimits(tstate);
     }
-
+    //TP("20.3");
     while (1) {
         _PyEval_AcquireLock(tstate);
-
+        //TP("20.4");
         // XXX assert(tstate_is_alive(tstate));
         current_fast_set(&_PyRuntime, tstate);
         if (!tstate_try_attach(tstate)) {
             tstate_wait_attach(tstate);
+            //TP("20.5");
         }
         tstate_activate(tstate);
 
 #ifdef Py_GIL_DISABLED
+        //TP("20.6");
         if (_PyEval_IsGILEnabled(tstate) && !tstate->holds_gil) {
             // The GIL was enabled between our call to _PyEval_AcquireLock()
             // and when we attached (the GIL can't go from enabled to disabled
@@ -2237,6 +2252,7 @@ _PyThreadState_Attach(PyThreadState *tstate)
         }
         _Py_qsbr_attach(((_PyThreadStateImpl *)tstate)->qsbr);
 #endif
+        //TP("20.7");
         break;
     }
 

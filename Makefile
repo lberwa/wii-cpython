@@ -1,10 +1,16 @@
-# Makefile für reinen Wii-Build
-SHELL := /bin/sh
-ROOT := $(shell CDPATH= cd -- "$(dir $(realpath $(firstword $(MAKEFILE_LIST))))" && pwd)
+# Wii-only build (no host build). Uses Python 3.15 configure output to build libpython.a.
 
-# Toolchain
+SHELL := /bin/sh
+VERSION=		3.15
+srcdir=			.
 DEVKITPRO ?= /opt/devkitpro
 DEVKITPPC ?= $(DEVKITPRO)/devkitPPC
+BUILD_DIR ?= build-wii
+LIB_DIR ?= libs
+BUILD_HOST_DIR ?= build-host
+BUILD_PYTHON ?= $(abspath $(BUILD_HOST_DIR))/python
+
+# Wii Cross-Tools (from current Makefile)
 CC := $(DEVKITPPC)/bin/powerpc-eabi-gcc
 CXX := $(DEVKITPPC)/bin/powerpc-eabi-g++
 AR := $(DEVKITPPC)/bin/powerpc-eabi-ar
@@ -16,57 +22,100 @@ OBJCOPY := $(DEVKITPPC)/bin/powerpc-eabi-objcopy
 OBJDUMP := $(DEVKITPPC)/bin/powerpc-eabi-objdump
 READELF := $(DEVKITPPC)/bin/powerpc-eabi-readelf
 
-OPT := -g -O2 -Wall -Wstrict-prototypes -fPIC
-CFLAGS_WII := -Os -Wall -msoft-float
+OPT=			-mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC
+CFLAGS_WII := -Os -Wall -DTERMINAL_PRINT_DEBUG
+CFLAGS=			$(OPT) -I. -I/opt/devkitpro/extras/bitmap/include $(CFLAGS_WII)
+MACHDEP=		wii
+prefix=			/usr/local
+exec_prefix=		${prefix}
+BINDIR=			$(exec_prefix)/bin
+LIBDIR=			$(exec_prefix)/lib
+SCRIPTDIR=		$(prefix)/lib
+LIBRARY=		libpython$(VERSION).a
+LDLIBRARY=		libpython$(VERSION).a
+SO=				.so
+LDSHARED=		$(CC) -shared
+CCSHARED=		-fpic
+LINKFORSHARED=		-Xlinker -export-dynamic
+SHELL=			/bin/sh
+LN=				ln
+INSTALL=		./install-sh -c
+DIRMODE=		755
+EXEMODE=		755
+FILEMODE=		644
 
-.PHONY: all clean wii python-wii cpython zlib curl
+CONFIGURE_ENV= \
+	DEVKITPRO="$(DEVKITPRO)" \
+	DEVKITPPC="$(DEVKITPPC)" \
+	CC="$(CC)" CXX="$(CXX)" AR="$(AR)" RANLIB="$(RANLIB)" \
+	LD="$(LD)" NM="$(NM)" STRIP="$(STRIP)" OBJCOPY="$(OBJCOPY)" \
+	OBJDUMP="$(OBJDUMP)" READELF="$(READELF)" \
+	CFLAGS="$(CFLAGS) -DWII_BUILD" \
+	CPPFLAGS="$(CPPFLAGS) -DWII_BUILD" \
+	ax_cv_c_float_words_bigendian=yes \
+	ac_cv_file__dev_ptmx=no ac_cv_file__dev_ptc=no \
+	ac_cv_header_sys_resource_h=no ac_cv_func_getrlimit=no ac_cv_func_setrlimit=no \
+	ac_cv_header_sys_statvfs_h=no ac_cv_func_statvfs=no
 
-all: wii
+CONFIGURE_FLAGS= \
+	--host=powerpc-eabi --build=$$(../config.guess) \
+	--with-build-python="$(BUILD_PYTHON)" \
+	--without-ensurepip --disable-shared --disable-ipv6 --with-mimalloc=no
 
-# ----------------------------
-# Clean
-# ----------------------------
+.PHONY: all clean configure libpython build-host python curl ssl wiitest regen-importlib
+
+all: wiitest
+
+cp-libs:
+	@mkdir -p "$(LIB_DIR)"
+	@find "$(BUILD_DIR)" -name "*.a" -exec cp {} "$(LIB_DIR)" \;
+
+
+build-host: $(BUILD_PYTHON)
+
+$(BUILD_PYTHON):
+	@mkdir -p "$(BUILD_HOST_DIR)"
+	cd "$(BUILD_HOST_DIR)" && \
+	../configure --without-ensurepip && \
+	$(MAKE) -j8
+
+configure: $(BUILD_DIR)/Makefile
+
+$(BUILD_DIR)/Makefile: $(BUILD_PYTHON)
+	@mkdir -p "$(BUILD_DIR)"
+	cd "$(BUILD_DIR)" && \
+	$(CONFIGURE_ENV) \
+	../configure $(CONFIGURE_FLAGS)
+
+libpython: configure
+	$(MAKE) -C  "$(BUILD_DIR)" libpython$(VERSION).a
+
+python: libpython
+
+ssl: configure
+	$(MAKE) -C "$(BUILD_DIR)" mbedtls-wii
+
+curl: ssl
+	$(MAKE) -C "$(BUILD_DIR)" curl-wii
+
+regen-importlib:
+	@PYTHON_FOR_REGEN=$${PYTHON_FOR_REGEN:-/usr/bin/python3}; \
+	if [ ! -x "$$PYTHON_FOR_REGEN" ]; then \
+		echo "PYTHON_FOR_REGEN not found: $$PYTHON_FOR_REGEN"; \
+		exit 1; \
+	fi; \
+	if [ ! -f "$(BUILD_HOST_DIR)/Makefile" ]; then \
+		mkdir -p "$(BUILD_HOST_DIR)"; \
+		cd "$(BUILD_HOST_DIR)" && ../configure --without-ensurepip; \
+	fi; \
+	$(MAKE) -C "$(BUILD_HOST_DIR)" PYTHON_FOR_REGEN="$$PYTHON_FOR_REGEN" regen-importlib
+
+wiitest: python curl cp-libs
+	@if [ -d "wiitest" ]; then \
+		cd wiitest && $(MAKE) clean && $(MAKE) -j8; \
+	else \
+		echo "wiitest/ not found, skipping"; \
+	fi
+
 clean:
-	rm -rf $(ROOT)/build-wii
-	rm -rf $(ROOT)/curl/build-wii $(ROOT)/curl/mbedtls/build-wii $(ROOT)/curl/mbedtls/install-wii
-	cd $(ROOT)/zlib && make distclean || true
-
-# ----------------------------
-# Wii Build
-# ----------------------------
-wii: zlib python-wii curl cpython
-
-# ----------------------------
-# zlib für Wii
-# ----------------------------
-zlib:
-	cd $(ROOT)/zlib && \
-	export DEVKITPRO=$(DEVKITPRO) && export DEVKITPPC=$(DEVKITPPC) && export PATH=$(DEVKITPPC)/bin:$$PATH && \
-	export CC=$(CC) && export AR=$(AR) && export RANLIB=$(RANLIB) && export CFLAGS="$(CFLAGS_WII)" && \
-	make distclean || true && \
-	./configure --static --prefix=$$(pwd)/install-wii && \
-	make libz.a V=1
-
-# ----------------------------
-# CPython konfigurieren für Wii
-# ----------------------------
-python-wii:
-	mkdir -p $(ROOT)/build-wii
-	cd $(ROOT)/build-wii && \
-	export DEVKITPRO=$(DEVKITPRO) && export DEVKITPPC=$(DEVKITPPC) && \
-	export CC=$(CC) && export CXX=$(CXX) && export AR=$(AR) && export RANLIB=$(RANLIB) && \
-	export LD=$(LD) && export NM=$(NM) && export STRIP=$(STRIP) && export OBJCOPY=$(OBJCOPY) && export OBJDUMP=$(OBJDUMP) && export READELF=$(READELF) && \
-	../configure --host=powerpc-eabi --build=$$(../config.guess) \
-		--without-ensurepip --disable-shared --disable-ipv6 --with-mimalloc=no
-
-# ----------------------------
-# mbedTLS + curl für Wii
-# ----------------------------
-curl:
-	$(MAKE) -C $(ROOT)/build-wii -j8 curl-wii OPT="$(OPT)"
-
-# ----------------------------
-# CPython bauen (libpython.a)
-# ----------------------------
-cpython:
-	$(MAKE) -C $(ROOT)/build-wii -j8 libpython.a
+	-rm -rf "$(BUILD_DIR)"

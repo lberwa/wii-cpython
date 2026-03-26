@@ -1,0 +1,306 @@
+cd ./zlib && \
+export CC=/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc AR=/opt/devkitpro/devkitPPC/bin/powerpc-eabi-ar RANLIB=/opt/devkitpro/devkitPPC/bin/powerpc-eabi-ranlib CFLAGS="-Os -Wall -msoft-float" && \
+make distclean || true && \
+./configure --static --prefix=$(pwd)/install-wii && \
+make libz.a V=1
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/zlib“ wird betreten
+cd contrib/minizip && { make clean ; cd ../.. ; }
+make[2]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/zlib/contrib/minizip“ wird betreten
+/bin/rm -f *.o *~ minizip miniunz test.*
+make[2]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/zlib/contrib/minizip“ wird verlassen
+rm -f *.o *.lo *~ \
+   example minigzip examplesh minigzipsh \
+   example64 minigzip64 \
+   infcover \
+   libz.* foo.gz so_locations \
+   _match.s maketree contrib/infback9/*.o
+rm -rf objs
+rm -f *.gcda *.gcno *.gcov
+rm -f contrib/infback9/*.gcda contrib/infback9/*.gcno contrib/infback9/*.gcov
+cp -p zconf.h.in zconf.h
+rm -f Makefile zlib.pc configure.log
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/zlib“ wird verlassen
+Building static library libz.a version 1.3.2.1-motley with /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc.
+Checking for size_t... Yes.
+Checking for off64_t... No.
+Checking for fseeko... Yes.
+Checking for strerror... Yes.
+Checking for unistd.h... Yes.
+Checking for stdarg.h... Yes.
+Checking whether to use vs[n]printf() or s[n]printf()... using vs[n]printf().
+Checking for vsnprintf() in stdio.h... No.
+  WARNING: vsnprintf() not found, falling back to vsprintf(). zlib
+  can build but will be open to possible buffer-overflow security
+  vulnerabilities.
+  The --insecure option must be provided to ./configure in order to
+  compile using the insecure vsprintf() function.
+Checking for return value of vsprintf()... Yes.
+Checking for attribute(visibility) support... Yes.
+Checking for s390x build ... No.
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/zlib“ wird betreten
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o adler32.o adler32.c
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o crc32.o crc32.c
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o deflate.o deflate.c
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o infback.o infback.c
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o inffast.o inffast.c
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o inflate.o inflate.c
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o inftrees.o inftrees.c
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o trees.o trees.c
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o zutil.o zutil.c
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o compress.o compress.c
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o uncompr.o uncompr.c
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o gzclose.o gzclose.c
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o gzlib.o gzlib.c
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o gzread.o gzread.c
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -Os -Wall -msoft-float -fPIC -DNO_vsnprintf -DHAVE_HIDDEN  -c -o gzwrite.o gzwrite.c
+gzwrite.c: In function 'gzvprintf':
+gzwrite.c:405:2: warning: #warning "vsnprintf() not available -- gzprintf() stub returns Z_STREAM_ERROR" [-Wcpp]
+  405 | #warning "vsnprintf() not available -- gzprintf() stub returns Z_STREAM_ERROR"
+      |  ^~~~~~~
+gzwrite.c:406:2: warning: #warning "you can recompile with ZLIB_INSECURE defined to use vsprintf()" [-Wcpp]
+  406 | #warning "you can recompile with ZLIB_INSECURE defined to use vsprintf()"
+      |  ^~~~~~~
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-ar rc libz.a adler32.o crc32.o deflate.o infback.o inffast.o inflate.o inftrees.o trees.o zutil.o compress.o uncompr.o gzclose.o gzlib.o gzread.o gzwrite.o 
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/zlib“ wird verlassen
+if test ! -f libpython3.15.a; \
+then for i in Parser Grammar Objects Python Modules; do rm -f $i/*.a; done; true; \
+else true; fi
+for i in Parser Grammar Objects Python Modules; do \
+	(cd $i; make VERSION="3.15" all); \
+	(cd $i; make lib$i.a); \
+done
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Parser“ wird betreten
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -g -O2 -Wall -Wstrict-prototypes -fPIC -Os -Wall -msoft-float -I../Include -I.. -DHAVE_CONFIG_H -c token.c
+In file included from ../Include/Python.h:14,
+                 from token.c:3:
+../pyconfig.h:6:9: warning: 'HAVE_CONFIG_H' redefined
+    6 | #define HAVE_CONFIG_H
+      |         ^~~~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+../pyconfig.h:25:18: warning: missing terminating " character
+   25 | #define MACHDEP \"wii\"
+      |                  ^
+../pyconfig.h:35:9: warning: 'Py_USING_UNICODE' redefined
+   35 | #define Py_USING_UNICODE 1
+      |         ^~~~~~~~~~~~~~~~
+../pyconfig.h:9:9: note: this is the location of the previous definition
+    9 | #define Py_USING_UNICODE
+      |         ^~~~~~~~~~~~~~~~
+../pyconfig.h:27:17: error: two or more data types in declaration specifiers
+   27 | #define ssize_t long
+      |                 ^~~~
+../pyconfig.h:26:20: error: two or more data types in declaration specifiers
+   26 | #define Py_ssize_t long
+      |                    ^~~~
+../Include/pyport.h:162:25: note: in expansion of macro 'Py_ssize_t'
+  162 | typedef Py_intptr_t     Py_ssize_t;
+      |                         ^~~~~~~~~~
+In file included from ../Include/Python.h:73:
+../Include/pyport.h:162:1: warning: useless type name in empty declaration
+  162 | typedef Py_intptr_t     Py_ssize_t;
+      | ^~~~~~~
+../Include/pyport.h:173:1: warning: useless type name in empty declaration
+  173 | typedef Py_ssize_t Py_hash_t;
+      | ^~~~~~~
+In file included from ../Include/Python.h:91:
+../Include/unicodeobject.h:61:9: warning: 'Py_USING_UNICODE' redefined
+   61 | #define Py_USING_UNICODE
+      |         ^~~~~~~~~~~~~~~~
+../pyconfig.h:35:9: note: this is the location of the previous definition
+   35 | #define Py_USING_UNICODE 1
+      |         ^~~~~~~~~~~~~~~~
+In file included from ../Include/Python.h:113:
+../Include/cpython/code.h:160:9: warning: 'CO_MAXBLOCKS' redefined
+  160 | #define CO_MAXBLOCKS 21 /* Max static block nesting within a function */
+      |         ^~~~~~~~~~~~
+../pyconfig.h:19:9: note: this is the location of the previous definition
+   19 | #define CO_MAXBLOCKS 80
+      |         ^~~~~~~~~~~~
+token.c: In function '_PyToken_OneChar':
+token.c:87:22: error: 'EXCLAMATION' undeclared (first use in this function)
+   87 |     case '!': return EXCLAMATION;
+      |                      ^~~~~~~~~~~
+token.c:87:22: note: each undeclared identifier is reported only once for each function it appears in
+token.c:88:22: error: 'PERCENT' undeclared (first use in this function)
+   88 |     case '%': return PERCENT;
+      |                      ^~~~~~~
+token.c:89:22: error: 'AMPER' undeclared (first use in this function)
+   89 |     case '&': return AMPER;
+      |                      ^~~~~
+token.c:90:22: error: 'LPAR' undeclared (first use in this function)
+   90 |     case '(': return LPAR;
+      |                      ^~~~
+token.c:91:22: error: 'RPAR' undeclared (first use in this function)
+   91 |     case ')': return RPAR;
+      |                      ^~~~
+token.c:92:22: error: 'STAR' undeclared (first use in this function)
+   92 |     case '*': return STAR;
+      |                      ^~~~
+token.c:93:22: error: 'PLUS' undeclared (first use in this function)
+   93 |     case '+': return PLUS;
+      |                      ^~~~
+token.c:94:22: error: 'COMMA' undeclared (first use in this function)
+   94 |     case ',': return COMMA;
+      |                      ^~~~~
+token.c:95:22: error: 'MINUS' undeclared (first use in this function)
+   95 |     case '-': return MINUS;
+      |                      ^~~~~
+token.c:96:22: error: 'DOT' undeclared (first use in this function)
+   96 |     case '.': return DOT;
+      |                      ^~~
+token.c:97:22: error: 'SLASH' undeclared (first use in this function)
+   97 |     case '/': return SLASH;
+      |                      ^~~~~
+token.c:98:22: error: 'COLON' undeclared (first use in this function)
+   98 |     case ':': return COLON;
+      |                      ^~~~~
+token.c:99:22: error: 'SEMI' undeclared (first use in this function)
+   99 |     case ';': return SEMI;
+      |                      ^~~~
+token.c:100:22: error: 'LESS' undeclared (first use in this function)
+  100 |     case '<': return LESS;
+      |                      ^~~~
+token.c:101:22: error: 'EQUAL' undeclared (first use in this function)
+  101 |     case '=': return EQUAL;
+      |                      ^~~~~
+token.c:102:22: error: 'GREATER' undeclared (first use in this function)
+  102 |     case '>': return GREATER;
+      |                      ^~~~~~~
+token.c:103:22: error: 'AT' undeclared (first use in this function)
+  103 |     case '@': return AT;
+      |                      ^~
+token.c:104:22: error: 'LSQB' undeclared (first use in this function)
+  104 |     case '[': return LSQB;
+      |                      ^~~~
+token.c:105:22: error: 'RSQB' undeclared (first use in this function)
+  105 |     case ']': return RSQB;
+      |                      ^~~~
+token.c:106:22: error: 'CIRCUMFLEX' undeclared (first use in this function)
+  106 |     case '^': return CIRCUMFLEX;
+      |                      ^~~~~~~~~~
+token.c:107:22: error: 'LBRACE' undeclared (first use in this function)
+  107 |     case '{': return LBRACE;
+      |                      ^~~~~~
+token.c:108:22: error: 'VBAR' undeclared (first use in this function)
+  108 |     case '|': return VBAR;
+      |                      ^~~~
+token.c:109:22: error: 'RBRACE' undeclared (first use in this function)
+  109 |     case '}': return RBRACE;
+      |                      ^~~~~~
+token.c:110:22: error: 'TILDE' undeclared (first use in this function)
+  110 |     case '~': return TILDE;
+      |                      ^~~~~
+token.c:112:12: error: 'OP' undeclared (first use in this function)
+  112 |     return OP;
+      |            ^~
+token.c: In function '_PyToken_TwoChars':
+token.c:121:26: error: 'NOTEQUAL' undeclared (first use in this function)
+  121 |         case '=': return NOTEQUAL;
+      |                          ^~~~~~~~
+token.c:126:26: error: 'PERCENTEQUAL' undeclared (first use in this function)
+  126 |         case '=': return PERCENTEQUAL;
+      |                          ^~~~~~~~~~~~
+token.c:131:26: error: 'AMPEREQUAL' undeclared (first use in this function)
+  131 |         case '=': return AMPEREQUAL;
+      |                          ^~~~~~~~~~
+token.c:136:26: error: 'DOUBLESTAR' undeclared (first use in this function)
+  136 |         case '*': return DOUBLESTAR;
+      |                          ^~~~~~~~~~
+token.c:137:26: error: 'STAREQUAL' undeclared (first use in this function)
+  137 |         case '=': return STAREQUAL;
+      |                          ^~~~~~~~~
+token.c:142:26: error: 'PLUSEQUAL' undeclared (first use in this function)
+  142 |         case '=': return PLUSEQUAL;
+      |                          ^~~~~~~~~
+token.c:147:26: error: 'MINEQUAL' undeclared (first use in this function)
+  147 |         case '=': return MINEQUAL;
+      |                          ^~~~~~~~
+token.c:148:26: error: 'RARROW' undeclared (first use in this function)
+  148 |         case '>': return RARROW;
+      |                          ^~~~~~
+token.c:153:26: error: 'DOUBLESLASH' undeclared (first use in this function)
+  153 |         case '/': return DOUBLESLASH;
+      |                          ^~~~~~~~~~~
+token.c:154:26: error: 'SLASHEQUAL' undeclared (first use in this function)
+  154 |         case '=': return SLASHEQUAL;
+      |                          ^~~~~~~~~~
+token.c:159:26: error: 'COLONEQUAL' undeclared (first use in this function)
+  159 |         case '=': return COLONEQUAL;
+      |                          ^~~~~~~~~~
+token.c:164:26: error: 'LEFTSHIFT' undeclared (first use in this function)
+  164 |         case '<': return LEFTSHIFT;
+      |                          ^~~~~~~~~
+token.c:165:26: error: 'LESSEQUAL' undeclared (first use in this function)
+  165 |         case '=': return LESSEQUAL;
+      |                          ^~~~~~~~~
+token.c:171:26: error: 'EQEQUAL' undeclared (first use in this function)
+  171 |         case '=': return EQEQUAL;
+      |                          ^~~~~~~
+token.c:176:26: error: 'GREATEREQUAL' undeclared (first use in this function)
+  176 |         case '=': return GREATEREQUAL;
+      |                          ^~~~~~~~~~~~
+token.c:177:26: error: 'RIGHTSHIFT' undeclared (first use in this function)
+  177 |         case '>': return RIGHTSHIFT;
+      |                          ^~~~~~~~~~
+token.c:182:26: error: 'ATEQUAL' undeclared (first use in this function)
+  182 |         case '=': return ATEQUAL;
+      |                          ^~~~~~~
+token.c:187:26: error: 'CIRCUMFLEXEQUAL' undeclared (first use in this function)
+  187 |         case '=': return CIRCUMFLEXEQUAL;
+      |                          ^~~~~~~~~~~~~~~
+token.c:192:26: error: 'VBAREQUAL' undeclared (first use in this function)
+  192 |         case '=': return VBAREQUAL;
+      |                          ^~~~~~~~~
+token.c:196:12: error: 'OP' undeclared (first use in this function)
+  196 |     return OP;
+      |            ^~
+token.c: In function '_PyToken_ThreeChars':
+token.c:207:30: error: 'DOUBLESTAREQUAL' undeclared (first use in this function)
+  207 |             case '=': return DOUBLESTAREQUAL;
+      |                              ^~~~~~~~~~~~~~~
+token.c:216:30: error: 'ELLIPSIS' undeclared (first use in this function)
+  216 |             case '.': return ELLIPSIS;
+      |                              ^~~~~~~~
+token.c:225:30: error: 'DOUBLESLASHEQUAL' undeclared (first use in this function)
+  225 |             case '=': return DOUBLESLASHEQUAL;
+      |                              ^~~~~~~~~~~~~~~~
+token.c:234:30: error: 'LEFTSHIFTEQUAL' undeclared (first use in this function)
+  234 |             case '=': return LEFTSHIFTEQUAL;
+      |                              ^~~~~~~~~~~~~~
+token.c:243:30: error: 'RIGHTSHIFTEQUAL' undeclared (first use in this function)
+  243 |             case '=': return RIGHTSHIFTEQUAL;
+      |                              ^~~~~~~~~~~~~~~
+token.c:249:12: error: 'OP' undeclared (first use in this function)
+  249 |     return OP;
+      |            ^~
+make[1]: *** [Makefile:21: token.o] Fehler 1
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Parser“ wird verlassen
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Parser“ wird betreten
+make[1]: *** Keine Regel, um „libParser.a“ zu erstellen.  Schluss.
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Parser“ wird verlassen
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Grammar“ wird betreten
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-ar rc libgrammar.a 
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-ranlib libgrammar.a
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Grammar“ wird verlassen
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Grammar“ wird betreten
+make[1]: *** Keine Regel, um „libGrammar.a“ zu erstellen.  Schluss.
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Grammar“ wird verlassen
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Objects“ wird betreten
+make[1]: Für das Ziel „all“ ist nichts zu tun.
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Objects“ wird verlassen
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Objects“ wird betreten
+make[1]: *** Keine Regel, um „libObjects.a“ zu erstellen.  Schluss.
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Objects“ wird verlassen
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Python“ wird betreten
+make[1]: Für das Ziel „all“ ist nichts zu tun.
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Python“ wird verlassen
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Python“ wird betreten
+make[1]: *** Keine Regel, um „libPython.a“ zu erstellen.  Schluss.
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Python“ wird verlassen
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Modules“ wird betreten
+make[1]: Für das Ziel „all“ ist nichts zu tun.
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Modules“ wird verlassen
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Modules“ wird betreten
+make[1]: *** Keine Regel, um „libModules.a“ zu erstellen.  Schluss.
+make[1]: Verzeichnis „/opt/devkitpro/extras/cpython/3.15.0a7/Modules“ wird verlassen
+make: *** [Makefile:73: libpython3.15.a] Fehler 2

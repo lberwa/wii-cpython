@@ -1,0 +1,11 @@
+file(REMOVE_RECURSE
+  "CMakeFiles/curl-example-progressfunc.dir/progressfunc.c.obj"
+  "CMakeFiles/curl-example-progressfunc.dir/progressfunc.c.obj.d"
+  "progressfunc"
+  "progressfunc.pdb"
+)
+
+# Per-language clean rules from dependency scanning.
+foreach(lang C)
+  include(CMakeFiles/curl-example-progressfunc.dir/cmake_clean_${lang}.cmake OPTIONAL)
+endforeach()

@@ -5,6 +5,19 @@
 #ifndef Py_PYTHON_H
 #define Py_PYTHON_H
 
+#ifndef __powerpc__
+#define __powerpc__
+#endif
+#ifndef __PPC__
+#define __PPC__
+#endif
+#ifndef __WII__
+#define __WII__
+#endif
+#ifndef __wii__
+#define __wii__
+#endif
+ 
 // Since this is a "meta-include" file, "#ifdef __cplusplus / extern "C" {"
 // is not needed.
 
@@ -68,6 +81,7 @@ __pragma(warning(push))
 __pragma(warning(disable: 4201))
 #endif
 
+//#define TERMINAL_PRINT_DEBUG
 
 // Include Python header files
 #include "pyport.h"

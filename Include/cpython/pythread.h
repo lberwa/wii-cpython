@@ -12,7 +12,10 @@ PyAPI_DATA(const long long) PY_TIMEOUT_MAX;
 
 #define PYTHREAD_INVALID_THREAD_ID ((unsigned long)-1)
 
-#ifdef HAVE_PTHREAD_H
+#if defined(HAVE_PTHREAD_STUBS)
+#   include "pthread_stubs.h"
+#   define NATIVE_TSS_KEY_T     pthread_key_t
+#elif defined(HAVE_PTHREAD_H)
     /* Darwin needs pthread.h to know type name the pthread_key_t. */
 #   include <pthread.h>
 #   define NATIVE_TSS_KEY_T     pthread_key_t
@@ -21,9 +24,6 @@ PyAPI_DATA(const long long) PY_TIMEOUT_MAX;
        but hardcode the unsigned long to avoid errors for include directive.
     */
 #   define NATIVE_TSS_KEY_T     unsigned long
-#elif defined(HAVE_PTHREAD_STUBS)
-#   include "pthread_stubs.h"
-#   define NATIVE_TSS_KEY_T     pthread_key_t
 #else
 #   error "Require native threads. See https://bugs.python.org/issue31370"
 #endif
