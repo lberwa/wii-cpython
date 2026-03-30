@@ -34,6 +34,8 @@
 #include "pycore_typevarobject.h" // _PyTypeAlias_Type
 #include "pycore_stackref.h"      // PyStackRef_FromPyObjectSteal
 #include "pycore_unionobject.h"   // _PyUnion_Type
+#include "../Include/refcount.h"
+#include "../faildedebug.h"
 
 
 #ifdef Py_LIMITED_API
@@ -266,6 +268,10 @@ _Py_AddToAllObjects(PyObject *op)
 }
 #endif  /* Py_TRACE_REFS */
 
+#ifndef Py_REF_DEBUG
+#define PY_REF_DEBUG 
+#endif
+
 #ifdef Py_REF_DEBUG
 /* Log a fatal error; doesn't return. */
 void
@@ -288,7 +294,10 @@ _Py_DECREF_DecRefTotal(void)
 {
     reftotal_add(_PyThreadState_GET(), -1);
 }
+#endif
 
+
+#ifdef Py_REF_DEBUG
 void
 _Py_IncRefTotal(PyThreadState *tstate)
 {

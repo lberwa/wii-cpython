@@ -87,10 +87,34 @@ $(BUILD_DIR)/Makefile: $(BUILD_PYTHON)
 	$(CONFIGURE_ENV) \
 	../configure $(CONFIGURE_FLAGS)
 
-libpython: configure
+libpython: configure ssl curl wiitools-build
 	$(MAKE) -C  "$(BUILD_DIR)" libpython$(VERSION).a
+	@# Add wiitools to the library
+	$(AR) rcs "$(BUILD_DIR)/libpython$(VERSION).a" "$(BUILD_DIR)/Modules/wiitoolsmodule.o"
 
 python: libpython
+
+wiitools-build: curl
+	@mkdir -p "$(BUILD_DIR)/Modules"
+	$(CC) \
+		-I$(srcdir)/Modules \
+		-I$(srcdir) \
+		-I$(srcdir)/Include \
+		-I$(BUILD_DIR) \
+		-I/opt/devkitpro/extras/bitmap/include \
+		-I/opt/devkitpro/extras/mysd_sdkarte_mounten/include \
+		-I$(srcdir)/curl/wii/include \
+		-I$(DEVKITPRO)/libogc/include \
+		-I$(DEVKITPRO)/libogc/gc \
+		-I$(DEVKITPRO)/libogc/gc/ogc \
+		-I$(srcdir)/curl/include \
+		-I$(srcdir)/curl/mbedtls/include \
+		-I$(srcdir)/curl/mbedtls/wii/include \
+		-I$(srcdir)/curl/mbedtls/tf-psa-crypto/include \
+		-I$(srcdir)/curl/mbedtls/tf-psa-crypto/drivers/builtin/include \
+		$(CFLAGS) -DWII_BUILD -DPy_BUILD_CORE -DPy_REF_DEBUG=1 \
+		-c "$(srcdir)/Modules/wiitoolsmodule.c" \
+		-o "$(BUILD_DIR)/Modules/wiitoolsmodule.o"
 
 ssl: configure
 	$(MAKE) -C "$(BUILD_DIR)" mbedtls-wii

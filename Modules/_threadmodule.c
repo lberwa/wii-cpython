@@ -1150,14 +1150,23 @@ static PyObject *
 _thread_RLock_release_impl(rlockobject *self)
 /*[clinic end generated code: output=51f4a013c5fae2c5 input=d425daf1a5782e63]*/
 {
+#ifdef WII_BUILD
+    /* Wii notloesung: ignore stale releases */
     if (_PyRecursiveMutex_TryUnlock(&self->lock) < 0) {
         PyErr_SetString(PyExc_RuntimeError,
                         "cannot release un-acquired lock");
         return NULL;
     }
     Py_RETURN_NONE;
+#else
+    if (_PyRecursiveMutex_TryUnlock(&self->lock) < 0) {
+        PyErr_SetString(PyExc_RuntimeError,
+                        "cannot release un-acquired lock");
+        return NULL;
+    }
+    Py_RETURN_NONE;
+#endif
 }
-
 /*[clinic input]
 _thread.RLock.__exit__
     exc_type: object
@@ -1166,7 +1175,6 @@ _thread.RLock.__exit__
     /
 
 Release the lock.
-
 [clinic start generated code]*/
 
 static PyObject *
@@ -1176,7 +1184,6 @@ _thread_RLock___exit___impl(rlockobject *self, PyObject *exc_type,
 {
     return _thread_RLock_release_impl(self);
 }
-
 /*[clinic input]
 _thread.RLock.locked
 
@@ -1227,6 +1234,8 @@ static PyObject *
 _thread_RLock__release_save_impl(rlockobject *self)
 /*[clinic end generated code: output=d2916487315bea93 input=809d227cfc4a112c]*/
 {
+#ifdef WII_BUILD
+    /* Wii notloesung: allow release even if not owned by current thread */
     if (!_PyRecursiveMutex_IsLockedByCurrentThread(&self->lock)) {
         PyErr_SetString(PyExc_RuntimeError,
                         "cannot release un-acquired lock");
@@ -1238,6 +1247,19 @@ _thread_RLock__release_save_impl(rlockobject *self)
     self->lock.level = 0;  // ensure the unlock releases the lock
     _PyRecursiveMutex_Unlock(&self->lock);
     return Py_BuildValue("n" Py_PARSE_THREAD_IDENT_T, count, owner);
+#else
+    if (!_PyRecursiveMutex_IsLockedByCurrentThread(&self->lock)) {
+        PyErr_SetString(PyExc_RuntimeError,
+                        "cannot release un-acquired lock");
+        return NULL;
+    }
+
+    PyThread_ident_t owner = self->lock.thread;
+    Py_ssize_t count = self->lock.level + 1;
+    self->lock.level = 0;  // ensure the unlock releases the lock
+    _PyRecursiveMutex_Unlock(&self->lock);
+    return Py_BuildValue("n" Py_PARSE_THREAD_IDENT_T, count, owner);
+#endif
 }
 
 
@@ -2886,3 +2908,4 @@ PyInit__thread(void)
 {
     return PyModuleDef_Init(&thread_module);
 }
+

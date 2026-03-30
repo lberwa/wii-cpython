@@ -90,8 +90,14 @@ _Py_ThreadCanHandleSignals(PyInterpreterState *interp)
    and interpreter state */
 
 #if !defined(Py_BUILD_CORE_MODULE)
+#ifdef HAVE_ALIGNED_REQUIRED
+// On strict-alignment systems (Wii), use global variables instead of TLS
+extern PyThreadState *_Py_tss_tstate;
+extern PyInterpreterState *_Py_tss_interp;
+#else
 extern _Py_thread_local PyThreadState *_Py_tss_tstate;
 extern _Py_thread_local PyInterpreterState *_Py_tss_interp;
+#endif
 #endif
 
 #ifndef NDEBUG

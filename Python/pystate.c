@@ -72,15 +72,31 @@ to avoid the expense of doing their own locking).
 
 
 /* The attached thread state for the current thread. */
+#ifdef HAVE_ALIGNED_REQUIRED
+// On strict-alignment systems (Wii), use global variables instead of TLS
+// to avoid alignment crashes with thread_local
+PyThreadState *_Py_tss_tstate = NULL;
+#else
 _Py_thread_local PyThreadState *_Py_tss_tstate = NULL;
+#endif
 
 /* The "bound" thread state used by PyGILState_Ensure(),
    also known as a "gilstate." */
+#ifdef HAVE_ALIGNED_REQUIRED
+// On strict-alignment systems (Wii), use global variables instead of TLS
+PyThreadState *_Py_tss_gilstate = NULL;
+#else
 _Py_thread_local PyThreadState *_Py_tss_gilstate = NULL;
+#endif
 
 /* The interpreter of the attached thread state,
    and is same as tstate->interp. */
+#ifdef HAVE_ALIGNED_REQUIRED
+// On strict-alignment systems (Wii), use global variables instead of TLS
+PyInterpreterState *_Py_tss_interp = NULL;
+#else
 _Py_thread_local PyInterpreterState *_Py_tss_interp = NULL;
+#endif
 
 static inline PyThreadState *
 current_fast_get(void)

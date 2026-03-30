@@ -4880,6 +4880,11 @@ _PyImport_InitExternal(PyThreadState *tstate)
     TP("32.2");
     // XXX Initialize here: sys.path_hooks and sys.path_importer_cache.
     TP("32.3");
+#if defined(WII_BUILD)
+    /* Wii notloesung: skip external importers to avoid hang */
+    (void)verbose;
+    return _PyStatus_OK();
+#endif
     if (init_importlib_external(tstate->interp) != 0) {
         TP("32.4");
         #if defined(WII_BUILD)

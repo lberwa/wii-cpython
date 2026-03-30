@@ -5,6 +5,9 @@ extern "C" {
 #endif
 
 
+#include "faildedebug.h"
+
+
 /*
 Immortalization:
 

@@ -89,10 +89,25 @@ print("hello world!!!!!!!!!!!!!!!!!!!!!!")
 print("3/2 =", 3/2)
 
 print("import test")
+
+print("import os")
+import os
+print("os imported successfully!")
 import wiitools
-print("hello WORLD!!!!!!!!!!!!!!!!!!!!!!")
-wiitools.usleep(1000000)
-print("exiting ... .... ...............")
+print("wiitools imported successfully!")
+
+for i in range(300):
+    wiitools.VIDEO_WaitVSync()
+print("3000")
+
+
+# Testet, ob die Konsole reagiert (gibt 0 bei Erfolg zurück)
+print("status")
+status = os.system("echo 'Test bestanden'") 
+print(status) 
+print("ende")
+
+
 """
 import wiitools
 import sys

@@ -21,6 +21,8 @@ main.o: /opt/devkitpro/extras/cpython/3.15.0a7/wiitest/source/main.c \
  /opt/devkitpro/extras/cpython/3.15.0a7/Include/object.h \
  /opt/devkitpro/extras/cpython/3.15.0a7/Include/cpython/object.h \
  /opt/devkitpro/extras/cpython/3.15.0a7/Include/refcount.h \
+ /opt/devkitpro/extras/cpython/3.15.0a7/Include/faildedebug.h \
+ /opt/devkitpro/extras/cpython/3.15.0a7/Include/Python.h \
  /opt/devkitpro/extras/cpython/3.15.0a7/Include/objimpl.h \
  /opt/devkitpro/extras/cpython/3.15.0a7/Include/cpython/objimpl.h \
  /opt/devkitpro/extras/cpython/3.15.0a7/Include/typeslots.h \
@@ -187,6 +189,8 @@ main.o: /opt/devkitpro/extras/cpython/3.15.0a7/wiitest/source/main.c \
 /opt/devkitpro/extras/cpython/3.15.0a7/Include/object.h:
 /opt/devkitpro/extras/cpython/3.15.0a7/Include/cpython/object.h:
 /opt/devkitpro/extras/cpython/3.15.0a7/Include/refcount.h:
+/opt/devkitpro/extras/cpython/3.15.0a7/Include/faildedebug.h:
+/opt/devkitpro/extras/cpython/3.15.0a7/Include/Python.h:
 /opt/devkitpro/extras/cpython/3.15.0a7/Include/objimpl.h:
 /opt/devkitpro/extras/cpython/3.15.0a7/Include/cpython/objimpl.h:
 /opt/devkitpro/extras/cpython/3.15.0a7/Include/typeslots.h:

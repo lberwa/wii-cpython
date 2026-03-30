@@ -224,167 +224,36 @@ def _has_deadlocked(target_id, *, seen_ids, candidate_ids, blocking_on):
 
 
 class _ModuleLock:
-    """A recursive lock implementation which is able to detect deadlocks
-    (e.g. thread 1 trying to take locks A then B, and thread 2 trying to
-    take locks B then A).
+    """A simple lock implementation for single-threaded environments (like Wii).
+    
+    This is a simplified version that works correctly for single-threaded
+    environments without complex synchronization primitives.
     """
 
     def __init__(self, name):
-        # Create an RLock for protecting the import process for the
-        # corresponding module.  Since it is an RLock, a single thread will be
-        # able to take it more than once.  This is necessary to support
-        # re-entrancy in the import system that arises from (at least) signal
-        # handlers and the garbage collector.  Consider the case of:
-        #
-        #  import foo
-        #  -> ...
-        #     -> importlib._bootstrap._ModuleLock.acquire
-        #        -> ...
-        #           -> <garbage collector>
-        #              -> __del__
-        #                 -> import foo
-        #                    -> ...
-        #                       -> importlib._bootstrap._ModuleLock.acquire
-        #                          -> _BlockingOnManager.__enter__
-        #
-        # If a different thread than the running one holds the lock then the
-        # thread will have to block on taking the lock, which is what we want
-        # for thread safety.
-        self.lock = _thread.RLock()
-        self.wakeup = _thread.allocate_lock()
-
         # The name of the module for which this is a lock.
         self.name = name
-
-        # Can end up being set to None if this lock is not owned by any thread
-        # or the thread identifier for the owning thread.
-        self.owner = None
-
-        # Represent the number of times the owning thread has acquired this lock
-        # via a list of True.  This supports RLock-like ("re-entrant lock")
-        # behavior, necessary in case a single thread is following a circular
-        # import dependency and needs to take the lock for a single module
-        # more than once.
-        #
-        # Counts are represented as a list of True because list.append(True)
-        # and list.pop() are both atomic and thread-safe in CPython and it's hard
-        # to find another primitive with the same properties.
-        self.count = []
-
-        # This is a count of the number of threads that are blocking on
-        # self.wakeup.acquire() awaiting to get their turn holding this module
-        # lock.  When the module lock is released, if this is greater than
-        # zero, it is decremented and `self.wakeup` is released one time.  The
-        # intent is that this will let one other thread make more progress on
-        # acquiring this module lock.  This repeats until all the threads have
-        # gotten a turn.
-        #
-        # This is incremented in self.acquire() when a thread notices it is
-        # going to have to wait for another thread to finish.
-        #
-        # See the comment above count for explanation of the representation.
-        self.waiters = []
-
-    def has_deadlock(self):
-        # To avoid deadlocks for concurrent or re-entrant circular imports,
-        # look at _blocking_on to see if any threads are blocking
-        # on getting the import lock for any module for which the import lock
-        # is held by this thread.
-        return _has_deadlocked(
-            # Try to find this thread.
-            target_id=_thread.get_ident(),
-            seen_ids=set(),
-            # Start from the thread that holds the import lock for this
-            # module.
-            candidate_ids=[self.owner],
-            # Use the global "blocking on" state.
-            blocking_on=_blocking_on,
-        )
+        # For single-threaded, we just track if locked
+        self.count = 0
 
     def acquire(self):
         """
-        Acquire the module lock.  If a potential deadlock is detected,
-        a _DeadlockError is raised.
-        Otherwise, the lock is always acquired and True is returned.
+        Acquire the module lock.
+        For single-threaded environments, this always succeeds immediately.
         """
-        tid = _thread.get_ident()
-        with _BlockingOnManager(tid, self):
-            while True:
-                # Protect interaction with state on self with a per-module
-                # lock.  This makes it safe for more than one thread to try to
-                # acquire the lock for a single module at the same time.
-                with self.lock:
-                    if self.count == [] or self.owner == tid:
-                        # If the lock for this module is unowned then we can
-                        # take the lock immediately and succeed.  If the lock
-                        # for this module is owned by the running thread then
-                        # we can also allow the acquire to succeed.  This
-                        # supports circular imports (thread T imports module A
-                        # which imports module B which imports module A).
-                        self.owner = tid
-                        self.count.append(True)
-                        return True
-
-                    # At this point we know the lock is held (because count !=
-                    # 0) by another thread (because owner != tid).  We'll have
-                    # to get in line to take the module lock.
-
-                    # But first, check to see if this thread would create a
-                    # deadlock by acquiring this module lock.  If it would
-                    # then just stop with an error.
-                    #
-                    # It's not clear who is expected to handle this error.
-                    # There is one handler in _lock_unlock_module but many
-                    # times this method is called when entering the context
-                    # manager _ModuleLockManager instead - so _DeadlockError
-                    # will just propagate up to application code.
-                    #
-                    # This seems to be more than just a hypothetical -
-                    # https://stackoverflow.com/questions/59509154
-                    # https://github.com/encode/django-rest-framework/issues/7078
-                    if self.has_deadlock():
-                        raise _DeadlockError(f'deadlock detected by {self!r}')
-
-                    # Check to see if we're going to be able to acquire the
-                    # lock.  If we are going to have to wait then increment
-                    # the waiters so `self.release` will know to unblock us
-                    # later on.  We do this part non-blockingly so we don't
-                    # get stuck here before we increment waiters.  We have
-                    # this extra acquire call (in addition to the one below,
-                    # outside the self.lock context manager) to make sure
-                    # self.wakeup is held when the next acquire is called (so
-                    # we block).  This is probably needlessly complex and we
-                    # should just take self.wakeup in the return codepath
-                    # above.
-                    if self.wakeup.acquire(False):
-                        self.waiters.append(None)
-
-                # Now take the lock in a blocking fashion.  This won't
-                # complete until the thread holding this lock
-                # (self.owner) calls self.release.
-                self.wakeup.acquire()
-
-                # Taking the lock has served its purpose (making us wait), so we can
-                # give it up now.  We'll take it w/o blocking again on the
-                # next iteration around this 'while' loop.
-                self.wakeup.release()
+        self.count += 1
+        return True
 
     def release(self):
-        tid = _thread.get_ident()
-        with self.lock:
-            if self.owner != tid:
-                # Wii single-thread workaround: ignore stale ownership
-                return
-            assert len(self.count) > 0
-            self.count.pop()
-            if not len(self.count):
-                self.owner = None
-                if len(self.waiters) > 0:
-                    self.waiters.pop()
-                    self.wakeup.release()
+        """
+        Release the module lock.
+        For single-threaded environments, this is a no-op.
+        """
+        if self.count > 0:
+            self.count -= 1
 
     def locked(self):
-        return bool(self.count)
+        return self.count > 0
 
     def __repr__(self):
         return f'_ModuleLock({self.name!r}) at {id(self)}'
@@ -442,10 +311,8 @@ def _get_module_lock(name):
             lock = None
 
         if lock is None:
-            if _thread is None:
-                lock = _DummyModuleLock(name)
-            else:
-                lock = _ModuleLock(name)
+            # For single-threaded environments, always use the simplified ModuleLock
+            lock = _ModuleLock(name)
 
             def cb(ref, name=name):
                 _imp.acquire_lock()

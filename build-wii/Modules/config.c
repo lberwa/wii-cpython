@@ -43,6 +43,7 @@ extern PyObject* PyInit__symtable(void);
 
 /* -- ADDMODULE MARKER 1 -- */
 
+extern PyObject* PyInit_wiitools(void);
 extern PyObject* PyMarshal_Init(void);
 extern PyObject* PyInit__imp(void);
 extern PyObject* PyInit_gc(void);
@@ -83,6 +84,9 @@ struct _inittab _PyImport_Inittab[] = {
     {"_symtable", PyInit__symtable},
 
 /* -- ADDMODULE MARKER 2 -- */
+
+    /* Wii helper module */
+    {"wiitools", PyInit_wiitools},
 
     /* This module lives in marshal.c */
     {"marshal", PyMarshal_Init},

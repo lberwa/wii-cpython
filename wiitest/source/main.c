@@ -136,7 +136,7 @@ int main(void) {
     video_init_custom();
     terminal_print("start");
     fatInitDefault();
-    //wait(100);
+    wait(100);
 
     #ifdef PNG
     if (!fatInitDefault()) {
@@ -160,9 +160,11 @@ int main(void) {
     }
     #endif
 
-    terminal_print("initalise ...");
-    //wait(100);
+    terminal_print("0.1  initalise ...");
+    wait(100);
     PyConfig config;
+    terminal_print("0.2  before PyConfig_InitIsolatedConfig");
+    wait(100);
     PyConfig_InitIsolatedConfig(&config);
     config.use_environment = 0;
     config.site_import = 0;
@@ -171,24 +173,31 @@ int main(void) {
     config.use_hash_seed = 1;
     config.hash_seed = 0;
     //config.utf8_mode = 1;
+    terminal_print("0.3   after PyConfig_InitIsolatedConfig");
 
+    terminal_print("1.1");
     // Minimal filesystem/stdlib setup (match your SD layout)
     PyConfig_SetString(&config, &config.program_name, L"python");
     PyConfig_SetString(&config, &config.home, L"sd:/python");
+    terminal_print("1.2");
     config.module_search_paths_set = 1;
     PyWideStringList_Append(&config.module_search_paths, L"sd:/python");
     PyWideStringList_Append(&config.module_search_paths, L"sd:/python/Lib");
     PyWideStringList_Append(&config.module_search_paths, L"sd:/python/lib/");
+    terminal_print("1.3");
     PyConfig_SetString(&config, &config.filesystem_encoding, L"utf-8");
     PyConfig_SetString(&config, &config.filesystem_errors, L"surrogatepass");
-    terminal_print("before Py_InitializeFromConfig");
+    terminal_print("1.4   before Py_InitializeFromConfig");
+    wait(100);
     {
-        terminal_print("1");
+        terminal_print("1.5");
+        wait(100);
         PyStatus status = Py_InitializeFromConfig(&config);
         terminal_print("2");
+        wait(100);
         if (PyStatus_Exception(status)) {
             terminal_print("3");
-            terminal_print("Py_InitializeFromConfig failed");
+            terminal_print("3.5 Py_InitializeFromConfig failed");
             if (status.func != NULL) {
                 terminal_print("4");
                 terminal_print(status.func);
@@ -207,14 +216,14 @@ int main(void) {
     }
     terminal_print("10");
     PyConfig_Clear(&config);
-    terminal_print("after Py_Initialize");
+    terminal_print("11   after Py_Initialize");
     //wait(100);
     if (!Py_IsInitialized()) {
-        terminal_print("Py initalized == false: exiting ...");
+        terminal_print("12 --- Py initalized == false: exiting ...");
         return 1;
     }
     //wait(100);
-    terminal_print("Py_IsInitialized == true");
+    terminal_print("13 --- Py_IsInitialized == true");
     //wait(100);
     {
         PyObject *wiiio = PyModule_Create(&WiiIOModule);
