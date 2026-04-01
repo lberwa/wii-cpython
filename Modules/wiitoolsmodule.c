@@ -10,7 +10,7 @@
 #endif
 
 #include <my_text_renderer.h>
-#include <fat2.h>
+#include <pyfat.h>
 #include <gccore.h>
 #include <video.h>
 #include <wiiuse/wpad.h>

@@ -46,6 +46,10 @@ Data members:
 #  include <unistd.h>             // getpid()
 #endif
 
+#ifdef HAVE_FCNTL_H
+#  include <fcntl.h>              // O_WRONLY, O_CREAT, O_APPEND, O_NOFOLLOW
+#endif
+
 #ifdef MS_WINDOWS
 #  ifndef WIN32_LEAN_AND_MEAN
 #    define WIN32_LEAN_AND_MEAN
@@ -74,6 +78,10 @@ module sys
 
 #include "clinic/sysmodule.c.h"
 
+/* Fallback for _PYTHONFRAMEWORK if not defined in pyconfig.h */
+#ifndef _PYTHONFRAMEWORK
+#  define _PYTHONFRAMEWORK ""
+#endif
 
 PyObject *
 PySys_GetAttr(PyObject *name)
@@ -4294,44 +4302,107 @@ static struct PyModuleDef _jit_module = {
     .m_methods = _jit_methods,
 };
 
+#ifdef PRINT_CRASH_DEBUG
+#include <my_text_renderer.h>
+
+static void print(const char *str) {
+    terminal_print(str);
+    for (int i = 0; i < 50; i++) {
+        VIDEO_WaitVSync();
+    }
+}
+#endif
+
 /* Create sys module without all attributes.
    _PySys_UpdateConfig() should be called later to add remaining attributes. */
 PyStatus
 _PySys_Create(PyThreadState *tstate, PyObject **sysmod_p)
 {
+    #ifdef PRINT_CRASH_DEBUG
+    print("1.1");
+    #endif
+
     assert(!_PyErr_Occurred(tstate));
 
     PyInterpreterState *interp = tstate->interp;
 
+    #ifdef PRINT_CRASH_DEBUG
+    print("1.2");
+    #endif
+
     PyObject *modules = _PyImport_InitModules(interp);
+
+    #ifdef PRINT_CRASH_DEBUG
+    print("1.3");
+    #endif
+
     if (modules == NULL) {
         goto error;
     }
 
+    #ifdef PRINT_CRASH_DEBUG
+    print("1.4");
+    #endif
+
     PyObject *sysmod = _PyModule_CreateInitialized(&sysmodule, PYTHON_API_VERSION);
+
+    #ifdef PRINT_CRASH_DEBUG
+    print("1.5");
+    #endif
+
     if (sysmod == NULL) {
         return _PyStatus_ERR("failed to create a module object");
     }
 #ifdef Py_GIL_DISABLED
     PyUnstable_Module_SetGIL(sysmod, Py_MOD_GIL_NOT_USED);
 #endif
+    #ifdef PRINT_CRASH_DEBUG
+    print("1.6");
+    #endif
 
     PyObject *sysdict = PyModule_GetDict(sysmod);
+
+    #ifdef PRINT_CRASH_DEBUG
+    print("1.7");
+    #endif
+
     if (sysdict == NULL) {
         goto error;
     }
     interp->sysdict = Py_NewRef(sysdict);
 
+    #ifdef PRINT_CRASH_DEBUG
+    print("1.8");
+    #endif
+
     interp->sysdict_copy = PyDict_Copy(sysdict);
+
+    #ifdef PRINT_CRASH_DEBUG
+    print("1.9");
+    #endif
+
     if (interp->sysdict_copy == NULL) {
         goto error;
     }
+
+    #ifdef PRINT_CRASH_DEBUG
+    print("1.10");
+    #endif
 
     if (PyDict_SetItemString(sysdict, "modules", modules) < 0) {
         goto error;
     }
 
+    #ifdef PRINT_CRASH_DEBUG
+    print("1.11");
+    #endif
+
     PyObject *lazy_modules = _PyImport_InitLazyModules(interp); // borrowed reference
+
+    #ifdef PRINT_CRASH_DEBUG
+    print("1.12");
+    #endif
+
     if (lazy_modules == NULL) {
         goto error;
     }
@@ -4340,12 +4411,30 @@ _PySys_Create(PyThreadState *tstate, PyObject **sysmod_p)
         goto error;
     }
 
+    #ifdef PRINT_CRASH_DEBUG
+    print("1.13");
+    #endif
+
     PyStatus status = _PySys_SetPreliminaryStderr(sysdict);
+    
+    #ifdef PRINT_CRASH_DEBUG
+    print("1.14");
+    #endif
+
     if (_PyStatus_EXCEPTION(status)) {
         return status;
     }
 
+    #ifdef PRINT_CRASH_DEBUG
+    print("1.15");
+    #endif
+
     status = _PySys_InitCore(tstate, sysdict);
+
+    #ifdef PRINT_CRASH_DEBUG
+    print("1.16");
+    #endif
+
     if (_PyStatus_EXCEPTION(status)) {
         return status;
     }

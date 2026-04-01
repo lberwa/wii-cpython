@@ -49,6 +49,17 @@ assert_def_missing_or_redundant(PyModuleObject *m)
 #endif // NDEBUG
 }
 
+#ifdef PRINT_CRASH_DEBUG
+#include <my_text_renderer.h>
+
+static void print(const char *str) {
+    terminal_print(str);
+    for (int i = 0; i < 50; i++) {
+        VIDEO_WaitVSync();
+    }
+}
+#endif
+
 
 PyTypeObject PyModuleDef_Type = {
     PyVarObject_HEAD_INIT(&PyType_Type, 0)
@@ -261,12 +272,36 @@ PyModule_NewObject(PyObject *name)
 PyObject *
 PyModule_New(const char *name)
 {
+    #ifdef PRINT_CRASH_DEBUG
+    print("2.1");
+    #endif
+
     PyObject *nameobj, *module;
     nameobj = PyUnicode_FromString(name);
+
+    #ifdef PRINT_CRASH_DEBUG
+    print("2.2");
+    #endif
+
     if (nameobj == NULL)
         return NULL;
+
+    #ifdef PRINT_CRASH_DEBUG
+    print("2.3");
+    #endif
+
     module = PyModule_NewObject(nameobj);
+
+    #ifdef PRINT_CRASH_DEBUG
+    print("2.4");
+    #endif
+
     Py_DECREF(nameobj);
+
+    #ifdef PRINT_CRASH_DEBUG
+    print("2.5");
+    #endif
+
     return module;
 }
 
@@ -347,23 +382,54 @@ _PyModule_CreateInitialized(PyModuleDef* module, int module_api_version)
     const char* name;
     PyModuleObject *m;
 
+    #ifdef PRINT_CRASH_DEBUG
+    print("2.1");
+    #endif
+
     if (!PyModuleDef_Init(module))
         return NULL;
     name = module->m_name;
     if (!check_api_version(name, module_api_version)) {
         return NULL;
     }
+
+    #ifdef PRINT_CRASH_DEBUG
+    print("2.2");
+    #endif
+
     if (module->m_slots) {
         PyErr_Format(
             PyExc_SystemError,
             "module %s: PyModule_Create is incompatible with m_slots", name);
         return NULL;
     }
+
+    #ifdef PRINT_CRASH_DEBUG
+    print("2.3");
+    #endif
     name = _PyImport_ResolveNameWithPackageContext(name);
 
+    #ifdef PRINT_CRASH_DEBUG
+    print("2.3.1");
+    #endif
+
     m = (PyModuleObject*)PyModule_New(name);
-    if (m == NULL)
+
+    #ifdef PRINT_CRASH_DEBUG
+    print("2.3.2");
+    #endif
+
+    if (m == NULL) {
+        #ifdef PRINT_CRASH_DEBUG
+        print("2.3.3 --- module creation failed: m == NULL");
+        #endif
+
         return NULL;
+    }
+
+    #ifdef PRINT_CRASH_DEBUG
+    print("2.4");
+    #endif
 
     if (module->m_size > 0) {
         m->md_state = PyMem_Malloc(module->m_size);
@@ -375,24 +441,48 @@ _PyModule_CreateInitialized(PyModuleDef* module, int module_api_version)
         memset(m->md_state, 0, module->m_size);
     }
 
+    #ifdef PRINT_CRASH_DEBUG
+    print("2.5");
+    #endif
+
     if (module->m_methods != NULL) {
         if (PyModule_AddFunctions((PyObject *) m, module->m_methods) != 0) {
             Py_DECREF(m);
             return NULL;
         }
     }
+
+    #ifdef PRINT_CRASH_DEBUG
+    print("2.6");
+    #endif
+
     if (module->m_doc != NULL) {
         if (PyModule_SetDocString((PyObject *) m, module->m_doc) != 0) {
             Py_DECREF(m);
             return NULL;
         }
     }
+
+    #ifdef PRINT_CRASH_DEBUG
+    print("2.7");
+    #endif
+
     m->md_token = module;
     m->md_token_is_def = true;
     module_copy_members_from_deflike(m, module);
+
+    #ifdef PRINT_CRASH_DEBUG
+    print("2.8");
+    #endif
+
 #ifdef Py_GIL_DISABLED
     m->md_requires_gil = true;
 #endif
+
+    #ifdef PRINT_CRASH_DEBUG
+    print("2.9 --- return");
+    #endif
+
     return (PyObject*)m;
 }
 

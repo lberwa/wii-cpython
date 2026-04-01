@@ -1,34 +1,14 @@
-export DEVKITPRO := /opt/devkitpro
-export DEVKITPPC := $(DEVKITPRO)/devkitPPC
-
-# Prefer the devkitPPC cross-compiler if available so includes/sysroot are correct
-ifneq (,$(wildcard $(DEVKITPPC)/bin/powerpc-eabi-gcc))
-	CC := $(DEVKITPPC)/bin/powerpc-eabi-gcc
-	AR := $(DEVKITPPC)/bin/powerpc-eabi-ar
-	RANLIB := $(DEVKITPPC)/bin/powerpc-eabi-ranlib
-endif
-
-# Use the devkitPPC sysroot so standard headers like <sys/socket.h> are found
-SYSROOT := $(DEVKITPPC)/powerpc-eabi/sysroot
-CPPFLAGS += --sysroot=$(SYSROOT)
-INCLUDE += -isystem $(SYSROOT)/usr/include
-
 #CRT0 := $(DEVKITPPC)/powerpc-eabi/lib/crt0.o
 CRTM := $(DEVKITPPC)/powerpc-eabi/lib/crtmain.o
 
 TARGET     := hello_world
 BUILD      := build
 SOURCES    := source
-DATA       := #data
+DATA       := data
 INCLUDES   :=
 
-INCLUDE    += -I/opt/devkitpro/libogc/include
-INCLUDE += -I/opt/devkitpro/extras/bitmap/include
-INCLUDE += -I/opt/devkitpro/extras/cpython-2.0/Include
-INCLUDE += -I/opt/devkitpro/extras/cpython-2.0/
-INCLUDE += -I/opt/devkitpro/extras/mysd_sdkarte_mounten/include
-INCLUDE += -I$(DEVKITPPC)/powerpc-eabi/include
-INCLUDE += -I$(DEVKITPPC)/powerpc-eabi/sysroot/usr/include
+INCLUDE += -I../Include
+INCLUDE += -I$(DEVKITPRO)/libogc/include
 
 CFLAGS     += -O0 -g -std=c99 -Wall -Wextra
 CXXFLAGS   := $(CFLAGS)
@@ -37,23 +17,16 @@ CFLAGS     += $(INCLUDE)
 CPPFLAGS   += $(INCLUDE)
 
 # Includes & Libs
-LDFLAGS += -T/opt/devkitpro/devkitPPC/powerpc-eabi/lib/rvl.ld
+LDFLAGS += -T$(DEVKITPPC)/powerpc-eabi/lib/rvl.ld
 
-LDFLAGS    += -L/opt/devkitpro/libogc/lib/wii
-# Nur, wenn libbitmap.a wirklich existiert:
-LDFLAGS    += -L/opt/devkitpro/extras/bitmap/lib
-LDFLAGS	   += -L/opt/devkitpro/libogc/lib/wii
-LDFLAGS    += -L/opt/devkitpro/extras/mysd_sdkarte_mounten/lib
-LDFLAGS    += -L/opt/devkitpro/extras/cpython-2.0/curl/build-wii/lib/
-LDFLAGS    += -L/opt/devkitpro/extras/cpython-2.0/curl/mbedtls/install-wii/lib
-CPYTHON_DIR := /opt/devkitpro/extras/cpython-2.0
-
-# Ensure curl's Wii compatibility header is available and force-include it
-INCLUDE += -I$(CPYTHON_DIR)/curl/wii/include
-CPPFLAGS += -include $(CPYTHON_DIR)/curl/wii/include/curl_wii_net_compat.h
+LDFLAGS    += -L$(DEVKITPRO)/libogc/lib/wii
+LDFLAGS    += -L../libs
+LDFLAGS    += -L..
+CPYTHON_DIR := ..
+CPYTHON_BUILD := ../build-wii
 
 
-LIBS       := -lmyfat -lwiiuse -lbte -lbitmap -logc -lm -lcurl -lmbedtls -lmbedx509 -lmbedcrypto -ltfpsacrypto
+LIBS       := -lpython3.15 -lfatpy -lwiiuse -lbte -lbitmap -logc -lcurl -lmbedtls -lmbedx509 -lmbedcrypto -ltfpsacrypto
 
 include $(DEVKITPPC)/wii_rules
 
@@ -100,8 +73,8 @@ else
 $(OUTPUT).dol: $(OUTPUT).elf
 
 $(OUTPUT).elf: $(OFILES)
-	@test -f $(CPYTHON_DIR)/libpython2.0.a || { \
-		echo "Missing $(CPYTHON_DIR)/libpython2.0.a (build CPython for powerpc-eabi first)."; \
+	@test -f $(CPYTHON_BUILD)/libpython3.15.a || { \
+		echo "Missing $(CPYTHON_BUILD)/libpython3.15.a (build CPython for powerpc-eabi first)."; \
 		exit 1; \
 	}
 	$(LD) $(LDFLAGS) $(CRTM) $(OFILES) $(LIBS) -o $@

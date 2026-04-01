@@ -3,12 +3,14 @@
 SHELL := /bin/sh
 VERSION=		3.15
 srcdir=			.
-DEVKITPRO ?= /opt/devkitpro
+DEVKITPRO ?= $(DEVKITPRO)
 DEVKITPPC ?= $(DEVKITPRO)/devkitPPC
 BUILD_DIR ?= build-wii
 LIB_DIR ?= libs
 BUILD_HOST_DIR ?= build-host
 BUILD_PYTHON ?= $(abspath $(BUILD_HOST_DIR))/python
+MAKEFILE_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+CPU_CORES := $(shell nproc)
 
 # Wii Cross-Tools (from current Makefile)
 CC := $(DEVKITPPC)/bin/powerpc-eabi-gcc
@@ -24,7 +26,7 @@ READELF := $(DEVKITPPC)/bin/powerpc-eabi-readelf
 
 OPT=			-mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC
 CFLAGS_WII := -Os -Wall -DTERMINAL_PRINT_DEBUG
-CFLAGS=			$(OPT) -I. -I/opt/devkitpro/extras/bitmap/include $(CFLAGS_WII)
+CFLAGS=			$(OPT) -I. -I$(MAKEFILE_DIR)bitmap/include $(CFLAGS_WII)
 MACHDEP=		wii
 prefix=			/usr/local
 exec_prefix=		${prefix}
@@ -66,7 +68,15 @@ CONFIGURE_FLAGS= \
 
 all: wiitest
 
-cp-libs:
+bitmap:
+	@cd $(MAKEFILE_DIR)bitmap
+	$(MAKE) -j$(CPU_CORES)
+	cd $(MAKEFILE_DIR)
+
+bitmap-clean:
+	@$(MAKE) -C $(MAKEFILE_DIR)bitmap clean
+
+cp-libs: python curl bitmap fat
 	@mkdir -p "$(LIB_DIR)"
 	@find "$(BUILD_DIR)" -name "*.a" -exec cp {} "$(LIB_DIR)" \;
 
@@ -77,7 +87,7 @@ $(BUILD_PYTHON):
 	@mkdir -p "$(BUILD_HOST_DIR)"
 	cd "$(BUILD_HOST_DIR)" && \
 	../configure --without-ensurepip && \
-	$(MAKE) -j8
+	$(MAKE) -j$(CPU_CORES)
 
 configure: $(BUILD_DIR)/Makefile
 
@@ -88,7 +98,7 @@ $(BUILD_DIR)/Makefile: $(BUILD_PYTHON)
 	../configure $(CONFIGURE_FLAGS)
 
 libpython: configure ssl curl wiitools-build
-	$(MAKE) -C  "$(BUILD_DIR)" libpython$(VERSION).a
+	$(MAKE) -j$(CPU_CORES) -C  "$(BUILD_DIR)" libpython$(VERSION).a
 	@# Add wiitools to the library
 	$(AR) rcs "$(BUILD_DIR)/libpython$(VERSION).a" "$(BUILD_DIR)/Modules/wiitoolsmodule.o"
 
@@ -101,8 +111,8 @@ wiitools-build: curl
 		-I$(srcdir) \
 		-I$(srcdir)/Include \
 		-I$(BUILD_DIR) \
-		-I/opt/devkitpro/extras/bitmap/include \
-		-I/opt/devkitpro/extras/mysd_sdkarte_mounten/include \
+		-I$(MAKEFILE_DIR)bitmap/include \
+		-I$(MAKEFILE_DIR)fat/include \
 		-I$(srcdir)/curl/wii/include \
 		-I$(DEVKITPRO)/libogc/include \
 		-I$(DEVKITPRO)/libogc/gc \
@@ -117,10 +127,10 @@ wiitools-build: curl
 		-o "$(BUILD_DIR)/Modules/wiitoolsmodule.o"
 
 ssl: configure
-	$(MAKE) -C "$(BUILD_DIR)" mbedtls-wii
+	$(MAKE) -j$(CPU_CORES) -C "$(BUILD_DIR)" mbedtls-wii
 
 curl: ssl
-	$(MAKE) -C "$(BUILD_DIR)" curl-wii
+	$(MAKE) -j$(CPU_CORES) -C "$(BUILD_DIR)" curl-wii
 
 regen-importlib:
 	@PYTHON_FOR_REGEN=$${PYTHON_FOR_REGEN:-/usr/bin/python3}; \
@@ -132,14 +142,26 @@ regen-importlib:
 		mkdir -p "$(BUILD_HOST_DIR)"; \
 		cd "$(BUILD_HOST_DIR)" && ../configure --without-ensurepip; \
 	fi; \
-	$(MAKE) -C "$(BUILD_HOST_DIR)" PYTHON_FOR_REGEN="$$PYTHON_FOR_REGEN" regen-importlib
+	$(MAKE) -j$(CPU_CORES) -C "$(BUILD_HOST_DIR)" PYTHON_FOR_REGEN="$$PYTHON_FOR_REGEN" regen-importlib
 
-wiitest: python curl cp-libs
+wiitest: cp-libs 
 	@if [ -d "wiitest" ]; then \
-		cd wiitest && $(MAKE) clean && $(MAKE) -j8; \
+		cd wiitest && $(MAKE) clean && $(MAKE) -j$(CPU_CORES); \
 	else \
 		echo "wiitest/ not found, skipping"; \
 	fi
 
-clean:
-	-rm -rf "$(BUILD_DIR)"
+wiitest-clean:
+	@$(MAKE) -C $(MAKEFILE_DIR)wiitest clean
+
+fat-clean:
+	@$(MAKE) -C $(MAKEFILE_DIR)fat ogc-clean
+
+fat:
+	$(MAKE) -j$(CPU_CORES) $(MAKEFILE_DIR)fat wii-release
+
+clean: fat-clean wiitest-clean bitmap-clean
+	@-rm -rf "$(BUILD_DIR)"
+	@-rm -rf $(MAKEFILE_DIR)bitmap/build
+	@-rm -rf $(LIB_DIR)
+	@echo "cleaning ..."

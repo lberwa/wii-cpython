@@ -529,6 +529,9 @@ STRINGLIB(utf16_decode)(const unsigned char **inptr, const unsigned char *e,
         Py_UCS4 ch2;
         /* First check for possible aligned read of a C 'long'. Unaligned
            reads are more expensive, better to defer to another iteration. */
+        #ifndef ALIGNOF_LONG
+        #define ALIGNOF_LONG 8
+        #endif
         if (_Py_IS_ALIGNED(q, ALIGNOF_LONG)) {
             /* Fast path for runs of in-range non-surrogate chars. */
             const unsigned char *_q = q;

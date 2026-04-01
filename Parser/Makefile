@@ -1,9 +1,9 @@
 # Simple 2.0-style Makefile for Parser (minimal for cross-build)
-CC = /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc
+CC = $(DEVKITPRO)/devkitPPC/bin/powerpc-eabi-gcc
 OPT = -g -O2 -Wall -Wstrict-prototypes -fPIC -Os -Wall -msoft-float
 CFLAGS = $(OPT) -I../Include -I.. -DHAVE_CONFIG_H
-AR = /opt/devkitpro/devkitPPC/bin/powerpc-eabi-ar
-RANLIB = /opt/devkitpro/devkitPPC/bin/powerpc-eabi-ranlib
+AR = $(DEVKITPRO)/devkitPPC/bin/powerpc-eabi-ar
+RANLIB = $(DEVKITPRO)/devkitPPC/bin/powerpc-eabi-ranlib
 
 all: libparser.a
 

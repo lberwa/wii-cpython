@@ -1,6 +1,3 @@
-export DEVKITPRO := /opt/devkitpro
-export DEVKITPPC := $(DEVKITPRO)/devkitPPC
-
 #CRT0 := $(DEVKITPPC)/powerpc-eabi/lib/crt0.o
 CRTM := $(DEVKITPPC)/powerpc-eabi/lib/crtmain.o
 
@@ -10,11 +7,10 @@ SOURCES    := source
 DATA       := data
 INCLUDES   :=
 
-INCLUDE += -I/opt/devkitpro/extras/cpython/3.15.0a7/build-wii
-INCLUDE += -I/opt/devkitpro/extras/cpython/3.15.0a7/Include
-INCLUDE += -I/opt/devkitpro/libogc/include
-INCLUDE += -I/opt/devkitpro/extras/bitmap/include
-INCLUDE += -I/opt/devkitpro/extras/mysd_sdkarte_mounten/include
+MAKEFILE_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+
+INCLUDE += -I$(MAKEFILE_DIR)../Include
+INCLUDE += -I$(DEVKITPRO)/libogc/include
 
 CFLAGS     += -O0 -g -std=c99 -Wall -Wextra
 CXXFLAGS   := $(CFLAGS)
@@ -23,20 +19,16 @@ CFLAGS     += $(INCLUDE)
 CPPFLAGS   += $(INCLUDE)
 
 # Includes & Libs
-LDFLAGS += -T/opt/devkitpro/devkitPPC/powerpc-eabi/lib/rvl.ld
+LDFLAGS += -T$(DEVKITPPC)/powerpc-eabi/lib/rvl.ld
 
-LDFLAGS    += -L/opt/devkitpro/libogc/lib/wii
-# Nur, wenn libbitmap.a wirklich existiert:
-LDFLAGS    += -L/opt/devkitpro/extras/bitmap/lib
-LDFLAGS	   += -L/opt/devkitpro/libogc/lib/wii
-LDFLAGS    += -L/opt/devkitpro/extras/mysd_sdkarte_mounten/lib
-LDFLAGS    += -L/opt/devkitpro/extras/cpython/3.15.0a7/libs
-LDFLAGS    += -L/opt/devkitpro/extras/cpython/3.15.0a7/
-CPYTHON_DIR := /opt/devkitpro/extras/cpython/3.15.0a7
-CPYTHON_BUILD := /opt/devkitpro/extras/cpython/3.15.0a7/build-wii
+LDFLAGS    += -L$(DEVKITPRO)/libogc/lib/wii
+LDFLAGS    += -L../libs
+LDFLAGS    += -L..
+CPYTHON_DIR := ..
+CPYTHON_BUILD := ../build-wii
 
 
-LIBS       := $(CPYTHON_BUILD)/libpython3.15.a -lmyfat -lwiiuse -lbte -lbitmap -logc -lm -lcurl -lmbedtls -lmbedx509 -lmbedcrypto -ltfpsacrypto
+LIBS       := -lpython3.15 -lfatpy -lwiiuse -lbte -lbitmap -logc -lcurl -lmbedtls -lmbedx509 -lmbedcrypto -ltfpsacrypto
 
 include $(DEVKITPPC)/wii_rules
 

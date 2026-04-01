@@ -909,7 +909,7 @@ _Py_GetLocaleEncoding(void)
     swprintf(encoding, Py_ARRAY_LENGTH(encoding), L"cp%u", ansi_codepage);
     encoding[Py_ARRAY_LENGTH(encoding) - 1] = 0;
     return _PyMem_RawWcsdup(encoding);
-#else
+#elif defined(HAVE_LANGINFO_H)
     const char *encoding = nl_langinfo(CODESET);
     if (!encoding || encoding[0] == '\0') {
         // Use UTF-8 if nl_langinfo() returns an empty string. It can happen on
@@ -924,6 +924,9 @@ _Py_GetLocaleEncoding(void)
         return NULL;
     }
     return wstr;
+#else
+    // Fallback: no langinfo, assume UTF-8
+    return _PyMem_RawWcsdup(L"utf-8");
 #endif  // !MS_WINDOWS
 
 #endif  // !_Py_FORCE_UTF8_LOCALE

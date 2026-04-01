@@ -1,9 +1,9 @@
 # Stub Makefile for Modules (add2lib only)
-CC = /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc
+CC = $(DEVKITPPC)/bin/powerpc-eabi-gcc
 OPT = -g -O2 -Wall -Wstrict-prototypes -fPIC -Os -Wall -msoft-float
 CFLAGS = $(OPT) -I../Include -I.. -DHAVE_CONFIG_H
-AR = /opt/devkitpro/devkitPPC/bin/powerpc-eabi-ar
-RANLIB = /opt/devkitpro/devkitPPC/bin/powerpc-eabi-ranlib
+AR = $(DEVKITPPC)/bin/powerpc-eabi-ar
+RANLIB = $(DEVKITPPC)/bin/powerpc-eabi-ranlib
 
 all:
 

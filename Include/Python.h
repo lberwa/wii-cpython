@@ -24,7 +24,7 @@
 
 // Include Python header files
 #include "patchlevel.h"
-#include "pyconfig.h"
+#include "../pyconfig.h"
 #include "pymacconfig.h"
 
 

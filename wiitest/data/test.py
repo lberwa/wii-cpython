@@ -100,12 +100,19 @@ for i in range(300):
     wiitools.VIDEO_WaitVSync()
 print("3000")
 
+def printf(str):
+    print(str)
+    for i in range(50):
+        wiitools.VIDEO_WaitVSync()
 
 # Testet, ob die Konsole reagiert (gibt 0 bei Erfolg zurück)
 print("status")
+printf("--- Status test ---")
 status = os.system("echo 'Test bestanden'") 
 print(status) 
 print("ende")
+print("test.py: === End of test.py ===")
+
 
 
 """

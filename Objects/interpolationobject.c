@@ -1,9 +1,12 @@
 /* t-string Interpolation object implementation */
 
 #include "Python.h"
+#include "pycore_runtime.h"        // _PyRuntime
 #include "pycore_initconfig.h"    // _PyStatus_OK
 #include "pycore_interpolation.h"
 #include "pycore_typeobject.h"    // _PyType_GetDict
+#include "pycore_global_objects.h" // _Py_SINGLETON()
+#include "pycore_global_strings.h" // _Py_STR(), _Py_LATIN1_CHR()
 
 static int
 _conversion_converter(PyObject *arg, PyObject **conversion)

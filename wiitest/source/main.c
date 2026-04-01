@@ -1,6 +1,6 @@
 /* test_python_embed.c */
 #include <Python.h>
-#include <my_text_renderer.h>
+#include "../../bitmap/include/render_text.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -10,7 +10,7 @@ extern const unsigned char test_py[];
 extern const unsigned char test_py_end[];
 
 //#define PNG
-#include <fat2.h>
+#include "../../fat/include/pyfat.h"
 #ifdef PNG
 
 #include <stdio.h>
@@ -251,18 +251,18 @@ int main(void) {
 
     //wait(100);
     terminal_print("run source_py/test.py ...");
-    //wait(100);
+    wait(100);
     rc = PyRun_SimpleString(script);
     terminal_print("after PyRun_SimpleString");
-    //wait(100);
+    wait(100);
     free(script);
     if (rc != 0) {
         terminal_print("python script returned error");
     }
-    //wait(100);
+    wait(100);
 
     terminal_print("py_finalize: return 0: exiting ...");
-    //wait(100);
+    wait(100);
     Py_Finalize();
     terminal_print("done");
     return 0;

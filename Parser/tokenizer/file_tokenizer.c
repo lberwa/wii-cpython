@@ -1,13 +1,13 @@
+#ifdef HAVE_UNISTD_H
+#  include <unistd.h>             // lseek(), read()
+#endif
+
 #include "Python.h"
 #include "pycore_call.h"          // _PyObject_CallNoArgs()
 #include "pycore_fileutils.h"     // _Py_UniversalNewlineFgetsWithSize()
 #include "pycore_runtime.h"       // _Py_ID()
 
 #include "errcode.h"              // E_NOMEM
-
-#ifdef HAVE_UNISTD_H
-#  include <unistd.h>             // lseek(), read()
-#endif
 
 #include "helpers.h"
 #include "../lexer/state.h"

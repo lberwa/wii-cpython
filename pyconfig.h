@@ -3,6 +3,11 @@
 #ifndef Py_PYCONFIG_H
 #define Py_PYCONFIG_H
 
+/* Enable POSIX features for proper fileno()/fdopen() declarations */
+#define _POSIX_C_SOURCE 200809L
+#define _DEFAULT_SOURCE
+#define __MISC_VISIBLE 1
+
 #define HAVE_CONFIG_H
 #undef _POSIX_C_SOURCE
 #define PY_VERSION "3.15.0a7"
@@ -28,6 +33,10 @@
 #define SIZEOF_SIZE_T 4
 #define SIZEOF_PY_SSIZE_T 4
 #define SIZEOF_WCHAR_T 4
+#define ALIGNOF_SIZE_T 4
+#define SIZEOF_LONG_LONG 8
+#define HAVE_LONG_LONG 1
+#define HAVE_USABLE_WCHAR_T 1
 /* #define Py_hash_t long */
 #define WITH_THREAD 0
 #define USE_COMPUTED_GOTOS 0
@@ -39,8 +48,15 @@
 #define HAVE_LIBMPDEC 0
 #define Py_NO_ENABLE_SHARED 1
 #define HAVE_STD_ATOMIC 1
+#define HAVE_UNISTD_H 1
+#define HAVE_SYS_STAT_H 1
+#define HAVE_FCNTL_H 1
+#define HAVE_DIRENT_H 1
+typedef unsigned pthread_key_t;
 #define NATIVE_TSS_KEY_T pthread_key_t
-#define HAVE_PTHREAD_H 0
+#define HAVE_PTHREAD_H 1
+#define _POSIX_THREADS 1
+#define SIZEOF_PTHREAD_T 4
 
 /* End */
 #endif

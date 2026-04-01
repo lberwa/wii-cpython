@@ -1,5 +1,5 @@
 
-#ifndef PYFAILDEDEBUG
+/*#ifndef PYFAILDEDEBUG
 #define PYFAILDEDEBUG
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,7 +10,7 @@
 #ifndef _Py_NegativeRefcount
 void _Py_NegativeRefcount(const char *filename, int lineno, PyObject *op)
 {
-    /* optional: debug output */
+    // optional: debug output 
 }
 #endif
 
@@ -28,4 +28,4 @@ void _Py_DECREF_DecRefTotal(void)
 
 #endif
 
-#endif
+#endif*/

@@ -9,6 +9,10 @@
    - a malloc'ed string ending in \n normally
 */
 
+#ifdef HAVE_UNISTD_H
+#  include <unistd.h>             // isatty()
+#endif
+
 #include "Python.h"
 #include "pycore_fileutils.h"     // _Py_BEGIN_SUPPRESS_IPH
 #include "pycore_interp.h"        // _PyInterpreterState_GetConfig()
@@ -21,6 +25,7 @@
 #  include "windows.h"
 #endif /* MS_WINDOWS */
 
+#include <stdio.h>                // isatty(), fileno()
 #ifdef HAVE_UNISTD_H
 #  include <unistd.h>             // isatty()
 #endif

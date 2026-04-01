@@ -897,20 +897,55 @@ _PyImport_ClearModulesByIndex(PyInterpreterState *interp)
    substitute this (if the name actually matches).
 */
 
-static _Py_thread_local const char *pkgcontext = NULL;
+#ifdef PRINT_CRASH_DEBUG
+#include <my_text_renderer.h>
+
+static void print(const char *str) {
+    terminal_print(str);
+    for (int i = 0; i < 50; i++) {
+        VIDEO_WaitVSync();
+    }
+}
+#endif
+
+static const char *pkgcontext = NULL;
 # undef PKGCONTEXT
 # define PKGCONTEXT pkgcontext
 
 const char *
 _PyImport_ResolveNameWithPackageContext(const char *name)
 {
+    #ifdef PRINT_CRASH_DEBUG
+    print("3.1");
+    #endif
+
     if (PKGCONTEXT != NULL) {
+        #ifdef PRINT_CRASH_DEBUG
+        print("3.2");
+        #endif
+
         const char *p = strrchr(PKGCONTEXT, '.');
+
+        #ifdef PRINT_CRASH_DEBUG
+        print("3.3");
+        #endif
+
         if (p != NULL && strcmp(name, p+1) == 0) {
+            #ifdef PRINT_CRASH_DEBUG
+            print("3.4");
+            #endif
+
             name = PKGCONTEXT;
             PKGCONTEXT = NULL;
         }
+        #ifdef PRINT_CRASH_DEBUG
+        print("3.5");
+        #endif
     }
+    #ifdef PRINT_CRASH_DEBUG
+    print("3.6");
+    #endif
+
     return name;
 }
 
