@@ -8,6 +8,9 @@ DEVKITPPC ?= $(DEVKITPRO)/devkitPPC
 BUILD_DIR ?= build-wii
 LIB_DIR ?= libs
 BUILD_HOST_DIR ?= build-host
+BUILD_DIR_ABS := $(abspath $(BUILD_DIR))
+LIB_DIR_ABS := $(abspath $(LIB_DIR))
+BUILD_HOST_DIR_ABS := $(abspath $(BUILD_HOST_DIR))
 BUILD_PYTHON ?= $(abspath $(BUILD_HOST_DIR))/python
 MAKEFILE_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 CPU_CORES := $(shell nproc)
@@ -64,21 +67,25 @@ CONFIGURE_FLAGS= \
 	--with-build-python="$(BUILD_PYTHON)" \
 	--without-ensurepip --disable-shared --disable-ipv6 --with-mimalloc=no
 
-.PHONY: all clean configure libpython build-host python curl ssl wiitest regen-importlib
+.PHONY: all clean configure libpython build-host python curl ssl wiitest	\
+ 		regen-importlib bitmap bitmap-clean fat fat-clean wiitest-clean
 
 all: wiitest
 
 bitmap:
-	@cd $(MAKEFILE_DIR)bitmap
-	$(MAKE) -j$(CPU_CORES)
-	cd $(MAKEFILE_DIR)
+	$(MAKE) -j$(CPU_CORES) -C $(MAKEFILE_DIR)bitmap
 
 bitmap-clean:
 	@$(MAKE) -C $(MAKEFILE_DIR)bitmap clean
 
 cp-libs: python curl bitmap fat
+	@rm -rf "$(LIB_DIR)"
 	@mkdir -p "$(LIB_DIR)"
-	@find "$(BUILD_DIR)" -name "*.a" -exec cp {} "$(LIB_DIR)" \;
+	@find "$(MAKEFILE_DIR)" \
+    -path "$(BUILD_HOST_DIR_ABS)" -prune -o \
+    -path "$(LIB_DIR_ABS)" -prune -o \
+    -name "*.a" -exec cp {} "$(LIB_DIR_ABS)" \;
+	@echo "Copied libraries to $(LIB_DIR)"
 
 
 build-host: $(BUILD_PYTHON)
@@ -122,7 +129,7 @@ wiitools-build: curl
 		-I$(srcdir)/curl/mbedtls/wii/include \
 		-I$(srcdir)/curl/mbedtls/tf-psa-crypto/include \
 		-I$(srcdir)/curl/mbedtls/tf-psa-crypto/drivers/builtin/include \
-		$(CFLAGS) -DWII_BUILD -DPy_BUILD_CORE -DPy_REF_DEBUG=1 \
+		$(CFLAGS) -DWII_BUILD -DPy_BUILD_CORE \
 		-c "$(srcdir)/Modules/wiitoolsmodule.c" \
 		-o "$(BUILD_DIR)/Modules/wiitoolsmodule.o"
 
@@ -158,7 +165,7 @@ fat-clean:
 	@$(MAKE) -C $(MAKEFILE_DIR)fat ogc-clean
 
 fat:
-	$(MAKE) -j$(CPU_CORES) $(MAKEFILE_DIR)fat wii-release
+	$(MAKE) -j$(CPU_CORES) -C $(MAKEFILE_DIR)fat wii-release
 
 clean: fat-clean wiitest-clean bitmap-clean
 	@-rm -rf "$(BUILD_DIR)"

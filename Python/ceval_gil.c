@@ -49,11 +49,6 @@
      much longer than expected.
      (Note: this mechanism is enabled with FORCE_SWITCHING above)
 */
-#ifndef WII_SINGLE_THREAD
-#define WIISINGLE_THREAD 
-#endif
-
-#ifndef WII_SINGLE_THREAD
 
 #ifndef __PPC__
 #define __PPC__
@@ -114,7 +109,6 @@ update_eval_breaker_for_thread(PyInterpreterState *interp, PyThreadState *tstate
  * Implementation of the Global Interpreter Lock (GIL).
  */
 
-
 #include <stdlib.h>
 #include <errno.h>
 
@@ -123,10 +117,12 @@ update_eval_breaker_for_thread(PyInterpreterState *interp, PyThreadState *tstate
 #define TP(msg) ((void)0)
 #define WII_LOG(msg) TP(msg)
 
-
+#if defined(WII_BUILD)
 #  define WII_SINGLE_THREAD 1
-
-#ifndef WII_SINGLE_THREAD
+#else
+#  define WII_SINGLE_THREAD 0
+#endif
+ 
 #define MUTEX_INIT(mut) \
     if (PyMUTEX_INIT(&(mut))) { \
         Py_FatalError("PyMUTEX_INIT(" #mut ") failed"); };
@@ -163,19 +159,6 @@ update_eval_breaker_for_thread(PyInterpreterState *interp, PyThreadState *tstate
             timeout_result = 0; \
     } \
 
-#else
-#define MUTEX_INIT(mut)        0
-#define MUTEX_FINI(mut)        0
-#define MUTEX_LOCK(mut)        0
-#define MUTEX_UNLOCK(mut)      0
-
-#define COND_INIT(cond)        0
-#define COND_FINI(cond)        0
-#define COND_SIGNAL(cond)      0
-#define COND_WAIT(cond, mut)   0
-#define COND_TIMED_WAIT(cond, mut, microseconds, timeout_result) \
-    timeout_result = 0
-#endif /* WII_SINGLE_THREAD */
 
 #define DEFAULT_INTERVAL 5000
 
@@ -195,7 +178,6 @@ static int gil_created(struct _gil_runtime_state *gil)
 
 static void create_gil(struct _gil_runtime_state *gil)
 {
-    #ifndef WII_SINGLE_THREAD
     MUTEX_INIT(gil->mutex);
 #ifdef FORCE_SWITCHING
     MUTEX_INIT(gil->switch_mutex);
@@ -204,11 +186,9 @@ static void create_gil(struct _gil_runtime_state *gil)
 #ifdef FORCE_SWITCHING
     COND_INIT(gil->switch_cond);
 #endif
-    #endif
     _Py_atomic_store_ptr_relaxed(&gil->last_holder, 0);
     _Py_ANNOTATE_RWLOCK_CREATE(&gil->locked);
     _Py_atomic_store_int_release(&gil->locked, 0);
-    
 }
 
 static void destroy_gil(struct _gil_runtime_state *gil)
@@ -216,14 +196,12 @@ static void destroy_gil(struct _gil_runtime_state *gil)
     /* some pthread-like implementations tie the mutex to the cond
      * and must have the cond destroyed first.
      */
-    #ifndef WII_SINGLE_THREAD
     COND_FINI(gil->cond);
     MUTEX_FINI(gil->mutex);
 #ifdef FORCE_SWITCHING
     COND_FINI(gil->switch_cond);
     MUTEX_FINI(gil->switch_mutex);
 #endif
-    #endif
     _Py_atomic_store_int_release(&gil->locked, -1);
     _Py_ANNOTATE_RWLOCK_DESTROY(&gil->locked);
 }
@@ -1511,138 +1489,3 @@ _PyEval_RaiseAsyncExc(PyThreadState *tstate)
     }
     return 0;
 }
-#else
-#include "Python.h"
-#include "pycore_runtime.h"
-#include "pycore_pystats.h"
-
-/* -------------------------------------------------------------------------
- * Minimaler GIL-Code für Wii (Single-Threaded)
- * ------------------------------------------------------------------------- */
-
-/* Dummy Logging-Makros */
-#define WII_LOG(msg) ((void)0)
-
-/* -------------------------------------------------------------------------
- * GIL Runtime State
- * ------------------------------------------------------------------------- */
-struct _gil_runtime_state {
-    int locked;                 /* 0 = frei, 1 = gehalten */
-    PyThreadState *last_holder; /* letzter Thread (für Konsistenzchecks) */
-    unsigned long interval;     /* Sys-Interval, optional */
-};
-
-/* Initialize the GIL state */
-static void _gil_initialize(struct _gil_runtime_state *gil) {
-    gil->locked = -1;
-    gil->last_holder = NULL;
-    gil->interval = 5000;  /* default, wird hier nicht genutzt */
-}
-
-/* Check if GIL exists */
-static int gil_created(struct _gil_runtime_state *gil) {
-    if (gil == NULL) return 0;
-    return (gil->locked >= 0);
-}
-
-/* Create the GIL (single-threaded) */
-static void create_gil(struct _gil_runtime_state *gil) {
-    _Py_atomic_store_int_relaxed(&gil->locked, 0);
-    gil->last_holder = NULL;
-}
-
-/* Destroy the GIL */
-static void destroy_gil(struct _gil_runtime_state *gil) {
-    _Py_atomic_store_int_relaxed(&gil->locked, -1);
-    gil->last_holder = NULL;
-}
-
-/* -------------------------------------------------------------------------
- * Take/Drop GIL (single-threaded)
- * ------------------------------------------------------------------------- */
-static void take_gil(PyThreadState *tstate) {
-    struct _gil_runtime_state *gil = tstate->interp->ceval.gil;
-
-    _Py_atomic_store_ptr_relaxed(&gil->last_holder, tstate);
-    _Py_atomic_store_int_relaxed(&gil->locked, 1);
-    tstate->holds_gil = 1;
-    tstate->gil_requested = 0;
-}
-
-static void drop_gil(PyInterpreterState *interp, PyThreadState *tstate, int final_release) {
-    (void)final_release;
-    struct _gil_runtime_state *gil = interp->ceval.gil;
-
-    if (tstate != NULL) tstate->holds_gil = 0;
-    if (gil != NULL) _Py_atomic_store_int_relaxed(&gil->locked, 0);
-}
-
-/* -------------------------------------------------------------------------
- * Initialize/Finalize GIL for interpreter
- * ------------------------------------------------------------------------- */
-void _PyEval_InitGIL(PyThreadState *tstate, int own_gil) {
-    if (!own_gil) {
-        PyInterpreterState *main_interp = _PyInterpreterState_Main();
-        struct _gil_runtime_state *gil = main_interp->ceval.gil;
-        tstate->interp->ceval.gil = gil;
-        tstate->interp->ceval.own_gil = 0;
-    } else {
-        PyThread_init_thread();
-        create_gil(&tstate->interp->_gil);
-        tstate->interp->ceval.gil = &tstate->interp->_gil;
-        tstate->interp->ceval.own_gil = 1;
-    }
-
-    _PyThreadState_Attach(tstate);
-}
-
-void _PyEval_FiniGIL(PyInterpreterState *interp) {
-    struct _gil_runtime_state *gil = interp->ceval.gil;
-    if (gil == NULL || !interp->ceval.own_gil) return;
-    destroy_gil(gil);
-    interp->ceval.gil = NULL;
-}
-
-/* -------------------------------------------------------------------------
- * Thread-safe API (Single-threaded: einfach Flag setzen)
- * ------------------------------------------------------------------------- */
-PyThreadState *PyEval_SaveThread(void) {
-    PyThreadState *tstate = _PyThreadState_GET();
-    _PyThreadState_Detach(tstate);
-    return tstate;
-}
-
-void PyEval_RestoreThread(PyThreadState *tstate) {
-    _PyThreadState_Attach(tstate);
-}
-
-void PyEval_AcquireLock(void) {
-    take_gil(_PyThreadState_GET());
-}
-
-void PyEval_ReleaseLock(void) {
-    PyThreadState *tstate = _PyThreadState_GET();
-    drop_gil(tstate->interp, tstate, 0);
-}
-
-void PyEval_AcquireThread(PyThreadState *tstate) {
-    _PyThreadState_Attach(tstate);
-}
-
-void PyEval_ReleaseThread(PyThreadState *tstate) {
-    _PyThreadState_Detach(tstate);
-}
-
-/* -------------------------------------------------------------------------
- * Switch Interval (optional, wird nicht genutzt)
- * ------------------------------------------------------------------------- */
-void _PyEval_SetSwitchInterval(unsigned long microseconds) {
-    PyInterpreterState *interp = _PyInterpreterState_GET();
-    interp->ceval.gil->interval = microseconds;
-}
-
-unsigned long _PyEval_GetSwitchInterval(void) {
-    PyInterpreterState *interp = _PyInterpreterState_GET();
-    return interp->ceval.gil->interval;
-}
-#endif

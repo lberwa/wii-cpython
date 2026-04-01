@@ -88,19 +88,19 @@ typedef CONDITION_VARIABLE  PyCOND_T;
 
 #endif /* _PY_EMULATED_WIN_CV */
 
-#else /* _POSIX_THREADS, NT_THREADS */
+//#else /* _POSIX_THREADS, NT_THREADS */
 
-/*
- * Wii/GameCube and other single-threaded platforms
- */
-#ifdef WII_BUILD
-#define Py_HAVE_CONDVAR
+///*
+// * Wii/GameCube and other single-threaded platforms
+// */
+//#ifdef WII_BUILD
+//#define Py_HAVE_CONDVAR
 
-/* Single-threaded stub implementation */
-typedef int PyMUTEX_T;
-typedef int PyCOND_T;
+///* Single-threaded stub implementation */
+//typedef int PyMUTEX_T;
+//typedef int PyCOND_T;
 
-#endif /* WII_BUILD */
+//#endif /* WII_BUILD */
 
 #endif /* _POSIX_THREADS, NT_THREADS */
 

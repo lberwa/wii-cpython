@@ -1,0 +1,29 @@
+Dateien 3.15.0a7/Include/cpython/pythread.h und aa_commit_hash/Include/cpython/pythread.h sind verschieden.
+Dateien 3.15.0a7/Include/faildedebug.h und aa_commit_hash/Include/faildedebug.h sind verschieden.
+Dateien 3.15.0a7/Include/internal/pycore_condvar.h und aa_commit_hash/Include/internal/pycore_condvar.h sind verschieden.
+Dateien 3.15.0a7/Include/internal/pycore_crossinterp.h und aa_commit_hash/Include/internal/pycore_crossinterp.h sind verschieden.
+Dateien 3.15.0a7/Include/Python.h und aa_commit_hash/Include/Python.h sind verschieden.
+
+Dateien 3.15.0a7/Makefile und aa_commit_hash/Makefile sind verschieden.
+
+Dateien 3.15.0a7/Modules/Makefile und aa_commit_hash/Modules/Makefile sind verschieden.
+Dateien 3.15.0a7/Modules/Setup.local und aa_commit_hash/Modules/Setup.local sind verschieden.
+Dateien 3.15.0a7/Modules/wiitoolsmodule.c und aa_commit_hash/Modules/wiitoolsmodule.c sind verschieden.
+Dateien 3.15.0a7/Objects/fileobject.c und aa_commit_hash/Objects/fileobject.c sind verschieden.
+Dateien 3.15.0a7/Objects/interpolationobject.c und aa_commit_hash/Objects/interpolationobject.c sind verschieden.
+Dateien 3.15.0a7/Objects/Makefile und aa_commit_hash/Objects/Makefile sind verschieden.
+Dateien 3.15.0a7/Objects/moduleobject.c und aa_commit_hash/Objects/moduleobject.c sind verschieden.
+Dateien 3.15.0a7/Objects/stringlib/codecs.h und aa_commit_hash/Objects/stringlib/codecs.h sind verschieden.
+Dateien 3.15.0a7/Parser/Makefile und aa_commit_hash/Parser/Makefile sind verschieden.
+Dateien 3.15.0a7/Parser/myreadline.c und aa_commit_hash/Parser/myreadline.c sind verschieden.
+Dateien 3.15.0a7/Parser/tokenizer/file_tokenizer.c und aa_commit_hash/Parser/tokenizer/file_tokenizer.c sind verschieden.
+Dateien 3.15.0a7/pyconfig.h und aa_commit_hash/pyconfig.h sind verschieden.
+Dateien 3.15.0a7/Python/ceval_gil.c und aa_commit_hash/Python/ceval_gil.c sind verschieden.
+Dateien 3.15.0a7/Python/fileutils.c und aa_commit_hash/Python/fileutils.c sind verschieden.
+Dateien 3.15.0a7/Python/import.c und aa_commit_hash/Python/import.c sind verschieden.
+Dateien 3.15.0a7/Python/pylifecycle.c und aa_commit_hash/Python/pylifecycle.c sind verschieden.
+Dateien 3.15.0a7/Python/sysmodule.c und aa_commit_hash/Python/sysmodule.c sind verschieden.
+
+Dateien 3.15.0a7/wiitest/Makefile und aa_commit_hash/wiitest/Makefile sind verschieden.
+Dateien 3.15.0a7/wiitest/source/atomic_stubs.c und aa_commit_hash/wiitest/source/atomic_stubs.c sind verschieden.
+Dateien 3.15.0a7/wiitest/source/main.c und aa_commit_hash/wiitest/source/main.c sind verschieden.

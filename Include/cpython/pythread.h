@@ -18,9 +18,9 @@ PyAPI_DATA(const long long) PY_TIMEOUT_MAX;
 #elif defined(HAVE_PTHREAD_H)
     /* Darwin needs pthread.h to know type name the pthread_key_t. */
 #   include <pthread.h>
-#ifndef NATIVE_TSS_KEY_T
+//#ifndef NATIVE_TSS_KEY_T
 #   define NATIVE_TSS_KEY_T     pthread_key_t
-#endif
+//#endif
 #elif defined(NT_THREADS)
     /* In Windows, native TSS key type is DWORD,
        but hardcode the unsigned long to avoid errors for include directive.

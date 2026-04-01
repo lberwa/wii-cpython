@@ -1,0 +1,33 @@
+# libcurl cross-build (Wii/devkitPPC)
+CURL_CMAKE ?= cmake
+CURL_DIR ?= $(srcdir)/curl
+CURL_WII_BUILD_DIR ?= $(CURL_DIR)/build-wii
+CURL_WII_LIB ?= $(CURL_WII_BUILD_DIR)/lib/libcurl.a
+DEVKITPRO ?= /opt/devkitpro
+DEVKITPPC ?= $(DEVKITPRO)/devkitPPC
+CURL_WII_CC ?= $(if $(wildcard $(DEVKITPPC)/bin/powerpc-eabi-gcc),$(DEVKITPPC)/bin/powerpc-eabi-gcc,$(CC))
+CURL_WII_AR ?= $(if $(wildcard $(DEVKITPPC)/bin/powerpc-eabi-ar),$(DEVKITPPC)/bin/powerpc-eabi-ar,$(AR))
+CURL_WII_RANLIB ?= $(if $(wildcard $(DEVKITPPC)/bin/powerpc-eabi-ranlib),$(DEVKITPPC)/bin/powerpc-eabi-ranlib,$(RANLIB))
+CURL_WII_CMAKE_FLAGS ?= \
+	-DCMAKE_SYSTEM_NAME=Generic \
+	-DCMAKE_C_COMPILER=$(CURL_WII_CC) \
+	-DCMAKE_AR=$(CURL_WII_AR) \
+	-DCMAKE_RANLIB=$(CURL_WII_RANLIB) \
+	-DCMAKE_C_FLAGS='$(OPT)' \
+	-DBUILD_CURL_EXE=OFF \
+	-DBUILD_SHARED_LIBS=OFF \
+	-DBUILD_STATIC_LIBS=ON \
+	-DBUILD_TESTING=OFF \
+	-DCURL_BUILD_TESTING=OFF \
+	-DCURL_BUILD_EVERYTHING=OFF \
+	-DCURL_DISABLE_INSTALL=ON \
+	-DENABLE_THREADED_RESOLVER=OFF \
+	-DCURL_ENABLE_SSL=OFF \
+	-DCURL_USE_LIBPSL=OFF \
+	-DCURL_USE_LIBSSH2=OFF \
+	-DCURL_ZLIB=OFF \
+	-DCURL_BROTLI=OFF \
+	-DCURL_ZSTD=OFF \
+	-DENABLE_IPV6=OFF \
+	-DHTTP_ONLY=ON
+

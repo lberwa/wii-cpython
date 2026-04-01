@@ -713,6 +713,8 @@ PYTHON_OBJS=	\
 		Python/perf_trampoline.o \
 		Python/perf_jit_trampoline.o \
 		Python/remote_debugging.o \
+		Python/atomic_stubs.o \
+		Python/posix_stubs.o \
 		Python/$(DYNLOADFILE) \
 		$(LIBOBJS) \
 		$(MACHDEP_OBJS) \

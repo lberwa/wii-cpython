@@ -9,8 +9,11 @@ INCLUDES   :=
 
 MAKEFILE_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
+INCLUDE += -I../build-wii
 INCLUDE += -I$(MAKEFILE_DIR)../Include
 INCLUDE += -I$(DEVKITPRO)/libogc/include
+INCLUDE += -I$(DEVKITPRO)/extras/bitmap/include
+INCLUDE += -I$(DEVKITPRO)/extras/mysd_sdkarte_mounten/include
 
 CFLAGS     += -O0 -g -std=c99 -Wall -Wextra
 CXXFLAGS   := $(CFLAGS)
@@ -22,13 +25,15 @@ CPPFLAGS   += $(INCLUDE)
 LDFLAGS += -T$(DEVKITPPC)/powerpc-eabi/lib/rvl.ld
 
 LDFLAGS    += -L$(DEVKITPRO)/libogc/lib/wii
-LDFLAGS    += -L../libs
-LDFLAGS    += -L..
-CPYTHON_DIR := ..
-CPYTHON_BUILD := ../build-wii
+LDFLAGS    += -L$(MAKEFILE_DIR)../libs
+LDFLAGS    += -L$(MAKEFILE_DIR)..+
+
+CPYTHON_BUILD := $(MAKEFILE_DIR)../libs
 
 
-LIBS       := -lpython3.15 -lfatpy -lwiiuse -lbte -lbitmap -logc -lcurl -lmbedtls -lmbedx509 -lmbedcrypto -ltfpsacrypto
+#LIBS       := -lpython3.15 -lfatpy -lwiiuse -lbte -lbitmap -logc -lcurl -lmbedtls -lmbedx509 -lmbedcrypto -ltfpsacrypto
+LIBS := -lpython3.15 -lcurl -lmbedtls -lmbedx509 -lmbedcrypto -ltfpsacrypto -lz -lfatpy -lwiiuse -lbte -lbitmap -logc -lm
+
 
 include $(DEVKITPPC)/wii_rules
 
