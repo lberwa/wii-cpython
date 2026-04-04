@@ -9,7 +9,10 @@
 extern const unsigned char test_py[];
 extern const unsigned char test_py_end[];
 
+// #define FIND_FILE2
+// #define FIND_FILE
 //#define PNG
+
 #include "../../fat/include/pyfat.h"
 #ifdef PNG
 
@@ -51,13 +54,12 @@ static int export_png_to_sd(const char *dst_path, const unsigned char *start, co
 }
 #endif
 
-void wait(int ms) {
-    for (int i = 0; i < ms; ++i) {
+void wait(int time) {
+    for (int i = 0; i < time; ++i) {
         VIDEO_WaitVSync();
     }
 }
-// #define FIND_FILE2
-// #define FIND_FILE
+
 
 #ifdef FIND_FILE2
 #include <stdio.h>
@@ -189,9 +191,6 @@ int main(void) {
         terminal_print(status.err_msg);
         return status.exitcode;  // ggf. Programm beenden
     }
-
-    // Init erfolgreich
-    printf("Python init successful!\n");
     
     script_len = (size_t)(test_py_end - test_py);
     script = (char *)malloc(script_len + 1);
@@ -207,15 +206,12 @@ int main(void) {
     terminal_print("run source_py/test.py ...");
     rc = PyRun_SimpleString(script);
 
-    terminal_print("after PyRun_SimpleString");
     free(script);
     if (rc != 0) {
         terminal_print("python script returned error");
+        wait(600);
     }
 
-    wait(600); // 10 Sekunden warten
-
-    terminal_print("py_finalize: return 0: exiting ...");
     Py_Finalize();
 
     terminal_print("done");

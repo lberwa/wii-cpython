@@ -11,6 +11,10 @@
 #include "osdefs.h"               // DELIM
 #include <wchar.h>
 
+#ifdef TERMINAL_PRINT_DEBUG
+#undef TERMINAL_PRINT_DEBUG
+#endif
+
 #if defined(TERMINAL_PRINT_DEBUG)
 #  include <my_text_renderer.h>
 #  define TP(msg) terminal_print(msg)

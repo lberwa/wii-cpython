@@ -85,85 +85,11 @@ else:
         print "[ERR] args:", getattr(eval, "args", None)
 """
 
-
-print("hello world!!!!!!!!!!!!!!!!!!!!!!")
-print("3/2 =", 3/2)
-
 import wiitools as w
-for i in range(1):
-    w.VIDEO_WaitVSync()
 
 
-w.fatInitDefault()
-
-
-
-############################################################################################################
-############################################################################################################
-############################################################################################################
-
-import sys
-import os
-
-# Custom loader for Wii that doesn't cache bytecode (which blocks)
-import importlib.abc
-import importlib.machinery
-import importlib.util
-import types
-
-class WiiSourceLoader(importlib.abc.Loader):
-    def __init__(self, name, path):
-        self.name = name
-        self.path = path
-    
-    def create_module(self, spec):
-        return None  # Use default module creation
-    
-    def exec_module(self, module):
-        with open(self.path, 'r', encoding='utf-8') as f:
-            code = compile(f.read(), self.path, 'exec')
-        exec(code, module.__dict__)
-
-class WiiSourceFinder(importlib.abc.MetaPathFinder):
-    def find_spec(self, fullname, path=None, target=None):
-        if '.' in fullname:
-            return None
-        for base_path in sys.path:
-            if not (base_path.startswith('sd') or base_path.startswith('usb')):
-                continue
-            if not base_path.endswith('/'):
-                base_path = base_path + '/'
-            mod_file = base_path + fullname + '.py'
-            try:
-                if os.path.isfile(mod_file):
-                    loader = WiiSourceLoader(fullname, mod_file)
-                    spec = importlib.util.spec_from_file_location(fullname, mod_file, loader=loader)
-                    if spec:
-                        return spec
-            except Exception:
-                pass
-        return None
-
-sys.meta_path.insert(0, WiiSourceFinder())
-for p in sys.path:
-    print("  ", p)
-
-for i in range(1):
-    w.VIDEO_WaitVSync()
-
-
-
-############################################################################################################
-############################################################################################################
-############################################################################################################
-
-print("[DBG] importlib path debug end")
 import testg  # DISABLED FOR TESTING
-print("test3 printed (testg import skipped)")
-
-print("-----------------------------------")
-
-
+print("testg imported successfully!")
 
 """
 file_path = "sd:/hello/test2.py"

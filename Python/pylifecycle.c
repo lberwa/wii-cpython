@@ -1696,6 +1696,44 @@ Py_Init_Custom(const char** import_paths, size_t *count)
         }
     }
 
+    /* Install Wii SD/USB source finder (from test.py). */
+    (void)PyRun_SimpleString(
+        "import sys, os\n"
+        "import importlib.abc\n"
+        "import importlib.machinery\n"
+        "import importlib.util\n"
+        "class WiiSourceLoader(importlib.abc.Loader):\n"
+        "    def __init__(self, name, path):\n"
+        "        self.name = name\n"
+        "        self.path = path\n"
+        "    def create_module(self, spec):\n"
+        "        return None\n"
+        "    def exec_module(self, module):\n"
+        "        with open(self.path, 'r', encoding='utf-8') as f:\n"
+        "            code = compile(f.read(), self.path, 'exec')\n"
+        "        exec(code, module.__dict__)\n"
+        "class WiiSourceFinder(importlib.abc.MetaPathFinder):\n"
+        "    def find_spec(self, fullname, path=None, target=None):\n"
+        "        if '.' in fullname:\n"
+        "            return None\n"
+        "        for base_path in sys.path:\n"
+        "            if not (base_path.startswith('sd') or base_path.startswith('usb')):\n"
+        "                continue\n"
+        "            if not base_path.endswith('/'):\n"
+        "                base_path = base_path + '/'\n"
+        "            mod_file = base_path + fullname + '.py'\n"
+        "            try:\n"
+        "                if os.path.isfile(mod_file):\n"
+        "                    loader = WiiSourceLoader(fullname, mod_file)\n"
+        "                    spec = importlib.util.spec_from_file_location(fullname, mod_file, loader=loader)\n"
+        "                    if spec:\n"
+        "                        return spec\n"
+        "            except Exception:\n"
+        "                pass\n"
+        "        return None\n"
+        "sys.meta_path.insert(0, WiiSourceFinder())\n"
+    );
+
     return _PyStatus_OK();
 }
 
