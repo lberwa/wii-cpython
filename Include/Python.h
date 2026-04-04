@@ -17,6 +17,9 @@
 #ifndef __wii__
 #define __wii__
 #endif
+#ifndef WII_BUILD
+#define WII_BUILD
+#endif
  
 // Since this is a "meta-include" file, "#ifdef __cplusplus / extern "C" {"
 // is not needed.

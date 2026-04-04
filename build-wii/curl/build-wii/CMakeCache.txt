@@ -41,8 +41,8 @@ BUILD_TESTING:BOOL=OFF
 //Path to a program.
 CMAKE_ADDR2LINE:FILEPATH=/opt/devkitpro/devkitPPC/bin/powerpc-eabi-addr2line
 
-//Path to a program.
-CMAKE_AR:FILEPATH=/opt/devkitpro/devkitPPC/bin/powerpc-eabi-ar
+//No help, variable specified on the command line.
+CMAKE_AR:UNINITIALIZED=/opt/devkitpro/devkitPPC/bin/powerpc-eabi-ar
 
 //Choose the type of build, options are: None Debug Release RelWithDebInfo
 // MinSizeRel ...
@@ -51,8 +51,8 @@ CMAKE_BUILD_TYPE:STRING=
 //Enable/Disable color output during build.
 CMAKE_COLOR_MAKEFILE:BOOL=ON
 
-//C compiler
-CMAKE_C_COMPILER:STRING=/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc
+//No help, variable specified on the command line.
+CMAKE_C_COMPILER:UNINITIALIZED=/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc
 
 //A wrapper around 'ar' adding the appropriate '--plugin' option
 // for the GCC compiler
@@ -211,8 +211,8 @@ CMAKE_PROJECT_VERSION_PATCH:STATIC=0
 //Value Computed by CMake
 CMAKE_PROJECT_VERSION_TWEAK:STATIC=
 
-//Path to a program.
-CMAKE_RANLIB:FILEPATH=/opt/devkitpro/devkitPPC/bin/powerpc-eabi-ranlib
+//No help, variable specified on the command line.
+CMAKE_RANLIB:UNINITIALIZED=/opt/devkitpro/devkitPPC/bin/powerpc-eabi-ranlib
 
 //Path to a program.
 CMAKE_READELF:FILEPATH=/opt/devkitpro/devkitPPC/bin/powerpc-eabi-readelf

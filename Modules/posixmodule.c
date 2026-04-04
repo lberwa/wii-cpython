@@ -5033,6 +5033,16 @@ _posix_listdir(path_t *path, PyObject *list)
             return_str = 1;
         }
 
+#if defined(__WII__) || defined(__wii__)
+        /* libogc's VFS does not support "/" as a root; avoid crashing in readdir */
+        if (name[0] == '/' && name[1] == '\0') {
+            errno = ENOENT;
+            path_error(path);
+            list = NULL;
+            goto exit;
+        }
+#endif
+
         Py_BEGIN_ALLOW_THREADS
         dirp = opendir(name);
         Py_END_ALLOW_THREADS

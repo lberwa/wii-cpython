@@ -52,6 +52,8 @@ extern PyObject* PyInit__tokenize(void);
 extern PyObject* PyInit__contextvars(void);
 extern PyObject* _PyWarnings_Init(void);
 extern PyObject* PyInit__string(void);
+extern PyObject* PyInit_posix(void);
+extern PyObject* PyInit__io(void);
 
 struct _inittab _PyImport_Inittab[] = {
 
@@ -115,6 +117,10 @@ struct _inittab _PyImport_Inittab[] = {
 
     /* This lives in Objects/unicodeobject.c */
     {"_string", PyInit__string},
+
+    /* POSIX + I/O (needed by importlib external) */
+    {"posix", PyInit_posix},
+    {"_io", PyInit__io},
 
     /* Sentinel */
     {0, 0}

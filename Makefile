@@ -85,6 +85,8 @@ cp-libs: python curl bitmap fat
     -path "$(BUILD_HOST_DIR_ABS)" -prune -o \
     -path "$(LIB_DIR_ABS)" -prune -o \
     -name "*.a" -exec cp {} "$(LIB_DIR_ABS)" \;
+	@# Ensure we use the Wii build of libpython (avoid host overwrite).
+	@cp "$(BUILD_DIR_ABS)/libpython$(VERSION).a" "$(LIB_DIR_ABS)/"
 	@echo "Copied libraries to $(LIB_DIR)"
 
 

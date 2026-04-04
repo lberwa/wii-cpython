@@ -27,6 +27,7 @@ uname -v = #1 SMP PREEMPT_DYNAMIC Debian 6.1.162-1 (2026-02-08)
 /usr/bin/oslevel       = unknown
 /bin/universe          = unknown
 
+PATH: /opt/devkitpro/extras/cpython/.python-venv/bin/
 PATH: /home/lew/.config/Code/User/globalStorage/github.copilot-chat/debugCommand/
 PATH: /home/lew/.config/Code/User/globalStorage/github.copilot-chat/copilotCli/
 PATH: /usr/local/bin/
@@ -17141,7 +17142,7 @@ configure:14530: result: no
 configure:14745: checking for library containing sem_init
 configure:14781: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccoct39F.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccjnw1ru.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:111:(.text.startup+0x10): undefined reference to `sem_init'
 collect2: error: ld returned 1 exit status
 configure:14781: $? = 1
@@ -19933,7 +19934,7 @@ configure: failed program was:
 configure:17867: checking for pthread_detach
 configure:17867: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccG53K0y.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccFJhGDg.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:128:(.text.startup+0x10): undefined reference to `pthread_detach'
 collect2: error: ld returned 1 exit status
 configure:17867: $? = 1
@@ -21111,7 +21112,7 @@ configure:19150: result: no
 configure:19281: checking for dlopen
 configure:19281: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccwnv6X1.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccvFXULm.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:134:(.text.startup+0x10): undefined reference to `dlopen'
 collect2: error: ld returned 1 exit status
 configure:19281: $? = 1
@@ -21261,7 +21262,7 @@ configure:19329: result: none
 configure:19362: checking for accept4
 configure:19362: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccdp6RJa.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccC7ixyc.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:134:(.text.startup+0x10): undefined reference to `accept4'
 collect2: error: ld returned 1 exit status
 configure:19362: $? = 1
@@ -21407,7 +21408,7 @@ configure:19362: result: no
 configure:19368: checking for alarm
 configure:19368: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cczzGuZJ.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccqEf3FJ.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:134:(.text.startup+0x10): undefined reference to `alarm'
 collect2: error: ld returned 1 exit status
 configure:19368: $? = 1
@@ -21553,7 +21554,7 @@ configure:19368: result: no
 configure:19374: checking for bind_textdomain_codeset
 configure:19374: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccgQssBZ.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccteieYz.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:134:(.text.startup+0x10): undefined reference to `bind_textdomain_codeset'
 collect2: error: ld returned 1 exit status
 configure:19374: $? = 1
@@ -21704,7 +21705,7 @@ configure:19380: result: yes
 configure:19386: checking for chown
 configure:19386: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccj87nbI.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccnz4540.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:135:(.text.startup+0x10): undefined reference to `chown'
 collect2: error: ld returned 1 exit status
 configure:19386: $? = 1
@@ -21851,7 +21852,7 @@ configure:19386: result: no
 configure:19392: checking for clearenv
 configure:19392: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cctcoyrI.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccgcWVFF.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:135:(.text.startup+0x10): undefined reference to `clearenv'
 collect2: error: ld returned 1 exit status
 configure:19392: $? = 1
@@ -22003,7 +22004,7 @@ configure:19398: result: yes
 configure:19404: checking for closefrom
 configure:19404: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccrlnVlc.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccxsQfHC.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:136:(.text.startup+0x10): undefined reference to `closefrom'
 collect2: error: ld returned 1 exit status
 configure:19404: $? = 1
@@ -22151,7 +22152,7 @@ configure:19404: result: no
 configure:19410: checking for close_range
 configure:19410: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc5XRL03.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc80asYt.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:136:(.text.startup+0x10): undefined reference to `close_range'
 collect2: error: ld returned 1 exit status
 configure:19410: $? = 1
@@ -22299,7 +22300,7 @@ configure:19410: result: no
 configure:19416: checking for confstr
 configure:19416: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cch6hz0n.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc1Y7dRh.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:136:(.text.startup+0x10): undefined reference to `confstr'
 collect2: error: ld returned 1 exit status
 configure:19416: $? = 1
@@ -22447,7 +22448,7 @@ configure:19416: result: no
 configure:19422: checking for copy_file_range
 configure:19422: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccOvKIrR.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccLws18W.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:136:(.text.startup+0x10): undefined reference to `copy_file_range'
 collect2: error: ld returned 1 exit status
 configure:19422: $? = 1
@@ -22595,7 +22596,7 @@ configure:19422: result: no
 configure:19428: checking for ctermid
 configure:19428: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccJola5q.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc7JupgR.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:136:(.text.startup+0x10): undefined reference to `ctermid'
 collect2: error: ld returned 1 exit status
 configure:19428: $? = 1
@@ -22743,7 +22744,7 @@ configure:19428: result: no
 configure:19434: checking for dladdr
 configure:19434: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccKXgZyj.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc1ZCqP9.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:136:(.text.startup+0x10): undefined reference to `dladdr'
 collect2: error: ld returned 1 exit status
 configure:19434: $? = 1
@@ -22896,7 +22897,7 @@ configure:19440: result: yes
 configure:19446: checking for dup3
 configure:19446: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccW0xzTL.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cclspbpK.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:137:(.text.startup+0x10): undefined reference to `dup3'
 collect2: error: ld returned 1 exit status
 configure:19446: $? = 1
@@ -23048,7 +23049,7 @@ conftest.c:126:6: warning: conflicting types for built-in function 'execv'; expe
   126 | char execv (void);
       |      ^~~~~
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccnZvy9U.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc3esvra.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:137:(.text.startup+0x10): undefined reference to `execv'
 collect2: error: ld returned 1 exit status
 configure:19452: $? = 1
@@ -23202,7 +23203,7 @@ configure:19458: result: yes
 configure:19464: checking for explicit_memset
 configure:19464: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccyp2kgm.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccJzB2jj.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:138:(.text.startup+0x10): undefined reference to `explicit_memset'
 collect2: error: ld returned 1 exit status
 configure:19464: $? = 1
@@ -23352,7 +23353,7 @@ configure:19464: result: no
 configure:19470: checking for faccessat
 configure:19470: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccptTn2O.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccPPbpnV.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:138:(.text.startup+0x10): undefined reference to `faccessat'
 collect2: error: ld returned 1 exit status
 configure:19470: $? = 1
@@ -23507,7 +23508,7 @@ configure:19476: result: yes
 configure:19482: checking for fchmodat
 configure:19482: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccIYUWR2.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccVX2OHc.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:139:(.text.startup+0x10): undefined reference to `fchmodat'
 collect2: error: ld returned 1 exit status
 configure:19482: $? = 1
@@ -23658,7 +23659,7 @@ configure:19482: result: no
 configure:19488: checking for fchown
 configure:19488: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccyvMLiq.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccGIun1W.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:139:(.text.startup+0x10): undefined reference to `fchown'
 collect2: error: ld returned 1 exit status
 configure:19488: $? = 1
@@ -23809,7 +23810,7 @@ configure:19488: result: no
 configure:19494: checking for fchownat
 configure:19494: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc0DX9rl.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccqoAuF3.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:139:(.text.startup+0x10): undefined reference to `fchownat'
 collect2: error: ld returned 1 exit status
 configure:19494: $? = 1
@@ -23960,7 +23961,7 @@ configure:19494: result: no
 configure:19500: checking for fdopendir
 configure:19500: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccDzzgwG.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccKckD2N.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:139:(.text.startup+0x10): undefined reference to `fdopendir'
 collect2: error: ld returned 1 exit status
 configure:19500: $? = 1
@@ -24111,7 +24112,7 @@ configure:19500: result: no
 configure:19506: checking for fdwalk
 configure:19506: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccLvyfl4.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccafksDR.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:139:(.text.startup+0x10): undefined reference to `fdwalk'
 collect2: error: ld returned 1 exit status
 configure:19506: $? = 1
@@ -24262,7 +24263,7 @@ configure:19506: result: no
 configure:19512: checking for fexecve
 configure:19512: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccz3Ancc.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc68V3DC.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:139:(.text.startup+0x10): undefined reference to `fexecve'
 collect2: error: ld returned 1 exit status
 configure:19512: $? = 1
@@ -24421,7 +24422,7 @@ configure:19518: result: yes
 configure:19524: checking for fork1
 configure:19524: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccCMdwhH.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc3ZeGEr.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:140:(.text.startup+0x10): undefined reference to `fork1'
 collect2: error: ld returned 1 exit status
 configure:19524: $? = 1
@@ -24578,7 +24579,7 @@ configure:19530: result: yes
 configure:19536: checking for fstatat
 configure:19536: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccNn8azr.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccyqXkaM.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:141:(.text.startup+0x10): undefined reference to `fstatat'
 collect2: error: ld returned 1 exit status
 configure:19536: $? = 1
@@ -24731,7 +24732,7 @@ configure:19536: result: no
 configure:19542: checking for ftime
 configure:19542: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc6iO7fA.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc2e4yw7.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:141:(.text.startup+0x10): undefined reference to `ftime'
 collect2: error: ld returned 1 exit status
 configure:19542: $? = 1
@@ -24889,7 +24890,7 @@ configure:19548: result: yes
 configure:19554: checking for futimens
 configure:19554: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cca0toWH.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc49QfUw.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:142:(.text.startup+0x10): undefined reference to `futimens'
 collect2: error: ld returned 1 exit status
 configure:19554: $? = 1
@@ -25043,7 +25044,7 @@ configure:19554: result: no
 configure:19560: checking for futimes
 configure:19560: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc6JI5nO.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccVULYys.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:142:(.text.startup+0x10): undefined reference to `futimes'
 collect2: error: ld returned 1 exit status
 configure:19560: $? = 1
@@ -25197,7 +25198,7 @@ configure:19560: result: no
 configure:19566: checking for futimesat
 configure:19566: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc4tyvBM.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc4p3vOU.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:142:(.text.startup+0x10): undefined reference to `futimesat'
 collect2: error: ld returned 1 exit status
 configure:19566: $? = 1
@@ -25351,7 +25352,7 @@ configure:19566: result: no
 configure:19572: checking for gai_strerror
 configure:19572: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccbBNIpx.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccxfv1v5.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:142:(.text.startup+0x10): undefined reference to `gai_strerror'
 collect2: error: ld returned 1 exit status
 configure:19572: $? = 1
@@ -25505,7 +25506,7 @@ configure:19572: result: no
 configure:19578: checking for getegid
 configure:19578: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccbFK9zT.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cccBe7RV.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:142:(.text.startup+0x10): undefined reference to `getegid'
 collect2: error: ld returned 1 exit status
 configure:19578: $? = 1
@@ -25659,7 +25660,7 @@ configure:19578: result: no
 configure:19584: checking for geteuid
 configure:19584: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc2BEfhv.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccbsF0Qu.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:142:(.text.startup+0x10): undefined reference to `geteuid'
 collect2: error: ld returned 1 exit status
 configure:19584: $? = 1
@@ -25813,7 +25814,7 @@ configure:19584: result: no
 configure:19590: checking for getgid
 configure:19590: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccGe7cTf.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cct4CX2U.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:142:(.text.startup+0x10): undefined reference to `getgid'
 collect2: error: ld returned 1 exit status
 configure:19590: $? = 1
@@ -25967,7 +25968,7 @@ configure:19590: result: no
 configure:19596: checking for getgrent
 configure:19596: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccbUpZln.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccxHdgaa.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:142:(.text.startup+0x10): undefined reference to `getgrent'
 collect2: error: ld returned 1 exit status
 configure:19596: $? = 1
@@ -26121,7 +26122,7 @@ configure:19596: result: no
 configure:19602: checking for getgrgid
 configure:19602: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccItsE9Y.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc9Xez7a.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:142:(.text.startup+0x10): undefined reference to `getgrgid'
 collect2: error: ld returned 1 exit status
 configure:19602: $? = 1
@@ -26275,7 +26276,7 @@ configure:19602: result: no
 configure:19608: checking for getgrgid_r
 configure:19608: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccngI5vO.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccnSJ1Yo.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:142:(.text.startup+0x10): undefined reference to `getgrgid_r'
 collect2: error: ld returned 1 exit status
 configure:19608: $? = 1
@@ -26429,7 +26430,7 @@ configure:19608: result: no
 configure:19614: checking for getgrnam_r
 configure:19614: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cci0SmkI.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc8NSBTQ.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:142:(.text.startup+0x10): undefined reference to `getgrnam_r'
 collect2: error: ld returned 1 exit status
 configure:19614: $? = 1
@@ -26583,7 +26584,7 @@ configure:19614: result: no
 configure:19620: checking for getgrouplist
 configure:19620: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cchIVs7n.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccbHMvPH.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:142:(.text.startup+0x10): undefined reference to `getgrouplist'
 collect2: error: ld returned 1 exit status
 configure:19620: $? = 1
@@ -26737,7 +26738,7 @@ configure:19620: result: no
 configure:19626: checking for gethostname
 configure:19626: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccRQGXOJ.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccTwpLkK.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:142:(.text.startup+0x10): undefined reference to `gethostname'
 collect2: error: ld returned 1 exit status
 configure:19626: $? = 1
@@ -26891,7 +26892,7 @@ configure:19626: result: no
 configure:19632: checking for getitimer
 configure:19632: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccrpihDC.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cckGsXlh.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:142:(.text.startup+0x10): undefined reference to `getitimer'
 collect2: error: ld returned 1 exit status
 configure:19632: $? = 1
@@ -27045,7 +27046,7 @@ configure:19632: result: no
 configure:19638: checking for getloadavg
 configure:19638: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc9QEDMt.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc2G0jFs.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:142:(.text.startup+0x10): undefined reference to `getloadavg'
 collect2: error: ld returned 1 exit status
 configure:19638: $? = 1
@@ -27199,7 +27200,7 @@ configure:19638: result: no
 configure:19644: checking for getlogin
 configure:19644: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccdXr7pT.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc2mH9Aa.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:142:(.text.startup+0x10): undefined reference to `getlogin'
 collect2: error: ld returned 1 exit status
 configure:19644: $? = 1
@@ -27353,7 +27354,7 @@ configure:19644: result: no
 configure:19650: checking for getlogin_r
 configure:19650: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccb2N9CS.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccGoUnR7.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:142:(.text.startup+0x10): undefined reference to `getlogin_r'
 collect2: error: ld returned 1 exit status
 configure:19650: $? = 1
@@ -27507,7 +27508,7 @@ configure:19650: result: no
 configure:19656: checking for getpeername
 configure:19656: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccDt9DeD.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccf9zvLn.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:142:(.text.startup+0x10): undefined reference to `getpeername'
 collect2: error: ld returned 1 exit status
 configure:19656: $? = 1
@@ -27661,7 +27662,7 @@ configure:19656: result: no
 configure:19662: checking for getpgid
 configure:19662: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccG58gDB.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cctr9dEa.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:142:(.text.startup+0x10): undefined reference to `getpgid'
 collect2: error: ld returned 1 exit status
 configure:19662: $? = 1
@@ -27820,7 +27821,7 @@ configure:19668: result: yes
 configure:19674: checking for getppid
 configure:19674: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc5lQNYG.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc34ToeE.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:143:(.text.startup+0x10): undefined reference to `getppid'
 collect2: error: ld returned 1 exit status
 configure:19674: $? = 1
@@ -27975,7 +27976,7 @@ configure:19674: result: no
 configure:19680: checking for getpriority
 configure:19680: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc6Fk0sj.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccnBzhS4.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:143:(.text.startup+0x10): undefined reference to `getpriority'
 collect2: error: ld returned 1 exit status
 configure:19680: $? = 1
@@ -28130,7 +28131,7 @@ configure:19680: result: no
 configure:19686: checking for _getpty
 configure:19686: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccuzLlxu.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccbaJ9L1.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:143:(.text.startup+0x10): undefined reference to `_getpty'
 collect2: error: ld returned 1 exit status
 configure:19686: $? = 1
@@ -28285,7 +28286,7 @@ configure:19686: result: no
 configure:19692: checking for getpwent
 configure:19692: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccxGaTNo.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc4hdzbc.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:143:(.text.startup+0x10): undefined reference to `getpwent'
 collect2: error: ld returned 1 exit status
 configure:19692: $? = 1
@@ -28440,7 +28441,7 @@ configure:19692: result: no
 configure:19698: checking for getpwnam_r
 configure:19698: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccTBswVU.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccu9K7Qg.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:143:(.text.startup+0x10): undefined reference to `getpwnam_r'
 collect2: error: ld returned 1 exit status
 configure:19698: $? = 1
@@ -28595,7 +28596,7 @@ configure:19698: result: no
 configure:19704: checking for getpwuid
 configure:19704: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccVA9GB0.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc7KLn5H.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:143:(.text.startup+0x10): undefined reference to `getpwuid'
 collect2: error: ld returned 1 exit status
 configure:19704: $? = 1
@@ -28750,7 +28751,7 @@ configure:19704: result: no
 configure:19710: checking for getpwuid_r
 configure:19710: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccvDTEbL.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cccZG6nI.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:143:(.text.startup+0x10): undefined reference to `getpwuid_r'
 collect2: error: ld returned 1 exit status
 configure:19710: $? = 1
@@ -28905,7 +28906,7 @@ configure:19710: result: no
 configure:19716: checking for getresgid
 configure:19716: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccW60HLa.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccI36TBq.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:143:(.text.startup+0x10): undefined reference to `getresgid'
 collect2: error: ld returned 1 exit status
 configure:19716: $? = 1
@@ -29060,7 +29061,7 @@ configure:19716: result: no
 configure:19722: checking for getresuid
 configure:19722: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccOSEhBz.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccAqnTXR.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:143:(.text.startup+0x10): undefined reference to `getresuid'
 collect2: error: ld returned 1 exit status
 configure:19722: $? = 1
@@ -29215,7 +29216,7 @@ configure:19722: result: no
 configure:19728: checking for getrusage
 configure:19728: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc9jqU4x.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccxvHVQ3.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:143:(.text.startup+0x10): undefined reference to `getrusage'
 collect2: error: ld returned 1 exit status
 configure:19728: $? = 1
@@ -29370,7 +29371,7 @@ configure:19728: result: no
 configure:19734: checking for getsid
 configure:19734: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc5VxadC.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc9zO463.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:143:(.text.startup+0x10): undefined reference to `getsid'
 collect2: error: ld returned 1 exit status
 configure:19734: $? = 1
@@ -29525,7 +29526,7 @@ configure:19734: result: no
 configure:19740: checking for getspent
 configure:19740: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccL5yXJp.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc49TNVg.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:143:(.text.startup+0x10): undefined reference to `getspent'
 collect2: error: ld returned 1 exit status
 configure:19740: $? = 1
@@ -29680,7 +29681,7 @@ configure:19740: result: no
 configure:19746: checking for getspnam
 configure:19746: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cck6cgRQ.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccVNQCyz.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:143:(.text.startup+0x10): undefined reference to `getspnam'
 collect2: error: ld returned 1 exit status
 configure:19746: $? = 1
@@ -29835,7 +29836,7 @@ configure:19746: result: no
 configure:19752: checking for getuid
 configure:19752: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc9gLkoR.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccNXOkyk.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:143:(.text.startup+0x10): undefined reference to `getuid'
 collect2: error: ld returned 1 exit status
 configure:19752: $? = 1
@@ -29990,7 +29991,7 @@ configure:19752: result: no
 configure:19758: checking for getwd
 configure:19758: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cch53s65.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccTQ0Suf.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:143:(.text.startup+0x10): undefined reference to `getwd'
 collect2: error: ld returned 1 exit status
 configure:19758: $? = 1
@@ -30145,7 +30146,7 @@ configure:19758: result: no
 configure:19764: checking for grantpt
 configure:19764: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc8vijaa.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cck2GoU4.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:143:(.text.startup+0x10): undefined reference to `grantpt'
 collect2: error: ld returned 1 exit status
 configure:19764: $? = 1
@@ -30300,7 +30301,7 @@ configure:19764: result: no
 configure:19770: checking for if_nameindex
 configure:19770: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccVZxF7P.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccDqRGr0.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:143:(.text.startup+0x10): undefined reference to `if_nameindex'
 collect2: error: ld returned 1 exit status
 configure:19770: $? = 1
@@ -30455,7 +30456,7 @@ configure:19770: result: no
 configure:19776: checking for initgroups
 configure:19776: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc5wNb9a.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccbC1XV2.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:143:(.text.startup+0x10): undefined reference to `initgroups'
 collect2: error: ld returned 1 exit status
 configure:19776: $? = 1
@@ -30615,7 +30616,7 @@ configure:19782: result: yes
 configure:19788: checking for killpg
 configure:19788: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccnOb6lx.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccWhotLo.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:144:(.text.startup+0x10): undefined reference to `killpg'
 collect2: error: ld returned 1 exit status
 configure:19788: $? = 1
@@ -30771,7 +30772,7 @@ configure:19788: result: no
 configure:19794: checking for lchown
 configure:19794: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccq9jlOd.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccBqPqnv.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:144:(.text.startup+0x10): undefined reference to `lchown'
 collect2: error: ld returned 1 exit status
 configure:19794: $? = 1
@@ -30927,7 +30928,7 @@ configure:19794: result: no
 configure:19800: checking for linkat
 configure:19800: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccxd2XVB.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccNcPnca.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:144:(.text.startup+0x10): undefined reference to `linkat'
 collect2: error: ld returned 1 exit status
 configure:19800: $? = 1
@@ -31083,7 +31084,7 @@ configure:19800: result: no
 configure:19806: checking for lockf
 configure:19806: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccsTFzvr.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cchBn1Oe.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:144:(.text.startup+0x10): undefined reference to `lockf'
 collect2: error: ld returned 1 exit status
 configure:19806: $? = 1
@@ -31244,7 +31245,7 @@ configure:19812: result: yes
 configure:19818: checking for lutimes
 configure:19818: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccEGHnPq.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cco52ucw.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:145:(.text.startup+0x10): undefined reference to `lutimes'
 collect2: error: ld returned 1 exit status
 configure:19818: $? = 1
@@ -31401,7 +31402,7 @@ configure:19818: result: no
 configure:19824: checking for madvise
 configure:19824: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccANY3RK.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccYWw6wu.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:145:(.text.startup+0x10): undefined reference to `madvise'
 collect2: error: ld returned 1 exit status
 configure:19824: $? = 1
@@ -31568,7 +31569,7 @@ configure:19836: result: yes
 configure:19842: checking for mkdirat
 configure:19842: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccbJKkZ7.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cchkZJ1P.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:147:(.text.startup+0x10): undefined reference to `mkdirat'
 collect2: error: ld returned 1 exit status
 configure:19842: $? = 1
@@ -31727,7 +31728,7 @@ configure:19842: result: no
 configure:19848: checking for mkfifo
 configure:19848: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc6A0TdU.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc5Fwl4M.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:147:(.text.startup+0x10): undefined reference to `mkfifo'
 collect2: error: ld returned 1 exit status
 configure:19848: $? = 1
@@ -31886,7 +31887,7 @@ configure:19848: result: no
 configure:19854: checking for mkfifoat
 configure:19854: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccaZfgZR.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccyG6ncR.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:147:(.text.startup+0x10): undefined reference to `mkfifoat'
 collect2: error: ld returned 1 exit status
 configure:19854: $? = 1
@@ -32045,7 +32046,7 @@ configure:19854: result: no
 configure:19860: checking for mknod
 configure:19860: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cccTmYMX.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccnUGryu.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:147:(.text.startup+0x10): undefined reference to `mknod'
 collect2: error: ld returned 1 exit status
 configure:19860: $? = 1
@@ -32204,7 +32205,7 @@ configure:19860: result: no
 configure:19866: checking for mknodat
 configure:19866: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccYhpcuk.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccA3Q4m1.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:147:(.text.startup+0x10): undefined reference to `mknodat'
 collect2: error: ld returned 1 exit status
 configure:19866: $? = 1
@@ -32368,7 +32369,7 @@ configure:19872: result: yes
 configure:19878: checking for mmap
 configure:19878: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccrZ3Lj3.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccQoNNMb.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:148:(.text.startup+0x10): undefined reference to `mmap'
 collect2: error: ld returned 1 exit status
 configure:19878: $? = 1
@@ -32528,7 +32529,7 @@ configure:19878: result: no
 configure:19884: checking for mremap
 configure:19884: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccqSUJ5N.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccP1jfyQ.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:148:(.text.startup+0x10): undefined reference to `mremap'
 collect2: error: ld returned 1 exit status
 configure:19884: $? = 1
@@ -32688,7 +32689,7 @@ configure:19884: result: no
 configure:19890: checking for nice
 configure:19890: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cclMrBet.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cctpk9IH.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:148:(.text.startup+0x10): undefined reference to `nice'
 collect2: error: ld returned 1 exit status
 configure:19890: $? = 1
@@ -32848,7 +32849,7 @@ configure:19890: result: no
 configure:19896: checking for openat
 configure:19896: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccsB83IZ.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccRKq1lU.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:148:(.text.startup+0x10): undefined reference to `openat'
 collect2: error: ld returned 1 exit status
 configure:19896: $? = 1
@@ -33018,7 +33019,7 @@ configure:19908: result: yes
 configure:19914: checking for pause
 configure:19914: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cccnaZj1.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc1yuvZ8.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:150:(.text.startup+0x10): undefined reference to `pause'
 collect2: error: ld returned 1 exit status
 configure:19914: $? = 1
@@ -33180,7 +33181,7 @@ configure:19914: result: no
 configure:19920: checking for pipe
 configure:19920: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccOkWdF2.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc9euBud.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:150:(.text.startup+0x10): undefined reference to `pipe'
 collect2: error: ld returned 1 exit status
 configure:19920: $? = 1
@@ -33342,7 +33343,7 @@ configure:19920: result: no
 configure:19926: checking for pipe2
 configure:19926: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccggu1ox.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccSRZ8N8.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:150:(.text.startup+0x10): undefined reference to `pipe2'
 collect2: error: ld returned 1 exit status
 configure:19926: $? = 1
@@ -33504,7 +33505,7 @@ configure:19926: result: no
 configure:19932: checking for plock
 configure:19932: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccIWkf9B.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cconxwNL.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:150:(.text.startup+0x10): undefined reference to `plock'
 collect2: error: ld returned 1 exit status
 configure:19932: $? = 1
@@ -33666,7 +33667,7 @@ configure:19932: result: no
 configure:19938: checking for poll
 configure:19938: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccjYzsKL.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc9NvdOt.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:150:(.text.startup+0x10): undefined reference to `poll'
 collect2: error: ld returned 1 exit status
 configure:19938: $? = 1
@@ -33828,7 +33829,7 @@ configure:19938: result: no
 configure:19944: checking for ppoll
 configure:19944: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc4aQr6X.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccIHxALV.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:150:(.text.startup+0x10): undefined reference to `ppoll'
 collect2: error: ld returned 1 exit status
 configure:19944: $? = 1
@@ -33990,7 +33991,7 @@ configure:19944: result: no
 configure:19950: checking for posix_fadvise
 configure:19950: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cciDCdWz.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccbOkRJe.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:150:(.text.startup+0x10): undefined reference to `posix_fadvise'
 collect2: error: ld returned 1 exit status
 configure:19950: $? = 1
@@ -34152,7 +34153,7 @@ configure:19950: result: no
 configure:19956: checking for posix_fallocate
 configure:19956: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc2khcIZ.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc6Rj5DU.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:150:(.text.startup+0x10): undefined reference to `posix_fallocate'
 collect2: error: ld returned 1 exit status
 configure:19956: $? = 1
@@ -34314,7 +34315,7 @@ configure:19956: result: no
 configure:19962: checking for posix_openpt
 configure:19962: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccRObJtu.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccB00N8c.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:150:(.text.startup+0x10): undefined reference to `posix_openpt'
 collect2: error: ld returned 1 exit status
 configure:19962: $? = 1
@@ -34476,7 +34477,7 @@ configure:19962: result: no
 configure:19968: checking for posix_spawn
 configure:19968: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccFWmNeG.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc4HO7tS.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:150:(.text.startup+0x10): undefined reference to `posix_spawn'
 collect2: error: ld returned 1 exit status
 configure:19968: $? = 1
@@ -34638,7 +34639,7 @@ configure:19968: result: no
 configure:19974: checking for posix_spawnp
 configure:19974: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccRKZLzW.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc5NyAnC.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:150:(.text.startup+0x10): undefined reference to `posix_spawnp'
 collect2: error: ld returned 1 exit status
 configure:19974: $? = 1
@@ -34800,7 +34801,7 @@ configure:19974: result: no
 configure:19980: checking for posix_spawn_file_actions_addclosefrom_np
 configure:19980: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cckuQrFn.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccle6oGY.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:150:(.text.startup+0x10): undefined reference to `posix_spawn_file_actions_addclosefrom_np'
 collect2: error: ld returned 1 exit status
 configure:19980: $? = 1
@@ -34962,7 +34963,7 @@ configure:19980: result: no
 configure:19986: checking for pread
 configure:19986: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccsknSOV.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc7wzubS.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:150:(.text.startup+0x10): undefined reference to `pread'
 collect2: error: ld returned 1 exit status
 configure:19986: $? = 1
@@ -35124,7 +35125,7 @@ configure:19986: result: no
 configure:19992: checking for preadv
 configure:19992: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccCwtE7L.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccQdxBzq.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:150:(.text.startup+0x10): undefined reference to `preadv'
 collect2: error: ld returned 1 exit status
 configure:19992: $? = 1
@@ -35286,7 +35287,7 @@ configure:19992: result: no
 configure:19998: checking for preadv2
 configure:19998: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccsKd2b2.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccaySfXI.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:150:(.text.startup+0x10): undefined reference to `preadv2'
 collect2: error: ld returned 1 exit status
 configure:19998: $? = 1
@@ -35448,7 +35449,7 @@ configure:19998: result: no
 configure:20004: checking for process_vm_readv
 configure:20004: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccoeMHDw.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccAhHAtI.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:150:(.text.startup+0x10): undefined reference to `process_vm_readv'
 collect2: error: ld returned 1 exit status
 configure:20004: $? = 1
@@ -35610,7 +35611,7 @@ configure:20004: result: no
 configure:20010: checking for pthread_cond_timedwait_relative_np
 configure:20010: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccZu53ZT.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccJFDoxT.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:150:(.text.startup+0x10): undefined reference to `pthread_cond_timedwait_relative_np'
 collect2: error: ld returned 1 exit status
 configure:20010: $? = 1
@@ -35772,7 +35773,7 @@ configure:20010: result: no
 configure:20016: checking for pthread_condattr_setclock
 configure:20016: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccOkAYk5.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccs2fJse.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:150:(.text.startup+0x10): undefined reference to `pthread_condattr_setclock'
 collect2: error: ld returned 1 exit status
 configure:20016: $? = 1
@@ -35934,7 +35935,7 @@ configure:20016: result: no
 configure:20022: checking for pthread_init
 configure:20022: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cciOe5XG.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccKfvdd8.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:150:(.text.startup+0x10): undefined reference to `pthread_init'
 collect2: error: ld returned 1 exit status
 configure:20022: $? = 1
@@ -36096,7 +36097,7 @@ configure:20022: result: no
 configure:20028: checking for pthread_kill
 configure:20028: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cccQQ80R.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccGhL741.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:150:(.text.startup+0x10): undefined reference to `pthread_kill'
 collect2: error: ld returned 1 exit status
 configure:20028: $? = 1
@@ -36258,7 +36259,7 @@ configure:20028: result: no
 configure:20034: checking for pthread_get_name_np
 configure:20034: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccz8A3sO.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccl24Cky.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:150:(.text.startup+0x10): undefined reference to `pthread_get_name_np'
 collect2: error: ld returned 1 exit status
 configure:20034: $? = 1
@@ -36420,7 +36421,7 @@ configure:20034: result: no
 configure:20040: checking for pthread_getname_np
 configure:20040: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc0EpciK.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccw9eNcm.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:150:(.text.startup+0x10): undefined reference to `pthread_getname_np'
 collect2: error: ld returned 1 exit status
 configure:20040: $? = 1
@@ -36582,7 +36583,7 @@ configure:20040: result: no
 configure:20046: checking for pthread_set_name_np
 configure:20046: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cck0t2Ve.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccLQcRrJ.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:150:(.text.startup+0x10): undefined reference to `pthread_set_name_np'
 collect2: error: ld returned 1 exit status
 configure:20046: $? = 1
@@ -36744,7 +36745,7 @@ configure:20046: result: no
 configure:20052: checking for pthread_setname_np
 configure:20052: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccNOKyLE.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccPClSlH.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:150:(.text.startup+0x10): undefined reference to `pthread_setname_np'
 collect2: error: ld returned 1 exit status
 configure:20052: $? = 1
@@ -36906,7 +36907,7 @@ configure:20052: result: no
 configure:20058: checking for pthread_getattr_np
 configure:20058: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccVaHfi1.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccbqjj17.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:150:(.text.startup+0x10): undefined reference to `pthread_getattr_np'
 collect2: error: ld returned 1 exit status
 configure:20058: $? = 1
@@ -37068,7 +37069,7 @@ configure:20058: result: no
 configure:20064: checking for ptsname
 configure:20064: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc8TAbnW.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccYnmPi1.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:150:(.text.startup+0x10): undefined reference to `ptsname'
 collect2: error: ld returned 1 exit status
 configure:20064: $? = 1
@@ -37230,7 +37231,7 @@ configure:20064: result: no
 configure:20070: checking for ptsname_r
 configure:20070: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccJvACbP.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccGVDzDG.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:150:(.text.startup+0x10): undefined reference to `ptsname_r'
 collect2: error: ld returned 1 exit status
 configure:20070: $? = 1
@@ -37392,7 +37393,7 @@ configure:20070: result: no
 configure:20076: checking for pwrite
 configure:20076: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cczkukuY.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccyQnAbQ.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:150:(.text.startup+0x10): undefined reference to `pwrite'
 collect2: error: ld returned 1 exit status
 configure:20076: $? = 1
@@ -37554,7 +37555,7 @@ configure:20076: result: no
 configure:20082: checking for pwritev
 configure:20082: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccrkKxAy.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccS8rT2N.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:150:(.text.startup+0x10): undefined reference to `pwritev'
 collect2: error: ld returned 1 exit status
 configure:20082: $? = 1
@@ -37716,7 +37717,7 @@ configure:20082: result: no
 configure:20088: checking for pwritev2
 configure:20088: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccsI525o.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc8JdjJI.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:150:(.text.startup+0x10): undefined reference to `pwritev2'
 collect2: error: ld returned 1 exit status
 configure:20088: $? = 1
@@ -37883,7 +37884,7 @@ configure:20094: result: yes
 configure:20100: checking for readlinkat
 configure:20100: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc4Hhhxh.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccKBhfMk.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:151:(.text.startup+0x10): undefined reference to `readlinkat'
 collect2: error: ld returned 1 exit status
 configure:20100: $? = 1
@@ -38046,7 +38047,7 @@ configure:20100: result: no
 configure:20106: checking for readv
 configure:20106: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccGRZ5ku.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccc52L0p.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:151:(.text.startup+0x10): undefined reference to `readv'
 collect2: error: ld returned 1 exit status
 configure:20106: $? = 1
@@ -38214,7 +38215,7 @@ configure:20112: result: yes
 configure:20118: checking for renameat
 configure:20118: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccdvlU04.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccp76Ful.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:152:(.text.startup+0x10): undefined reference to `renameat'
 collect2: error: ld returned 1 exit status
 configure:20118: $? = 1
@@ -38378,7 +38379,7 @@ configure:20118: result: no
 configure:20124: checking for rtpSpawn
 configure:20124: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccRwjtZq.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccFRzH35.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:152:(.text.startup+0x10): undefined reference to `rtpSpawn'
 collect2: error: ld returned 1 exit status
 configure:20124: $? = 1
@@ -38542,7 +38543,7 @@ configure:20124: result: no
 configure:20130: checking for sched_get_priority_max
 configure:20130: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccgTBqFG.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccgWHSak.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:152:(.text.startup+0x10): undefined reference to `sched_get_priority_max'
 collect2: error: ld returned 1 exit status
 configure:20130: $? = 1
@@ -38706,7 +38707,7 @@ configure:20130: result: no
 configure:20136: checking for sched_rr_get_interval
 configure:20136: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc2Q60nD.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc1czZ56.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:152:(.text.startup+0x10): undefined reference to `sched_rr_get_interval'
 collect2: error: ld returned 1 exit status
 configure:20136: $? = 1
@@ -38870,7 +38871,7 @@ configure:20136: result: no
 configure:20142: checking for sched_setaffinity
 configure:20142: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc1VU5y4.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccdcQKec.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:152:(.text.startup+0x10): undefined reference to `sched_setaffinity'
 collect2: error: ld returned 1 exit status
 configure:20142: $? = 1
@@ -39034,7 +39035,7 @@ configure:20142: result: no
 configure:20148: checking for sched_setparam
 configure:20148: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccj5PAJl.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccGxkkG7.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:152:(.text.startup+0x10): undefined reference to `sched_setparam'
 collect2: error: ld returned 1 exit status
 configure:20148: $? = 1
@@ -39198,7 +39199,7 @@ configure:20148: result: no
 configure:20154: checking for sched_setscheduler
 configure:20154: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccVYmkZC.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccd4lM85.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:152:(.text.startup+0x10): undefined reference to `sched_setscheduler'
 collect2: error: ld returned 1 exit status
 configure:20154: $? = 1
@@ -39362,7 +39363,7 @@ configure:20154: result: no
 configure:20160: checking for sem_clockwait
 configure:20160: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccPc6LNu.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccnQiNc4.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:152:(.text.startup+0x10): undefined reference to `sem_clockwait'
 collect2: error: ld returned 1 exit status
 configure:20160: $? = 1
@@ -39526,7 +39527,7 @@ configure:20160: result: no
 configure:20166: checking for sem_getvalue
 configure:20166: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccsyDmaT.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccUsD8En.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:152:(.text.startup+0x10): undefined reference to `sem_getvalue'
 collect2: error: ld returned 1 exit status
 configure:20166: $? = 1
@@ -39690,7 +39691,7 @@ configure:20166: result: no
 configure:20172: checking for sem_open
 configure:20172: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccHBJFkr.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccdafoGy.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:152:(.text.startup+0x10): undefined reference to `sem_open'
 collect2: error: ld returned 1 exit status
 configure:20172: $? = 1
@@ -39854,7 +39855,7 @@ configure:20172: result: no
 configure:20178: checking for sem_timedwait
 configure:20178: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccNufQfy.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccn0ek6E.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:152:(.text.startup+0x10): undefined reference to `sem_timedwait'
 collect2: error: ld returned 1 exit status
 configure:20178: $? = 1
@@ -40018,7 +40019,7 @@ configure:20178: result: no
 configure:20184: checking for sem_unlink
 configure:20184: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cci4Yssy.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccrZms0u.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:152:(.text.startup+0x10): undefined reference to `sem_unlink'
 collect2: error: ld returned 1 exit status
 configure:20184: $? = 1
@@ -40182,7 +40183,7 @@ configure:20184: result: no
 configure:20190: checking for sendfile
 configure:20190: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccUhBeIW.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc2YatOy.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:152:(.text.startup+0x10): undefined reference to `sendfile'
 collect2: error: ld returned 1 exit status
 configure:20190: $? = 1
@@ -40346,7 +40347,7 @@ configure:20190: result: no
 configure:20196: checking for setegid
 configure:20196: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccPEApus.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccp3Fd7d.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:152:(.text.startup+0x10): undefined reference to `setegid'
 collect2: error: ld returned 1 exit status
 configure:20196: $? = 1
@@ -40510,7 +40511,7 @@ configure:20196: result: no
 configure:20202: checking for seteuid
 configure:20202: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc5PKOGC.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cccf5XMN.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:152:(.text.startup+0x10): undefined reference to `seteuid'
 collect2: error: ld returned 1 exit status
 configure:20202: $? = 1
@@ -40674,7 +40675,7 @@ configure:20202: result: no
 configure:20208: checking for setgid
 configure:20208: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccYdFkQ1.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc9qGg7z.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:152:(.text.startup+0x10): undefined reference to `setgid'
 collect2: error: ld returned 1 exit status
 configure:20208: $? = 1
@@ -40838,7 +40839,7 @@ configure:20208: result: no
 configure:20214: checking for sethostname
 configure:20214: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccvcDzmo.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccUykg1w.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:152:(.text.startup+0x10): undefined reference to `sethostname'
 collect2: error: ld returned 1 exit status
 configure:20214: $? = 1
@@ -41002,7 +41003,7 @@ configure:20214: result: no
 configure:20220: checking for setitimer
 configure:20220: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccRtZ8bj.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccsSBIKq.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:152:(.text.startup+0x10): undefined reference to `setitimer'
 collect2: error: ld returned 1 exit status
 configure:20220: $? = 1
@@ -41171,7 +41172,7 @@ configure:20226: result: yes
 configure:20232: checking for setpgid
 configure:20232: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccVZ01Mb.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccWDxuhK.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:153:(.text.startup+0x10): undefined reference to `setpgid'
 collect2: error: ld returned 1 exit status
 configure:20232: $? = 1
@@ -41336,7 +41337,7 @@ configure:20232: result: no
 configure:20238: checking for setpgrp
 configure:20238: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccupYXKt.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cci2EwV7.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:153:(.text.startup+0x10): undefined reference to `setpgrp'
 collect2: error: ld returned 1 exit status
 configure:20238: $? = 1
@@ -41501,7 +41502,7 @@ configure:20238: result: no
 configure:20244: checking for setpriority
 configure:20244: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc3AJu4B.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cczffRuA.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:153:(.text.startup+0x10): undefined reference to `setpriority'
 collect2: error: ld returned 1 exit status
 configure:20244: $? = 1
@@ -41666,7 +41667,7 @@ configure:20244: result: no
 configure:20250: checking for setregid
 configure:20250: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cchaWdMj.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccfQsJHf.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:153:(.text.startup+0x10): undefined reference to `setregid'
 collect2: error: ld returned 1 exit status
 configure:20250: $? = 1
@@ -41831,7 +41832,7 @@ configure:20250: result: no
 configure:20256: checking for setresgid
 configure:20256: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccU6vNLa.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccImj1LN.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:153:(.text.startup+0x10): undefined reference to `setresgid'
 collect2: error: ld returned 1 exit status
 configure:20256: $? = 1
@@ -41996,7 +41997,7 @@ configure:20256: result: no
 configure:20262: checking for setresuid
 configure:20262: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccZlYO1D.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccOCv9bN.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:153:(.text.startup+0x10): undefined reference to `setresuid'
 collect2: error: ld returned 1 exit status
 configure:20262: $? = 1
@@ -42161,7 +42162,7 @@ configure:20262: result: no
 configure:20268: checking for setreuid
 configure:20268: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccY1y0gq.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccNs2nEQ.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:153:(.text.startup+0x10): undefined reference to `setreuid'
 collect2: error: ld returned 1 exit status
 configure:20268: $? = 1
@@ -42326,7 +42327,7 @@ configure:20268: result: no
 configure:20274: checking for setsid
 configure:20274: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cceEH3H4.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cccbVUvz.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:153:(.text.startup+0x10): undefined reference to `setsid'
 collect2: error: ld returned 1 exit status
 configure:20274: $? = 1
@@ -42491,7 +42492,7 @@ configure:20274: result: no
 configure:20280: checking for setuid
 configure:20280: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccdkUWB7.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccYLq2dq.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:153:(.text.startup+0x10): undefined reference to `setuid'
 collect2: error: ld returned 1 exit status
 configure:20280: $? = 1
@@ -42661,7 +42662,7 @@ configure:20286: result: yes
 configure:20292: checking for shutdown
 configure:20292: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccDYSsak.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccFu80Gd.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:154:(.text.startup+0x10): undefined reference to `shutdown'
 collect2: error: ld returned 1 exit status
 configure:20292: $? = 1
@@ -42827,7 +42828,7 @@ configure:20292: result: no
 configure:20298: checking for sigaction
 configure:20298: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccnkI2S9.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cch6eai2.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:154:(.text.startup+0x10): undefined reference to `sigaction'
 collect2: error: ld returned 1 exit status
 configure:20298: $? = 1
@@ -42993,7 +42994,7 @@ configure:20298: result: no
 configure:20304: checking for sigaltstack
 configure:20304: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccmDnmn3.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccg5Dx9X.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:154:(.text.startup+0x10): undefined reference to `sigaltstack'
 collect2: error: ld returned 1 exit status
 configure:20304: $? = 1
@@ -43159,7 +43160,7 @@ configure:20304: result: no
 configure:20310: checking for sigfillset
 configure:20310: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccilGAk1.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccKPunMk.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:154:(.text.startup+0x10): undefined reference to `sigfillset'
 collect2: error: ld returned 1 exit status
 configure:20310: $? = 1
@@ -43325,7 +43326,7 @@ configure:20310: result: no
 configure:20316: checking for siginterrupt
 configure:20316: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccHtmuXa.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccahF9jm.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:154:(.text.startup+0x10): undefined reference to `siginterrupt'
 collect2: error: ld returned 1 exit status
 configure:20316: $? = 1
@@ -43491,7 +43492,7 @@ configure:20316: result: no
 configure:20322: checking for sigpending
 configure:20322: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cctmJOME.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccvSAAFl.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:154:(.text.startup+0x10): undefined reference to `sigpending'
 collect2: error: ld returned 1 exit status
 configure:20322: $? = 1
@@ -43657,7 +43658,7 @@ configure:20322: result: no
 configure:20328: checking for sigrelse
 configure:20328: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccWgKMTp.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccUyNuW9.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:154:(.text.startup+0x10): undefined reference to `sigrelse'
 collect2: error: ld returned 1 exit status
 configure:20328: $? = 1
@@ -43823,7 +43824,7 @@ configure:20328: result: no
 configure:20334: checking for sigtimedwait
 configure:20334: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cceURwiP.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccDXJuFr.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:154:(.text.startup+0x10): undefined reference to `sigtimedwait'
 collect2: error: ld returned 1 exit status
 configure:20334: $? = 1
@@ -43989,7 +43990,7 @@ configure:20334: result: no
 configure:20340: checking for sigwait
 configure:20340: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cce4341c.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccjZG5pC.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:154:(.text.startup+0x10): undefined reference to `sigwait'
 collect2: error: ld returned 1 exit status
 configure:20340: $? = 1
@@ -44155,7 +44156,7 @@ configure:20340: result: no
 configure:20346: checking for sigwaitinfo
 configure:20346: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccP7cJS7.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccuKm8HG.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:154:(.text.startup+0x10): undefined reference to `sigwaitinfo'
 collect2: error: ld returned 1 exit status
 configure:20346: $? = 1
@@ -44332,7 +44333,7 @@ configure:20352: result: yes
 configure:20358: checking for splice
 configure:20358: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc9H6Upq.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccb6aOJS.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:155:(.text.startup+0x10): undefined reference to `splice'
 collect2: error: ld returned 1 exit status
 configure:20358: $? = 1
@@ -44520,7 +44521,7 @@ configure:20376: result: yes
 configure:20382: checking for symlinkat
 configure:20382: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cczbJRZh.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccEt0iIl.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:158:(.text.startup+0x10): undefined reference to `symlinkat'
 collect2: error: ld returned 1 exit status
 configure:20382: $? = 1
@@ -44690,7 +44691,7 @@ configure:20382: result: no
 configure:20388: checking for sync
 configure:20388: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccjf2as0.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccVQ2QGS.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:158:(.text.startup+0x10): undefined reference to `sync'
 collect2: error: ld returned 1 exit status
 configure:20388: $? = 1
@@ -44860,7 +44861,7 @@ configure:20388: result: no
 configure:20394: checking for sysconf
 configure:20394: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccRDgnWx.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccqnvK1M.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:158:(.text.startup+0x10): undefined reference to `sysconf'
 collect2: error: ld returned 1 exit status
 configure:20394: $? = 1
@@ -45030,7 +45031,7 @@ configure:20394: result: no
 configure:20400: checking for tcgetpgrp
 configure:20400: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccRfZrUu.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccfUfo69.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:158:(.text.startup+0x10): undefined reference to `tcgetpgrp'
 collect2: error: ld returned 1 exit status
 configure:20400: $? = 1
@@ -45200,7 +45201,7 @@ configure:20400: result: no
 configure:20406: checking for tcsetpgrp
 configure:20406: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc8v4I2f.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc49mE6u.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:158:(.text.startup+0x10): undefined reference to `tcsetpgrp'
 collect2: error: ld returned 1 exit status
 configure:20406: $? = 1
@@ -45375,7 +45376,7 @@ configure:20412: result: yes
 configure:20418: checking for timegm
 configure:20418: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccH5j8X1.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccVMIylr.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:159:(.text.startup+0x10): undefined reference to `timegm'
 collect2: error: ld returned 1 exit status
 configure:20418: $? = 1
@@ -45561,7 +45562,7 @@ configure:20436: result: yes
 configure:20442: checking for tmpnam_r
 configure:20442: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccL49Xw7.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc0qz3aO.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:162:(.text.startup+0x10): undefined reference to `tmpnam_r'
 collect2: error: ld returned 1 exit status
 configure:20442: $? = 1
@@ -45740,7 +45741,7 @@ configure:20448: result: yes
 configure:20454: checking for ttyname_r
 configure:20454: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccBMt9DX.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc8809TG.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:163:(.text.startup+0x10): undefined reference to `ttyname_r'
 collect2: error: ld returned 1 exit status
 configure:20454: $? = 1
@@ -45915,7 +45916,7 @@ configure:20454: result: no
 configure:20460: checking for umask
 configure:20460: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccjQn4xa.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cca3k8ES.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:163:(.text.startup+0x10): undefined reference to `umask'
 collect2: error: ld returned 1 exit status
 configure:20460: $? = 1
@@ -46090,7 +46091,7 @@ configure:20460: result: no
 configure:20466: checking for uname
 configure:20466: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc287QzS.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccZRfYSs.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:163:(.text.startup+0x10): undefined reference to `uname'
 collect2: error: ld returned 1 exit status
 configure:20466: $? = 1
@@ -46265,7 +46266,7 @@ configure:20466: result: no
 configure:20472: checking for unlinkat
 configure:20472: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccA7Z355.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cclOhmti.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:163:(.text.startup+0x10): undefined reference to `unlinkat'
 collect2: error: ld returned 1 exit status
 configure:20472: $? = 1
@@ -46440,7 +46441,7 @@ configure:20472: result: no
 configure:20478: checking for unlockpt
 configure:20478: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccA9sEJx.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccK95V4s.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:163:(.text.startup+0x10): undefined reference to `unlockpt'
 collect2: error: ld returned 1 exit status
 configure:20478: $? = 1
@@ -46615,7 +46616,7 @@ configure:20478: result: no
 configure:20484: checking for utimensat
 configure:20484: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccrcP97W.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccBZnWpI.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:163:(.text.startup+0x10): undefined reference to `utimensat'
 collect2: error: ld returned 1 exit status
 configure:20484: $? = 1
@@ -46795,7 +46796,7 @@ configure:20490: result: yes
 configure:20496: checking for vfork
 configure:20496: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccOumtyq.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cckQlCLt.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:164:(.text.startup+0x10): undefined reference to `vfork'
 collect2: error: ld returned 1 exit status
 configure:20496: $? = 1
@@ -46976,7 +46977,7 @@ configure:20502: result: yes
 configure:20508: checking for wait3
 configure:20508: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccXLA6ck.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cczjk7Z3.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:165:(.text.startup+0x10): undefined reference to `wait3'
 collect2: error: ld returned 1 exit status
 configure:20508: $? = 1
@@ -47153,7 +47154,7 @@ configure:20508: result: no
 configure:20514: checking for wait4
 configure:20514: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc5w1acg.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cca9vxMj.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:165:(.text.startup+0x10): undefined reference to `wait4'
 collect2: error: ld returned 1 exit status
 configure:20514: $? = 1
@@ -47330,7 +47331,7 @@ configure:20514: result: no
 configure:20520: checking for waitid
 configure:20520: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc1fE2Ah.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccOblJTq.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:165:(.text.startup+0x10): undefined reference to `waitid'
 collect2: error: ld returned 1 exit status
 configure:20520: $? = 1
@@ -47507,7 +47508,7 @@ configure:20520: result: no
 configure:20526: checking for waitpid
 configure:20526: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccIBHLui.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccwmjK5Y.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:165:(.text.startup+0x10): undefined reference to `waitpid'
 collect2: error: ld returned 1 exit status
 configure:20526: $? = 1
@@ -47704,7 +47705,7 @@ configure:20550: result: yes
 configure:20556: checking for writev
 configure:20556: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cclKHuok.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc6yKtes.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:169:(.text.startup+0x10): undefined reference to `writev'
 collect2: error: ld returned 1 exit status
 configure:20556: $? = 1
@@ -47885,7 +47886,7 @@ configure:20556: result: no
 configure:20584: checking for lchmod
 configure:20584: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccYLZ296.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccbDJhQD.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:169:(.text.startup+0x10): undefined reference to `lchmod'
 collect2: error: ld returned 1 exit status
 configure:20584: $? = 1
@@ -48247,7 +48248,7 @@ configure:20598: result: no
 configure:20604: checking for getgroups
 configure:20604: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccZbS5qj.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccEvCnsJ.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:169:(.text.startup+0x10): undefined reference to `getgroups'
 collect2: error: ld returned 1 exit status
 configure:20604: $? = 1
@@ -50195,7 +50196,7 @@ configure:21392: result: yes
 configure:21399: checking for flock
 configure:21399: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc7Wnk6p.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccnjARR4.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:177:(.text.startup+0x10): undefined reference to `flock'
 collect2: error: ld returned 1 exit status
 configure:21399: $? = 1
@@ -50578,7 +50579,7 @@ configure:21578: result: true
 configure:21591: checking for inet_aton in -lc
 configure:21620: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c -lc   >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccSEVAdk.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccpyFO5N.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:165:(.text.startup+0x10): undefined reference to `inet_aton'
 collect2: error: ld returned 1 exit status
 configure:21620: $? = 1
@@ -50931,7 +50932,7 @@ configure:21679: result: no
 configure:21690: checking for hstrerror in -lc
 configure:21719: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c -lc   >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccZpSD0N.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccYeRAMj.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:165:(.text.startup+0x10): undefined reference to `hstrerror'
 collect2: error: ld returned 1 exit status
 configure:21719: $? = 1
@@ -51286,7 +51287,7 @@ configure:21830: result: cross
 configure:21833: checking for chflags
 configure:21833: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccfbnAzA.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccOvV9yw.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:178:(.text.startup+0x10): undefined reference to `chflags'
 collect2: error: ld returned 1 exit status
 configure:21833: $? = 1
@@ -51478,7 +51479,7 @@ configure:21887: result: cross
 configure:21890: checking for lchflags
 configure:21890: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccearSw9.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccY7R3dd.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:178:(.text.startup+0x10): undefined reference to `lchflags'
 collect2: error: ld returned 1 exit status
 configure:21890: $? = 1
@@ -52097,7 +52098,7 @@ Package 'libzstd', required by 'virtual:world', not found
 configure:22871: checking for library containing ZDICT_finalizeDictionary
 configure:22907: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD   -DWII_BUILD   conftest.c   >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccm63Qaz.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc8Ax1GS.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:166:(.text.startup+0x10): undefined reference to `ZDICT_finalizeDictionary'
 collect2: error: ld returned 1 exit status
 configure:22907: $? = 1
@@ -56079,7 +56080,7 @@ configure:24108: result: no
 configure:24133: checking for openpty
 configure:24133: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccugr4IE.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccirZTKr.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:182:(.text.startup+0x10): undefined reference to `openpty'
 collect2: error: ld returned 1 exit status
 configure:24133: $? = 1
@@ -56633,7 +56634,7 @@ configure:24228: result: no
 configure:24243: checking for library containing login_tty
 configure:24279: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc1gzTr0.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cco9ucqy.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:169:(.text.startup+0x10): undefined reference to `login_tty'
 collect2: error: ld returned 1 exit status
 configure:24279: $? = 1
@@ -56992,7 +56993,7 @@ configure:24301: result: no
 configure:24316: checking for forkpty
 configure:24316: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc2jcL0H.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccC4VFQi.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:182:(.text.startup+0x10): undefined reference to `forkpty'
 collect2: error: ld returned 1 exit status
 configure:24316: $? = 1
@@ -57546,7 +57547,7 @@ configure:24411: result: no
 configure:24428: checking for fseek64
 configure:24428: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc8gmXum.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccDcQpuq.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:182:(.text.startup+0x10): undefined reference to `fseek64'
 collect2: error: ld returned 1 exit status
 configure:24428: $? = 1
@@ -57745,7 +57746,7 @@ configure:24434: result: yes
 configure:24440: checking for fstatvfs
 configure:24440: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccojroj3.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc5DEP78.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:183:(.text.startup+0x10): undefined reference to `fstatvfs'
 collect2: error: ld returned 1 exit status
 configure:24440: $? = 1
@@ -57940,7 +57941,7 @@ configure:24440: result: no
 configure:24446: checking for ftell64
 configure:24446: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccv1KZQU.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccxIxu7c.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:183:(.text.startup+0x10): undefined reference to `ftell64'
 collect2: error: ld returned 1 exit status
 configure:24446: $? = 1
@@ -58147,7 +58148,7 @@ configure:24466: result: yes
 configure:24484: checking for getpgrp
 configure:24484: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccOh77Pg.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc0kJjCu.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:185:(.text.startup+0x10): undefined reference to `getpgrp'
 collect2: error: ld returned 1 exit status
 configure:24484: $? = 1
@@ -58346,7 +58347,7 @@ configure:24512: result: no
 configure:24539: checking for setns
 configure:24539: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccZZIL3B.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cctUpBvL.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:185:(.text.startup+0x10): undefined reference to `setns'
 collect2: error: ld returned 1 exit status
 configure:24539: $? = 1
@@ -58543,7 +58544,7 @@ configure:24539: result: no
 configure:24545: checking for unshare
 configure:24545: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccgAz8kX.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccxzNLOg.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:185:(.text.startup+0x10): undefined reference to `unshare'
 collect2: error: ld returned 1 exit status
 configure:24545: $? = 1
@@ -58755,7 +58756,7 @@ configure:24699: result: yes
 configure:24771: checking for clock_nanosleep
 configure:24771: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc9F7vPM.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc846yVH.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:188:(.text.startup+0x10): undefined reference to `clock_nanosleep'
 collect2: error: ld returned 1 exit status
 configure:24771: $? = 1
@@ -59520,7 +59521,7 @@ configure:24996: result: no
 configure:25146: checking for getnameinfo
 configure:25146: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccQLVRNU.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccTITE2C.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:190:(.text.startup+0x10): undefined reference to `getnameinfo'
 collect2: error: ld returned 1 exit status
 configure:25146: $? = 1
@@ -62942,7 +62943,7 @@ configure:25814: result: no
 configure:25828: checking for gethostbyname_r
 configure:25828: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccyA4vNY.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccDycQGr.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:198:(.text.startup+0x10): undefined reference to `gethostbyname_r'
 collect2: error: ld returned 1 exit status
 configure:25828: $? = 1
@@ -63154,7 +63155,7 @@ configure:25963: result: no
 configure:25984: checking for __fpu_control
 configure:25984: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccKDYxl2.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccgEi6nt.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:198:(.text.startup+0x10): undefined reference to `__fpu_control'
 collect2: error: ld returned 1 exit status
 configure:25984: $? = 1
@@ -63563,8 +63564,8 @@ configure:26077: checking for --with-libc=STRING
 configure:26095: result: default LIBC=""
 configure:26106: checking for x64 gcc inline assembler
 configure:26126: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
-/tmp/ccGtngUZ.s: Assembler messages:
-/tmp/ccGtngUZ.s:25: Error: unrecognized opcode: `movq'
+/tmp/cc6OFx0Z.s: Assembler messages:
+/tmp/cc6OFx0Z.s:25: Error: unrecognized opcode: `movq'
 configure:26126: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -63752,9 +63753,9 @@ configure:26154: checking whether float word ordering is bigendian
 configure:26200: result: yes
 configure:26241: checking whether we can use gcc inline assembler to get and set x87 control word
 configure:26263: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
-/tmp/ccuU9znQ.s: Assembler messages:
-/tmp/ccuU9znQ.s:26: Error: unrecognized opcode: `fnstcw'
-/tmp/ccuU9znQ.s:30: Error: unrecognized opcode: `fldcw'
+/tmp/cct7JHGl.s: Assembler messages:
+/tmp/cct7JHGl.s:26: Error: unrecognized opcode: `fnstcw'
+/tmp/cct7JHGl.s:30: Error: unrecognized opcode: `fldcw'
 configure:26263: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -63943,9 +63944,9 @@ configure: failed program was:
 configure:26275: result: no
 configure:26286: checking whether we can use gcc inline assembler to get and set mc68881 fpcr
 configure:26308: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
-/tmp/ccrrE9AF.s: Assembler messages:
-/tmp/ccrrE9AF.s:26: Error: unrecognized opcode: `fmove.l'
-/tmp/ccrrE9AF.s:31: Error: unrecognized opcode: `fmove.l'
+/tmp/ccAyTAjm.s: Assembler messages:
+/tmp/ccAyTAjm.s:26: Error: unrecognized opcode: `fmove.l'
+/tmp/ccAyTAjm.s:31: Error: unrecognized opcode: `fmove.l'
 configure:26308: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -66762,7 +66763,7 @@ configure:27209: result: yes
 configure:27219: checking for getc_unlocked() and friends
 configure:27242: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccM4oNRT.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccJBLSX4.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:198:(.text.startup+0x38): undefined reference to `flockfile'
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:200:(.text.startup+0x48): undefined reference to `funlockfile'
 collect2: error: ld returned 1 exit status
@@ -74972,7 +74973,7 @@ configure:30532: result: no
 configure:30553: checking for library containing shm_open
 configure:30589: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccdUm0la.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccwvr3GP.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:212:(.text.startup+0x10): undefined reference to `shm_open'
 collect2: error: ld returned 1 exit status
 configure:30589: $? = 1
@@ -75417,7 +75418,7 @@ configure:30611: result: no
 configure:30638: checking for shm_open
 configure:30638: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccUjcrOq.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc5cpx6J.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:225:(.text.startup+0x10): undefined reference to `shm_open'
 collect2: error: ld returned 1 exit status
 configure:30638: $? = 1
@@ -75654,7 +75655,7 @@ configure:30638: result: no
 configure:30638: checking for shm_unlink
 configure:30638: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccFnxNIH.o: in function `main':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccdZr8gC.o: in function `main':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/conftest.c:225:(.text.startup+0x10): undefined reference to `shm_unlink'
 collect2: error: ld returned 1 exit status
 configure:30638: $? = 1
@@ -76571,11 +76572,11 @@ configure:31226: result: yes
 configure:31247: checking whether libatomic is needed by <pyatomic.h>
 configure:31293: /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -o conftest -mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC -I. -I/opt/devkitpro/extras/cpython/3.15.0a7/bitmap/include -Os -Wall -DTERMINAL_PRINT_DEBUG -DWII_BUILD -IObjects -IInclude -IPython -I. -I../Include  -DWII_BUILD  conftest.c  >&5
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc48qS0s.o: in function `_Py_atomic_store_uint64':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccPG9EJw.o: in function `_Py_atomic_store_uint64':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../Include/cpython/pyatomic_gcc.h:438:(.text.startup+0x28): undefined reference to `__atomic_store_8'
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc48qS0s.o: in function `_Py_atomic_or_uint64':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccPG9EJw.o: in function `_Py_atomic_or_uint64':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../Include/cpython/pyatomic_gcc.h:237:(.text.startup+0x3c): undefined reference to `__atomic_fetch_or_8'
-/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/cc48qS0s.o: in function `_Py_atomic_load_uint64':
+/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: /tmp/ccPG9EJw.o: in function `_Py_atomic_load_uint64':
 /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../Include/cpython/pyatomic_gcc.h:284:(.text.startup+0x64): undefined reference to `__atomic_load_8'
 collect2: error: ld returned 1 exit status
 configure:31293: $? = 1
@@ -78952,3 +78953,88 @@ target_alias=''
 #define PY_BUILTIN_HASHLIB_HASHES "md5,sha1,sha2,sha3,blake2"
 
 configure: exit 0
+
+## ---------------------- ##
+## Running config.status. ##
+## ---------------------- ##
+
+This file was extended by python config.status 3.15, which was
+generated by GNU Autoconf 2.72.  Invocation command line was
+
+  CONFIG_FILES    = Makefile.pre
+  CONFIG_HEADERS  = 
+  CONFIG_LINKS    = 
+  CONFIG_COMMANDS = 
+  $ ./config.status 
+
+on cebe-laptop
+
+config.status:1505: creating Makefile.pre
+
+## ---------------------- ##
+## Running config.status. ##
+## ---------------------- ##
+
+This file was extended by python config.status 3.15, which was
+generated by GNU Autoconf 2.72.  Invocation command line was
+
+  CONFIG_FILES    = Makefile.pre
+  CONFIG_HEADERS  = 
+  CONFIG_LINKS    = 
+  CONFIG_COMMANDS = 
+  $ ./config.status 
+
+on cebe-laptop
+
+config.status:1505: creating Makefile.pre
+
+## ---------------------- ##
+## Running config.status. ##
+## ---------------------- ##
+
+This file was extended by python config.status 3.15, which was
+generated by GNU Autoconf 2.72.  Invocation command line was
+
+  CONFIG_FILES    = Makefile.pre
+  CONFIG_HEADERS  = 
+  CONFIG_LINKS    = 
+  CONFIG_COMMANDS = 
+  $ ./config.status 
+
+on cebe-laptop
+
+config.status:1505: creating Makefile.pre
+
+## ---------------------- ##
+## Running config.status. ##
+## ---------------------- ##
+
+This file was extended by python config.status 3.15, which was
+generated by GNU Autoconf 2.72.  Invocation command line was
+
+  CONFIG_FILES    = Makefile.pre
+  CONFIG_HEADERS  = 
+  CONFIG_LINKS    = 
+  CONFIG_COMMANDS = 
+  $ ./config.status 
+
+on cebe-laptop
+
+config.status:1505: creating Makefile.pre
+
+## ---------------------- ##
+## Running config.status. ##
+## ---------------------- ##
+
+This file was extended by python config.status 3.15, which was
+generated by GNU Autoconf 2.72.  Invocation command line was
+
+  CONFIG_FILES    = Makefile.pre
+  CONFIG_HEADERS  = 
+  CONFIG_LINKS    = 
+  CONFIG_COMMANDS = 
+  $ ./config.status 
+
+on cebe-laptop
+
+config.status:1505: creating Makefile.pre

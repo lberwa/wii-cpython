@@ -538,6 +538,12 @@ def decode_source(source_bytes):
     source_bytes_readline = _io.BytesIO(source_bytes).readline
     encoding = tokenize.detect_encoding(source_bytes_readline)
     return _io.TextIOWrapper(_io.BytesIO(source_bytes), encoding=encoding[0], newline=None).read()
+    # Wii/embedded: avoid importing tokenize during bootstrap.
+    # Default to UTF-8 and fall back to latin-1 to prevent hard failure.
+   # try:
+   #     return source_bytes.decode('utf-8')
+   # except UnicodeDecodeError:
+   #     return source_bytes.decode('latin-1')
 
 
 # Module specifications #######################################################

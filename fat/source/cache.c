@@ -33,6 +33,13 @@
  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#ifndef __wii__
+#define __wii__
+#endif
+#ifndef __WII__
+#define __WII__
+#endif
+
 #include <string.h>
 #include <limits.h>
 
@@ -83,6 +90,15 @@ CACHE* _FAT_cache_constructor (unsigned int numberOfPages, unsigned int sectorsP
 		cacheEntries[i].last_access = 0;
 		cacheEntries[i].dirty = false;
 		cacheEntries[i].cache = (uint8_t*) _FAT_mem_align ( sectorsPerPage * bytesPerSector );
+		if (cacheEntries[i].cache == NULL) {
+			unsigned int j;
+			for (j = 0; j < i; j++) {
+				_FAT_mem_free (cacheEntries[j].cache);
+			}
+			_FAT_mem_free (cacheEntries);
+			_FAT_mem_free (cache);
+			return NULL;
+		}
 	}
 
 	cache->cacheEntries = cacheEntries;
@@ -141,6 +157,10 @@ static CACHE_ENTRY* _FAT_cache_getPage(CACHE *cache,sec_t sector)
 		cacheEntries[oldUsed].dirty = false;
 	}
 
+	if (cacheEntries[oldUsed].cache == NULL) {
+		return NULL;
+	}
+
 	sector = (sector/sectorsPerPage)*sectorsPerPage; // align base sector to page size
 	sec_t next_page = sector + sectorsPerPage;
 	if(next_page > cache->endOfPartition)	next_page = cache->endOfPartition;
@@ -166,6 +186,7 @@ bool _FAT_cache_readSectors(CACHE *cache,sec_t sector,sec_t numSectors,void *buf
 		if(entry==NULL) return false;
 
 		sec = sector - entry->sector;
+		if (sec >= entry->count) return false;
 		secs_to_read = entry->count - sec;
 		if(secs_to_read>numSectors) secs_to_read = numSectors;
 
@@ -187,15 +208,47 @@ bool _FAT_cache_readPartialSector (CACHE* cache, void* buffer, sec_t sector, uns
 	sec_t sec;
 	CACHE_ENTRY *entry;
 
+	if (cache == NULL || buffer == NULL) return false;
+	if (cache->bytesPerSector == 0 || cache->bytesPerSector > MAX_SECTOR_SIZE) return false;
 	if (offset + size > cache->bytesPerSector) return false;
+
+#if defined(__WII__) || defined(__wii__)
+	/*
+	 * Defensive: bypass cache on Wii for partial reads to avoid crashes if
+	 * cache pages are corrupted. Read directly from disc into a temp buffer.
+	 */
+	if (cache->disc == NULL) return false;
+	if (cache->bytesPerSector < MIN_SECTOR_SIZE) return false;
+	{
+		uint8_t *tmp = (uint8_t*)_FAT_mem_align(cache->bytesPerSector);
+		if (tmp == NULL) return false;
+		if (!_FAT_disc_readSectors(cache->disc, sector, 1, tmp)) {
+			_FAT_mem_free(tmp);
+			return false;
+		}
+		memcpy(buffer, tmp + offset, size);
+		_FAT_mem_free(tmp);
+		return true;
+	}
+#else
 
 	entry = _FAT_cache_getPage(cache,sector);
 	if(entry==NULL) return false;
+	if (entry->cache == NULL) return false;
 
 	sec = sector - entry->sector;
+	if (sec >= entry->count) return false;
+	{
+		uint64_t bps = (uint64_t)cache->bytesPerSector;
+		uint64_t start = (uint64_t)sec * bps + (uint64_t)offset;
+		uint64_t end = start + (uint64_t)size;
+		uint64_t limit = (uint64_t)entry->count * bps;
+		if (end > limit) return false;
+	}
 	memcpy(buffer,entry->cache + ((sec*cache->bytesPerSector) + offset),size);
 
 	return true;
+#endif
 }
 
 bool _FAT_cache_readLittleEndianValue (CACHE* cache, uint32_t *value, sec_t sector, unsigned int offset, int num_bytes) {

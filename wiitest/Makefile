@@ -12,8 +12,7 @@ MAKEFILE_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 INCLUDE += -I../build-wii
 INCLUDE += -I$(MAKEFILE_DIR)../Include
 INCLUDE += -I$(DEVKITPRO)/libogc/include
-INCLUDE += -I$(DEVKITPRO)/extras/bitmap/include
-INCLUDE += -I$(DEVKITPRO)/extras/mysd_sdkarte_mounten/include
+
 
 CFLAGS     += -O0 -g -std=c99 -Wall -Wextra
 CXXFLAGS   := $(CFLAGS)

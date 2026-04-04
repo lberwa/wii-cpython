@@ -56,73 +56,43 @@ void wait(int ms) {
         VIDEO_WaitVSync();
     }
 }
+// #define FIND_FILE2
+// #define FIND_FILE
 
-/* Minimal stdout/stderr bridge for Python 3 (PyFile_SetTerminalPrintHook was removed) */
-static PyObject *wiiio_write(PyObject *self, PyObject *args) {
-    (void)self;
-    PyObject *obj;
-    const char *data = NULL;
-    Py_ssize_t len = 0;
-    PyObject *tmp = NULL;
+#ifdef FIND_FILE2
+#include <stdio.h>
+#include <dirent.h>
+#include <string.h>
+#include "../../fat/include/pyfat.h"      // für fatInitDefault
 
-    if (!PyArg_ParseTuple(args, "O", &obj)) {
-        return NULL;
+void list_dir(const char *path, int level) {
+    DIR *dir = opendir(path);
+    if (!dir) {
+        //terminal_print("Kann %s nicht öffnen\n", path);
+        terminal_print("Kann");
+        terminal_print(path);
+        terminal_print("nicht öffnen\n");
+        return;
     }
 
-    if (PyUnicode_Check(obj)) {
-        data = PyUnicode_AsUTF8AndSize(obj, &len);
-        if (!data) return NULL;
-    } else if (PyBytes_Check(obj)) {
-        if (PyBytes_AsStringAndSize(obj, (char **)&data, &len) < 0) return NULL;
-    } else {
-        tmp = PyObject_Str(obj);
-        if (!tmp) return NULL;
-        data = PyUnicode_AsUTF8AndSize(tmp, &len);
-        if (!data) {
-            Py_DECREF(tmp);
-            return NULL;
+    struct dirent *entry;
+    while ((entry = readdir(dir)) != NULL) {
+        for (int i = 0; i < level; i++) terminal_print("  "); // Einrückung
+//        terminal_print("%s%s\n", entry->d_name,
+//                       (entry->d_type == DT_DIR) ? "/" : "");
+        terminal_print(entry->d_name);
+        terminal_print((entry->d_type == DT_DIR) ? "/" : "");
+
+        if (entry->d_type == DT_DIR && strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
+            char subpath[256];
+            snprintf(subpath, sizeof(subpath), "%s/%s", path, entry->d_name);
+            list_dir(subpath, level + 1);
         }
     }
 
-    if (len > 0 && data) {
-        char *buf = (char *)PyMem_Malloc((size_t)len + 1);
-        if (!buf) {
-            Py_XDECREF(tmp);
-            return PyErr_NoMemory();
-        }
-        memcpy(buf, data, (size_t)len);
-        buf[len] = '\0';
-        terminal_print(buf);
-        PyMem_Free(buf);
-    }
-
-    Py_XDECREF(tmp);
-    return PyLong_FromSsize_t(len);
+    closedir(dir);
 }
-
-static PyObject *wiiio_flush(PyObject *self, PyObject *args) {
-    (void)self;
-    (void)args;
-    Py_RETURN_NONE;
-}
-
-static PyMethodDef WiiIOMethods[] = {
-    {"write", wiiio_write, METH_VARARGS, "Write to Wii terminal"},
-    {"flush", wiiio_flush, METH_VARARGS, "Flush (no-op)"},
-    {NULL, NULL, 0, NULL}
-};
-
-static struct PyModuleDef WiiIOModule = {
-    PyModuleDef_HEAD_INIT,
-    "wiiio",
-    NULL,
-    -1,
-    WiiIOMethods,
-    NULL,
-    NULL,
-    NULL,
-    NULL
-};
+#endif
 
 int main(void) {
     
@@ -135,8 +105,6 @@ int main(void) {
 
     video_init_custom();
     terminal_print("start");
-    fatInitDefault();
-    wait(100);
 
     #ifdef PNG
     if (!fatInitDefault()) {
@@ -144,9 +112,6 @@ int main(void) {
     }
 
     terminal_print("load test.png ...");
-    //rc = export_png_to_sd("sd:/test.png", test_png, test_png_end);
-    //snprintf(msg, sizeof(msg), "export_test_png_to_sd rc=%d", rc);
-    //terminal_print(msg);
     if (rc != 0) {
         terminal_print("PNG export failed; sd:/test.png may be missing");
     }
@@ -160,84 +125,74 @@ int main(void) {
     }
     #endif
 
-    terminal_print("0.1  initalise ...");
-    wait(100);
-    PyConfig config;
-    terminal_print("0.2  before PyConfig_InitIsolatedConfig");
-    wait(100);
-    PyConfig_InitIsolatedConfig(&config);
-    config.use_environment = 0;
-    config.site_import = 0;
-    config.user_site_directory = 0;
-    config.install_signal_handlers = 0;
-    config.use_hash_seed = 1;
-    config.hash_seed = 0;
-    //config.utf8_mode = 1;
-    terminal_print("0.3   after PyConfig_InitIsolatedConfig");
-
-    terminal_print("1.1");
-    // Minimal filesystem/stdlib setup (match your SD layout)
-    PyConfig_SetString(&config, &config.program_name, L"python");
-    PyConfig_SetString(&config, &config.home, L"sd:/python");
-    terminal_print("1.2");
-    config.module_search_paths_set = 1;
-    PyWideStringList_Append(&config.module_search_paths, L"sd:/python");
-    PyWideStringList_Append(&config.module_search_paths, L"sd:/python/Lib");
-    PyWideStringList_Append(&config.module_search_paths, L"sd:/python/lib/");
-    terminal_print("1.3");
-    PyConfig_SetString(&config, &config.filesystem_encoding, L"utf-8");
-    PyConfig_SetString(&config, &config.filesystem_errors, L"surrogatepass");
-    terminal_print("1.4   before Py_InitializeFromConfig");
-    wait(100);
-    {
-        terminal_print("1.5");
-        wait(100);
-        PyStatus status = Py_InitializeFromConfig(&config);
-        terminal_print("2");
-        wait(100);
-        if (PyStatus_Exception(status)) {
-            terminal_print("3");
-            terminal_print("3.5 Py_InitializeFromConfig failed");
-            if (status.func != NULL) {
-                terminal_print("4");
-                terminal_print(status.func);
-            }
-            terminal_print("5");
-            if (status.err_msg != NULL) {
-                terminal_print("6");
-                terminal_print(status.err_msg);
-            }
-            terminal_print("7");
-            PyConfig_Clear(&config);
-            terminal_print("8");
-            return 1;
-        }
-        terminal_print("9");
-    }
-    terminal_print("10");
-    PyConfig_Clear(&config);
-    terminal_print("11   after Py_Initialize");
-    //wait(100);
-    if (!Py_IsInitialized()) {
-        terminal_print("12 --- Py initalized == false: exiting ...");
+    if (!fatInitDefault()) {
+        terminal_print("fatInitDefault fehlgeschlagen!\n");
         return 1;
     }
-    //wait(100);
-    terminal_print("13 --- Py_IsInitialized == true");
-    //wait(100);
-    {
-        PyObject *wiiio = PyModule_Create(&WiiIOModule);
-        if (wiiio) {
-            PySys_SetObject("stdout", wiiio);
-            PySys_SetObject("stderr", wiiio);
-            Py_DECREF(wiiio);
-            terminal_print("terminal hook set");
-        } else {
-            terminal_print("terminal hook failed");
-        }
+
+#ifdef FIND_FILE2
+    terminal_print("start 2\n");
+
+    // Datei auf der SD-Karte erstellen / überschreiben
+    FILE *f = fopen("sd:/text.txt", "w");
+    if (!f) {
+        terminal_print("Fehler beim Öffnen der Datei!\n");
+        return 1;
     }
-    //wait(100);
-    // ======================================================================== //
+
+    // Inhalt schreiben
+    const char *text = "Hallo Welt!";
+    fprintf(f, "%s\n", text);
+
+    fclose(f);
+    terminal_print("Datei erfolgreich geschrieben.\n");
+    terminal_print("-----------------------");
+
+    terminal_print("Inhalt von SD-Karte:\n");
+    list_dir("sd:", 0);
+    terminal_print("-----------------------");
+
+    wait(300); // 5 Sekunden warten
+#endif
+
+#ifdef FIND_FILE
+    const char *file_path = "sd:/hello/test2.py";
+    FILE *fp = fopen(file_path, "r");
+    if (!fp) {
+        terminal_print("Datei nicht gefunden: ");
+        terminal_print(file_path);
+        return 1;
+    }
+
+    terminal_print("Inhalt von ");
+    terminal_print(file_path);
+    terminal_print("--------------------\n");
+
+    char buffer[256];
+    while (fgets(buffer, sizeof(buffer), fp)) {
+        terminal_print(buffer);
+    }
+
+    fclose(fp);
+    terminal_print("\nFertig.\n");
+#endif
+
+    size_t count = 1;
+
+    //Py_Initalize_Custom(NULL); 
+    PyStatus status = Py_Init_Custom((const char*[]){ "sd:/", "sd:"}, &count);
+
+    if (status._type != _PyStatus_TYPE_OK) {
+        // Init ist fehlgeschlagen
+        terminal_print("Init failed in:");
+        terminal_print(status.func);
+        terminal_print(status.err_msg);
+        return status.exitcode;  // ggf. Programm beenden
+    }
+
+    // Init erfolgreich
+    printf("Python init successful!\n");
+    
     script_len = (size_t)(test_py_end - test_py);
     script = (char *)malloc(script_len + 1);
     if (script == NULL) {
@@ -245,25 +200,24 @@ int main(void) {
         Py_Finalize();
         return 1;
     }
-    //wait(100);
+
     memcpy(script, test_py, script_len);
     script[script_len] = '\0';
 
-    //wait(100);
     terminal_print("run source_py/test.py ...");
-    wait(100);
     rc = PyRun_SimpleString(script);
+
     terminal_print("after PyRun_SimpleString");
-    wait(100);
     free(script);
     if (rc != 0) {
         terminal_print("python script returned error");
     }
-    wait(100);
+
+    wait(600); // 10 Sekunden warten
 
     terminal_print("py_finalize: return 0: exiting ...");
-    wait(100);
     Py_Finalize();
+
     terminal_print("done");
     return 0;
 }

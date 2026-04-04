@@ -1448,6 +1448,15 @@ _Py_get_inheritable(int fd)
 static int
 set_inheritable(int fd, int inheritable, int raise, int *atomic_flag_works)
 {
+#if defined(WII_BUILD)
+    /* Wii: no exec/fork semantics, CLOEXEC is irrelevant and fcntl/ioctl
+       may be unimplemented (ENOSYS). Treat as a no-op. */
+    (void)fd;
+    (void)inheritable;
+    (void)raise;
+    (void)atomic_flag_works;
+    return 0;
+#endif
 #ifdef MS_WINDOWS
     HANDLE handle;
     DWORD flags;

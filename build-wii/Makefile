@@ -1947,6 +1947,149 @@ FROZEN_FILES_IN = \
 		Lib/zipimport.py \
 		Lib/abc.py \
 		Lib/codecs.py \
+		Lib/tokenize.py \
+		Lib/token.py \
+		Lib/re/__init__.py \
+		Lib/re/_casefix.py \
+		Lib/re/_compiler.py \
+		Lib/re/_constants.py \
+		Lib/re/_parser.py \
+		Lib/functools.py \
+		Lib/collections/__init__.py \
+		Lib/types.py \
+		Lib/traceback.py \
+		Lib/encodings/__init__.py \
+		Lib/encodings/_win_cp_codecs.py \
+		Lib/encodings/aliases.py \
+		Lib/encodings/ascii.py \
+		Lib/encodings/base64_codec.py \
+		Lib/encodings/big5.py \
+		Lib/encodings/big5hkscs.py \
+		Lib/encodings/bz2_codec.py \
+		Lib/encodings/charmap.py \
+		Lib/encodings/cp037.py \
+		Lib/encodings/cp1006.py \
+		Lib/encodings/cp1026.py \
+		Lib/encodings/cp1125.py \
+		Lib/encodings/cp1140.py \
+		Lib/encodings/cp1250.py \
+		Lib/encodings/cp1251.py \
+		Lib/encodings/cp1252.py \
+		Lib/encodings/cp1253.py \
+		Lib/encodings/cp1254.py \
+		Lib/encodings/cp1255.py \
+		Lib/encodings/cp1256.py \
+		Lib/encodings/cp1257.py \
+		Lib/encodings/cp1258.py \
+		Lib/encodings/cp273.py \
+		Lib/encodings/cp424.py \
+		Lib/encodings/cp437.py \
+		Lib/encodings/cp500.py \
+		Lib/encodings/cp720.py \
+		Lib/encodings/cp737.py \
+		Lib/encodings/cp775.py \
+		Lib/encodings/cp850.py \
+		Lib/encodings/cp852.py \
+		Lib/encodings/cp855.py \
+		Lib/encodings/cp856.py \
+		Lib/encodings/cp857.py \
+		Lib/encodings/cp858.py \
+		Lib/encodings/cp860.py \
+		Lib/encodings/cp861.py \
+		Lib/encodings/cp862.py \
+		Lib/encodings/cp863.py \
+		Lib/encodings/cp864.py \
+		Lib/encodings/cp865.py \
+		Lib/encodings/cp866.py \
+		Lib/encodings/cp869.py \
+		Lib/encodings/cp874.py \
+		Lib/encodings/cp875.py \
+		Lib/encodings/cp932.py \
+		Lib/encodings/cp949.py \
+		Lib/encodings/cp950.py \
+		Lib/encodings/euc_jis_2004.py \
+		Lib/encodings/euc_jisx0213.py \
+		Lib/encodings/euc_jp.py \
+		Lib/encodings/euc_kr.py \
+		Lib/encodings/gb18030.py \
+		Lib/encodings/gb2312.py \
+		Lib/encodings/gbk.py \
+		Lib/encodings/hex_codec.py \
+		Lib/encodings/hp_roman8.py \
+		Lib/encodings/hz.py \
+		Lib/encodings/idna.py \
+		Lib/encodings/iso2022_jp.py \
+		Lib/encodings/iso2022_jp_1.py \
+		Lib/encodings/iso2022_jp_2.py \
+		Lib/encodings/iso2022_jp_2004.py \
+		Lib/encodings/iso2022_jp_3.py \
+		Lib/encodings/iso2022_jp_ext.py \
+		Lib/encodings/iso2022_kr.py \
+		Lib/encodings/iso8859_1.py \
+		Lib/encodings/iso8859_10.py \
+		Lib/encodings/iso8859_11.py \
+		Lib/encodings/iso8859_13.py \
+		Lib/encodings/iso8859_14.py \
+		Lib/encodings/iso8859_15.py \
+		Lib/encodings/iso8859_16.py \
+		Lib/encodings/iso8859_2.py \
+		Lib/encodings/iso8859_3.py \
+		Lib/encodings/iso8859_4.py \
+		Lib/encodings/iso8859_5.py \
+		Lib/encodings/iso8859_6.py \
+		Lib/encodings/iso8859_7.py \
+		Lib/encodings/iso8859_8.py \
+		Lib/encodings/iso8859_9.py \
+		Lib/encodings/johab.py \
+		Lib/encodings/koi8_r.py \
+		Lib/encodings/koi8_t.py \
+		Lib/encodings/koi8_u.py \
+		Lib/encodings/kz1048.py \
+		Lib/encodings/latin_1.py \
+		Lib/encodings/mac_arabic.py \
+		Lib/encodings/mac_croatian.py \
+		Lib/encodings/mac_cyrillic.py \
+		Lib/encodings/mac_farsi.py \
+		Lib/encodings/mac_greek.py \
+		Lib/encodings/mac_iceland.py \
+		Lib/encodings/mac_latin2.py \
+		Lib/encodings/mac_roman.py \
+		Lib/encodings/mac_romanian.py \
+		Lib/encodings/mac_turkish.py \
+		Lib/encodings/mbcs.py \
+		Lib/encodings/oem.py \
+		Lib/encodings/palmos.py \
+		Lib/encodings/ptcp154.py \
+		Lib/encodings/punycode.py \
+		Lib/encodings/quopri_codec.py \
+		Lib/encodings/raw_unicode_escape.py \
+		Lib/encodings/rot_13.py \
+		Lib/encodings/shift_jis.py \
+		Lib/encodings/shift_jis_2004.py \
+		Lib/encodings/shift_jisx0213.py \
+		Lib/encodings/tis_620.py \
+		Lib/encodings/undefined.py \
+		Lib/encodings/unicode_escape.py \
+		Lib/encodings/utf_16.py \
+		Lib/encodings/utf_16_be.py \
+		Lib/encodings/utf_16_le.py \
+		Lib/encodings/utf_32.py \
+		Lib/encodings/utf_32_be.py \
+		Lib/encodings/utf_32_le.py \
+		Lib/encodings/utf_7.py \
+		Lib/encodings/utf_8.py \
+		Lib/encodings/utf_8_sig.py \
+		Lib/encodings/uu_codec.py \
+		Lib/encodings/zlib_codec.py \
+		Lib/importlib/__init__.py \
+		Lib/importlib/_abc.py \
+		Lib/importlib/abc.py \
+		Lib/importlib/machinery.py \
+		Lib/importlib/metadata/__init__.py \
+		Lib/importlib/readers.py \
+		Lib/importlib/resources/__init__.py \
+		Lib/importlib/simple.py \
+		Lib/importlib/util.py \
 		Lib/io.py \
 		Lib/_collections_abc.py \
 		Lib/_sitebuiltins.py \
@@ -1956,8 +2099,6 @@ FROZEN_FILES_IN = \
 		Lib/os.py \
 		Lib/site.py \
 		Lib/stat.py \
-		Lib/importlib/util.py \
-		Lib/importlib/machinery.py \
 		Lib/runpy.py \
 		Lib/__hello__.py \
 		Lib/__phello__/__init__.py \
@@ -1972,6 +2113,149 @@ FROZEN_FILES_OUT = \
 		Python/frozen_modules/zipimport.h \
 		Python/frozen_modules/abc.h \
 		Python/frozen_modules/codecs.h \
+		Python/frozen_modules/tokenize.h \
+		Python/frozen_modules/token.h \
+		Python/frozen_modules/re.h \
+		Python/frozen_modules/re._casefix.h \
+		Python/frozen_modules/re._compiler.h \
+		Python/frozen_modules/re._constants.h \
+		Python/frozen_modules/re._parser.h \
+		Python/frozen_modules/functools.h \
+		Python/frozen_modules/collections.h \
+		Python/frozen_modules/types.h \
+		Python/frozen_modules/traceback.h \
+		Python/frozen_modules/encodings.h \
+		Python/frozen_modules/encodings._win_cp_codecs.h \
+		Python/frozen_modules/encodings.aliases.h \
+		Python/frozen_modules/encodings.ascii.h \
+		Python/frozen_modules/encodings.base64_codec.h \
+		Python/frozen_modules/encodings.big5.h \
+		Python/frozen_modules/encodings.big5hkscs.h \
+		Python/frozen_modules/encodings.bz2_codec.h \
+		Python/frozen_modules/encodings.charmap.h \
+		Python/frozen_modules/encodings.cp037.h \
+		Python/frozen_modules/encodings.cp1006.h \
+		Python/frozen_modules/encodings.cp1026.h \
+		Python/frozen_modules/encodings.cp1125.h \
+		Python/frozen_modules/encodings.cp1140.h \
+		Python/frozen_modules/encodings.cp1250.h \
+		Python/frozen_modules/encodings.cp1251.h \
+		Python/frozen_modules/encodings.cp1252.h \
+		Python/frozen_modules/encodings.cp1253.h \
+		Python/frozen_modules/encodings.cp1254.h \
+		Python/frozen_modules/encodings.cp1255.h \
+		Python/frozen_modules/encodings.cp1256.h \
+		Python/frozen_modules/encodings.cp1257.h \
+		Python/frozen_modules/encodings.cp1258.h \
+		Python/frozen_modules/encodings.cp273.h \
+		Python/frozen_modules/encodings.cp424.h \
+		Python/frozen_modules/encodings.cp437.h \
+		Python/frozen_modules/encodings.cp500.h \
+		Python/frozen_modules/encodings.cp720.h \
+		Python/frozen_modules/encodings.cp737.h \
+		Python/frozen_modules/encodings.cp775.h \
+		Python/frozen_modules/encodings.cp850.h \
+		Python/frozen_modules/encodings.cp852.h \
+		Python/frozen_modules/encodings.cp855.h \
+		Python/frozen_modules/encodings.cp856.h \
+		Python/frozen_modules/encodings.cp857.h \
+		Python/frozen_modules/encodings.cp858.h \
+		Python/frozen_modules/encodings.cp860.h \
+		Python/frozen_modules/encodings.cp861.h \
+		Python/frozen_modules/encodings.cp862.h \
+		Python/frozen_modules/encodings.cp863.h \
+		Python/frozen_modules/encodings.cp864.h \
+		Python/frozen_modules/encodings.cp865.h \
+		Python/frozen_modules/encodings.cp866.h \
+		Python/frozen_modules/encodings.cp869.h \
+		Python/frozen_modules/encodings.cp874.h \
+		Python/frozen_modules/encodings.cp875.h \
+		Python/frozen_modules/encodings.cp932.h \
+		Python/frozen_modules/encodings.cp949.h \
+		Python/frozen_modules/encodings.cp950.h \
+		Python/frozen_modules/encodings.euc_jis_2004.h \
+		Python/frozen_modules/encodings.euc_jisx0213.h \
+		Python/frozen_modules/encodings.euc_jp.h \
+		Python/frozen_modules/encodings.euc_kr.h \
+		Python/frozen_modules/encodings.gb18030.h \
+		Python/frozen_modules/encodings.gb2312.h \
+		Python/frozen_modules/encodings.gbk.h \
+		Python/frozen_modules/encodings.hex_codec.h \
+		Python/frozen_modules/encodings.hp_roman8.h \
+		Python/frozen_modules/encodings.hz.h \
+		Python/frozen_modules/encodings.idna.h \
+		Python/frozen_modules/encodings.iso2022_jp.h \
+		Python/frozen_modules/encodings.iso2022_jp_1.h \
+		Python/frozen_modules/encodings.iso2022_jp_2.h \
+		Python/frozen_modules/encodings.iso2022_jp_2004.h \
+		Python/frozen_modules/encodings.iso2022_jp_3.h \
+		Python/frozen_modules/encodings.iso2022_jp_ext.h \
+		Python/frozen_modules/encodings.iso2022_kr.h \
+		Python/frozen_modules/encodings.iso8859_1.h \
+		Python/frozen_modules/encodings.iso8859_10.h \
+		Python/frozen_modules/encodings.iso8859_11.h \
+		Python/frozen_modules/encodings.iso8859_13.h \
+		Python/frozen_modules/encodings.iso8859_14.h \
+		Python/frozen_modules/encodings.iso8859_15.h \
+		Python/frozen_modules/encodings.iso8859_16.h \
+		Python/frozen_modules/encodings.iso8859_2.h \
+		Python/frozen_modules/encodings.iso8859_3.h \
+		Python/frozen_modules/encodings.iso8859_4.h \
+		Python/frozen_modules/encodings.iso8859_5.h \
+		Python/frozen_modules/encodings.iso8859_6.h \
+		Python/frozen_modules/encodings.iso8859_7.h \
+		Python/frozen_modules/encodings.iso8859_8.h \
+		Python/frozen_modules/encodings.iso8859_9.h \
+		Python/frozen_modules/encodings.johab.h \
+		Python/frozen_modules/encodings.koi8_r.h \
+		Python/frozen_modules/encodings.koi8_t.h \
+		Python/frozen_modules/encodings.koi8_u.h \
+		Python/frozen_modules/encodings.kz1048.h \
+		Python/frozen_modules/encodings.latin_1.h \
+		Python/frozen_modules/encodings.mac_arabic.h \
+		Python/frozen_modules/encodings.mac_croatian.h \
+		Python/frozen_modules/encodings.mac_cyrillic.h \
+		Python/frozen_modules/encodings.mac_farsi.h \
+		Python/frozen_modules/encodings.mac_greek.h \
+		Python/frozen_modules/encodings.mac_iceland.h \
+		Python/frozen_modules/encodings.mac_latin2.h \
+		Python/frozen_modules/encodings.mac_roman.h \
+		Python/frozen_modules/encodings.mac_romanian.h \
+		Python/frozen_modules/encodings.mac_turkish.h \
+		Python/frozen_modules/encodings.mbcs.h \
+		Python/frozen_modules/encodings.oem.h \
+		Python/frozen_modules/encodings.palmos.h \
+		Python/frozen_modules/encodings.ptcp154.h \
+		Python/frozen_modules/encodings.punycode.h \
+		Python/frozen_modules/encodings.quopri_codec.h \
+		Python/frozen_modules/encodings.raw_unicode_escape.h \
+		Python/frozen_modules/encodings.rot_13.h \
+		Python/frozen_modules/encodings.shift_jis.h \
+		Python/frozen_modules/encodings.shift_jis_2004.h \
+		Python/frozen_modules/encodings.shift_jisx0213.h \
+		Python/frozen_modules/encodings.tis_620.h \
+		Python/frozen_modules/encodings.undefined.h \
+		Python/frozen_modules/encodings.unicode_escape.h \
+		Python/frozen_modules/encodings.utf_16.h \
+		Python/frozen_modules/encodings.utf_16_be.h \
+		Python/frozen_modules/encodings.utf_16_le.h \
+		Python/frozen_modules/encodings.utf_32.h \
+		Python/frozen_modules/encodings.utf_32_be.h \
+		Python/frozen_modules/encodings.utf_32_le.h \
+		Python/frozen_modules/encodings.utf_7.h \
+		Python/frozen_modules/encodings.utf_8.h \
+		Python/frozen_modules/encodings.utf_8_sig.h \
+		Python/frozen_modules/encodings.uu_codec.h \
+		Python/frozen_modules/encodings.zlib_codec.h \
+		Python/frozen_modules/importlib.h \
+		Python/frozen_modules/importlib._abc.h \
+		Python/frozen_modules/importlib.abc.h \
+		Python/frozen_modules/importlib.machinery.h \
+		Python/frozen_modules/importlib.metadata.h \
+		Python/frozen_modules/importlib.readers.h \
+		Python/frozen_modules/importlib.resources.h \
+		Python/frozen_modules/importlib.simple.h \
+		Python/frozen_modules/importlib.util.h \
 		Python/frozen_modules/io.h \
 		Python/frozen_modules/_collections_abc.h \
 		Python/frozen_modules/_sitebuiltins.h \
@@ -1981,8 +2265,6 @@ FROZEN_FILES_OUT = \
 		Python/frozen_modules/os.h \
 		Python/frozen_modules/site.h \
 		Python/frozen_modules/stat.h \
-		Python/frozen_modules/importlib.util.h \
-		Python/frozen_modules/importlib.machinery.h \
 		Python/frozen_modules/runpy.h \
 		Python/frozen_modules/__hello__.h \
 		Python/frozen_modules/__phello__.h \
@@ -2020,6 +2302,435 @@ Python/frozen_modules/abc.h: Lib/abc.py $(FREEZE_MODULE_DEPS)
 Python/frozen_modules/codecs.h: Lib/codecs.py $(FREEZE_MODULE_DEPS)
 	$(FREEZE_MODULE) codecs $(srcdir)/Lib/codecs.py Python/frozen_modules/codecs.h
 
+Python/frozen_modules/tokenize.h: Lib/tokenize.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) tokenize $(srcdir)/Lib/tokenize.py Python/frozen_modules/tokenize.h
+
+Python/frozen_modules/token.h: Lib/token.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) token $(srcdir)/Lib/token.py Python/frozen_modules/token.h
+
+Python/frozen_modules/re.h: Lib/re/__init__.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) re $(srcdir)/Lib/re/__init__.py Python/frozen_modules/re.h
+
+Python/frozen_modules/re._casefix.h: Lib/re/_casefix.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) re._casefix $(srcdir)/Lib/re/_casefix.py Python/frozen_modules/re._casefix.h
+
+Python/frozen_modules/re._compiler.h: Lib/re/_compiler.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) re._compiler $(srcdir)/Lib/re/_compiler.py Python/frozen_modules/re._compiler.h
+
+Python/frozen_modules/re._constants.h: Lib/re/_constants.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) re._constants $(srcdir)/Lib/re/_constants.py Python/frozen_modules/re._constants.h
+
+Python/frozen_modules/re._parser.h: Lib/re/_parser.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) re._parser $(srcdir)/Lib/re/_parser.py Python/frozen_modules/re._parser.h
+
+Python/frozen_modules/functools.h: Lib/functools.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) functools $(srcdir)/Lib/functools.py Python/frozen_modules/functools.h
+
+Python/frozen_modules/collections.h: Lib/collections/__init__.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) collections $(srcdir)/Lib/collections/__init__.py Python/frozen_modules/collections.h
+
+Python/frozen_modules/types.h: Lib/types.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) types $(srcdir)/Lib/types.py Python/frozen_modules/types.h
+
+Python/frozen_modules/traceback.h: Lib/traceback.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) traceback $(srcdir)/Lib/traceback.py Python/frozen_modules/traceback.h
+
+Python/frozen_modules/encodings.h: Lib/encodings/__init__.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings $(srcdir)/Lib/encodings/__init__.py Python/frozen_modules/encodings.h
+
+Python/frozen_modules/encodings._win_cp_codecs.h: Lib/encodings/_win_cp_codecs.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings._win_cp_codecs $(srcdir)/Lib/encodings/_win_cp_codecs.py Python/frozen_modules/encodings._win_cp_codecs.h
+
+Python/frozen_modules/encodings.aliases.h: Lib/encodings/aliases.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.aliases $(srcdir)/Lib/encodings/aliases.py Python/frozen_modules/encodings.aliases.h
+
+Python/frozen_modules/encodings.ascii.h: Lib/encodings/ascii.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.ascii $(srcdir)/Lib/encodings/ascii.py Python/frozen_modules/encodings.ascii.h
+
+Python/frozen_modules/encodings.base64_codec.h: Lib/encodings/base64_codec.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.base64_codec $(srcdir)/Lib/encodings/base64_codec.py Python/frozen_modules/encodings.base64_codec.h
+
+Python/frozen_modules/encodings.big5.h: Lib/encodings/big5.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.big5 $(srcdir)/Lib/encodings/big5.py Python/frozen_modules/encodings.big5.h
+
+Python/frozen_modules/encodings.big5hkscs.h: Lib/encodings/big5hkscs.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.big5hkscs $(srcdir)/Lib/encodings/big5hkscs.py Python/frozen_modules/encodings.big5hkscs.h
+
+Python/frozen_modules/encodings.bz2_codec.h: Lib/encodings/bz2_codec.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.bz2_codec $(srcdir)/Lib/encodings/bz2_codec.py Python/frozen_modules/encodings.bz2_codec.h
+
+Python/frozen_modules/encodings.charmap.h: Lib/encodings/charmap.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.charmap $(srcdir)/Lib/encodings/charmap.py Python/frozen_modules/encodings.charmap.h
+
+Python/frozen_modules/encodings.cp037.h: Lib/encodings/cp037.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.cp037 $(srcdir)/Lib/encodings/cp037.py Python/frozen_modules/encodings.cp037.h
+
+Python/frozen_modules/encodings.cp1006.h: Lib/encodings/cp1006.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.cp1006 $(srcdir)/Lib/encodings/cp1006.py Python/frozen_modules/encodings.cp1006.h
+
+Python/frozen_modules/encodings.cp1026.h: Lib/encodings/cp1026.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.cp1026 $(srcdir)/Lib/encodings/cp1026.py Python/frozen_modules/encodings.cp1026.h
+
+Python/frozen_modules/encodings.cp1125.h: Lib/encodings/cp1125.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.cp1125 $(srcdir)/Lib/encodings/cp1125.py Python/frozen_modules/encodings.cp1125.h
+
+Python/frozen_modules/encodings.cp1140.h: Lib/encodings/cp1140.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.cp1140 $(srcdir)/Lib/encodings/cp1140.py Python/frozen_modules/encodings.cp1140.h
+
+Python/frozen_modules/encodings.cp1250.h: Lib/encodings/cp1250.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.cp1250 $(srcdir)/Lib/encodings/cp1250.py Python/frozen_modules/encodings.cp1250.h
+
+Python/frozen_modules/encodings.cp1251.h: Lib/encodings/cp1251.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.cp1251 $(srcdir)/Lib/encodings/cp1251.py Python/frozen_modules/encodings.cp1251.h
+
+Python/frozen_modules/encodings.cp1252.h: Lib/encodings/cp1252.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.cp1252 $(srcdir)/Lib/encodings/cp1252.py Python/frozen_modules/encodings.cp1252.h
+
+Python/frozen_modules/encodings.cp1253.h: Lib/encodings/cp1253.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.cp1253 $(srcdir)/Lib/encodings/cp1253.py Python/frozen_modules/encodings.cp1253.h
+
+Python/frozen_modules/encodings.cp1254.h: Lib/encodings/cp1254.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.cp1254 $(srcdir)/Lib/encodings/cp1254.py Python/frozen_modules/encodings.cp1254.h
+
+Python/frozen_modules/encodings.cp1255.h: Lib/encodings/cp1255.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.cp1255 $(srcdir)/Lib/encodings/cp1255.py Python/frozen_modules/encodings.cp1255.h
+
+Python/frozen_modules/encodings.cp1256.h: Lib/encodings/cp1256.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.cp1256 $(srcdir)/Lib/encodings/cp1256.py Python/frozen_modules/encodings.cp1256.h
+
+Python/frozen_modules/encodings.cp1257.h: Lib/encodings/cp1257.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.cp1257 $(srcdir)/Lib/encodings/cp1257.py Python/frozen_modules/encodings.cp1257.h
+
+Python/frozen_modules/encodings.cp1258.h: Lib/encodings/cp1258.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.cp1258 $(srcdir)/Lib/encodings/cp1258.py Python/frozen_modules/encodings.cp1258.h
+
+Python/frozen_modules/encodings.cp273.h: Lib/encodings/cp273.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.cp273 $(srcdir)/Lib/encodings/cp273.py Python/frozen_modules/encodings.cp273.h
+
+Python/frozen_modules/encodings.cp424.h: Lib/encodings/cp424.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.cp424 $(srcdir)/Lib/encodings/cp424.py Python/frozen_modules/encodings.cp424.h
+
+Python/frozen_modules/encodings.cp437.h: Lib/encodings/cp437.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.cp437 $(srcdir)/Lib/encodings/cp437.py Python/frozen_modules/encodings.cp437.h
+
+Python/frozen_modules/encodings.cp500.h: Lib/encodings/cp500.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.cp500 $(srcdir)/Lib/encodings/cp500.py Python/frozen_modules/encodings.cp500.h
+
+Python/frozen_modules/encodings.cp720.h: Lib/encodings/cp720.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.cp720 $(srcdir)/Lib/encodings/cp720.py Python/frozen_modules/encodings.cp720.h
+
+Python/frozen_modules/encodings.cp737.h: Lib/encodings/cp737.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.cp737 $(srcdir)/Lib/encodings/cp737.py Python/frozen_modules/encodings.cp737.h
+
+Python/frozen_modules/encodings.cp775.h: Lib/encodings/cp775.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.cp775 $(srcdir)/Lib/encodings/cp775.py Python/frozen_modules/encodings.cp775.h
+
+Python/frozen_modules/encodings.cp850.h: Lib/encodings/cp850.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.cp850 $(srcdir)/Lib/encodings/cp850.py Python/frozen_modules/encodings.cp850.h
+
+Python/frozen_modules/encodings.cp852.h: Lib/encodings/cp852.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.cp852 $(srcdir)/Lib/encodings/cp852.py Python/frozen_modules/encodings.cp852.h
+
+Python/frozen_modules/encodings.cp855.h: Lib/encodings/cp855.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.cp855 $(srcdir)/Lib/encodings/cp855.py Python/frozen_modules/encodings.cp855.h
+
+Python/frozen_modules/encodings.cp856.h: Lib/encodings/cp856.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.cp856 $(srcdir)/Lib/encodings/cp856.py Python/frozen_modules/encodings.cp856.h
+
+Python/frozen_modules/encodings.cp857.h: Lib/encodings/cp857.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.cp857 $(srcdir)/Lib/encodings/cp857.py Python/frozen_modules/encodings.cp857.h
+
+Python/frozen_modules/encodings.cp858.h: Lib/encodings/cp858.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.cp858 $(srcdir)/Lib/encodings/cp858.py Python/frozen_modules/encodings.cp858.h
+
+Python/frozen_modules/encodings.cp860.h: Lib/encodings/cp860.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.cp860 $(srcdir)/Lib/encodings/cp860.py Python/frozen_modules/encodings.cp860.h
+
+Python/frozen_modules/encodings.cp861.h: Lib/encodings/cp861.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.cp861 $(srcdir)/Lib/encodings/cp861.py Python/frozen_modules/encodings.cp861.h
+
+Python/frozen_modules/encodings.cp862.h: Lib/encodings/cp862.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.cp862 $(srcdir)/Lib/encodings/cp862.py Python/frozen_modules/encodings.cp862.h
+
+Python/frozen_modules/encodings.cp863.h: Lib/encodings/cp863.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.cp863 $(srcdir)/Lib/encodings/cp863.py Python/frozen_modules/encodings.cp863.h
+
+Python/frozen_modules/encodings.cp864.h: Lib/encodings/cp864.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.cp864 $(srcdir)/Lib/encodings/cp864.py Python/frozen_modules/encodings.cp864.h
+
+Python/frozen_modules/encodings.cp865.h: Lib/encodings/cp865.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.cp865 $(srcdir)/Lib/encodings/cp865.py Python/frozen_modules/encodings.cp865.h
+
+Python/frozen_modules/encodings.cp866.h: Lib/encodings/cp866.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.cp866 $(srcdir)/Lib/encodings/cp866.py Python/frozen_modules/encodings.cp866.h
+
+Python/frozen_modules/encodings.cp869.h: Lib/encodings/cp869.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.cp869 $(srcdir)/Lib/encodings/cp869.py Python/frozen_modules/encodings.cp869.h
+
+Python/frozen_modules/encodings.cp874.h: Lib/encodings/cp874.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.cp874 $(srcdir)/Lib/encodings/cp874.py Python/frozen_modules/encodings.cp874.h
+
+Python/frozen_modules/encodings.cp875.h: Lib/encodings/cp875.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.cp875 $(srcdir)/Lib/encodings/cp875.py Python/frozen_modules/encodings.cp875.h
+
+Python/frozen_modules/encodings.cp932.h: Lib/encodings/cp932.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.cp932 $(srcdir)/Lib/encodings/cp932.py Python/frozen_modules/encodings.cp932.h
+
+Python/frozen_modules/encodings.cp949.h: Lib/encodings/cp949.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.cp949 $(srcdir)/Lib/encodings/cp949.py Python/frozen_modules/encodings.cp949.h
+
+Python/frozen_modules/encodings.cp950.h: Lib/encodings/cp950.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.cp950 $(srcdir)/Lib/encodings/cp950.py Python/frozen_modules/encodings.cp950.h
+
+Python/frozen_modules/encodings.euc_jis_2004.h: Lib/encodings/euc_jis_2004.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.euc_jis_2004 $(srcdir)/Lib/encodings/euc_jis_2004.py Python/frozen_modules/encodings.euc_jis_2004.h
+
+Python/frozen_modules/encodings.euc_jisx0213.h: Lib/encodings/euc_jisx0213.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.euc_jisx0213 $(srcdir)/Lib/encodings/euc_jisx0213.py Python/frozen_modules/encodings.euc_jisx0213.h
+
+Python/frozen_modules/encodings.euc_jp.h: Lib/encodings/euc_jp.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.euc_jp $(srcdir)/Lib/encodings/euc_jp.py Python/frozen_modules/encodings.euc_jp.h
+
+Python/frozen_modules/encodings.euc_kr.h: Lib/encodings/euc_kr.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.euc_kr $(srcdir)/Lib/encodings/euc_kr.py Python/frozen_modules/encodings.euc_kr.h
+
+Python/frozen_modules/encodings.gb18030.h: Lib/encodings/gb18030.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.gb18030 $(srcdir)/Lib/encodings/gb18030.py Python/frozen_modules/encodings.gb18030.h
+
+Python/frozen_modules/encodings.gb2312.h: Lib/encodings/gb2312.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.gb2312 $(srcdir)/Lib/encodings/gb2312.py Python/frozen_modules/encodings.gb2312.h
+
+Python/frozen_modules/encodings.gbk.h: Lib/encodings/gbk.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.gbk $(srcdir)/Lib/encodings/gbk.py Python/frozen_modules/encodings.gbk.h
+
+Python/frozen_modules/encodings.hex_codec.h: Lib/encodings/hex_codec.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.hex_codec $(srcdir)/Lib/encodings/hex_codec.py Python/frozen_modules/encodings.hex_codec.h
+
+Python/frozen_modules/encodings.hp_roman8.h: Lib/encodings/hp_roman8.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.hp_roman8 $(srcdir)/Lib/encodings/hp_roman8.py Python/frozen_modules/encodings.hp_roman8.h
+
+Python/frozen_modules/encodings.hz.h: Lib/encodings/hz.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.hz $(srcdir)/Lib/encodings/hz.py Python/frozen_modules/encodings.hz.h
+
+Python/frozen_modules/encodings.idna.h: Lib/encodings/idna.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.idna $(srcdir)/Lib/encodings/idna.py Python/frozen_modules/encodings.idna.h
+
+Python/frozen_modules/encodings.iso2022_jp.h: Lib/encodings/iso2022_jp.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.iso2022_jp $(srcdir)/Lib/encodings/iso2022_jp.py Python/frozen_modules/encodings.iso2022_jp.h
+
+Python/frozen_modules/encodings.iso2022_jp_1.h: Lib/encodings/iso2022_jp_1.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.iso2022_jp_1 $(srcdir)/Lib/encodings/iso2022_jp_1.py Python/frozen_modules/encodings.iso2022_jp_1.h
+
+Python/frozen_modules/encodings.iso2022_jp_2.h: Lib/encodings/iso2022_jp_2.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.iso2022_jp_2 $(srcdir)/Lib/encodings/iso2022_jp_2.py Python/frozen_modules/encodings.iso2022_jp_2.h
+
+Python/frozen_modules/encodings.iso2022_jp_2004.h: Lib/encodings/iso2022_jp_2004.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.iso2022_jp_2004 $(srcdir)/Lib/encodings/iso2022_jp_2004.py Python/frozen_modules/encodings.iso2022_jp_2004.h
+
+Python/frozen_modules/encodings.iso2022_jp_3.h: Lib/encodings/iso2022_jp_3.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.iso2022_jp_3 $(srcdir)/Lib/encodings/iso2022_jp_3.py Python/frozen_modules/encodings.iso2022_jp_3.h
+
+Python/frozen_modules/encodings.iso2022_jp_ext.h: Lib/encodings/iso2022_jp_ext.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.iso2022_jp_ext $(srcdir)/Lib/encodings/iso2022_jp_ext.py Python/frozen_modules/encodings.iso2022_jp_ext.h
+
+Python/frozen_modules/encodings.iso2022_kr.h: Lib/encodings/iso2022_kr.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.iso2022_kr $(srcdir)/Lib/encodings/iso2022_kr.py Python/frozen_modules/encodings.iso2022_kr.h
+
+Python/frozen_modules/encodings.iso8859_1.h: Lib/encodings/iso8859_1.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.iso8859_1 $(srcdir)/Lib/encodings/iso8859_1.py Python/frozen_modules/encodings.iso8859_1.h
+
+Python/frozen_modules/encodings.iso8859_10.h: Lib/encodings/iso8859_10.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.iso8859_10 $(srcdir)/Lib/encodings/iso8859_10.py Python/frozen_modules/encodings.iso8859_10.h
+
+Python/frozen_modules/encodings.iso8859_11.h: Lib/encodings/iso8859_11.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.iso8859_11 $(srcdir)/Lib/encodings/iso8859_11.py Python/frozen_modules/encodings.iso8859_11.h
+
+Python/frozen_modules/encodings.iso8859_13.h: Lib/encodings/iso8859_13.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.iso8859_13 $(srcdir)/Lib/encodings/iso8859_13.py Python/frozen_modules/encodings.iso8859_13.h
+
+Python/frozen_modules/encodings.iso8859_14.h: Lib/encodings/iso8859_14.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.iso8859_14 $(srcdir)/Lib/encodings/iso8859_14.py Python/frozen_modules/encodings.iso8859_14.h
+
+Python/frozen_modules/encodings.iso8859_15.h: Lib/encodings/iso8859_15.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.iso8859_15 $(srcdir)/Lib/encodings/iso8859_15.py Python/frozen_modules/encodings.iso8859_15.h
+
+Python/frozen_modules/encodings.iso8859_16.h: Lib/encodings/iso8859_16.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.iso8859_16 $(srcdir)/Lib/encodings/iso8859_16.py Python/frozen_modules/encodings.iso8859_16.h
+
+Python/frozen_modules/encodings.iso8859_2.h: Lib/encodings/iso8859_2.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.iso8859_2 $(srcdir)/Lib/encodings/iso8859_2.py Python/frozen_modules/encodings.iso8859_2.h
+
+Python/frozen_modules/encodings.iso8859_3.h: Lib/encodings/iso8859_3.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.iso8859_3 $(srcdir)/Lib/encodings/iso8859_3.py Python/frozen_modules/encodings.iso8859_3.h
+
+Python/frozen_modules/encodings.iso8859_4.h: Lib/encodings/iso8859_4.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.iso8859_4 $(srcdir)/Lib/encodings/iso8859_4.py Python/frozen_modules/encodings.iso8859_4.h
+
+Python/frozen_modules/encodings.iso8859_5.h: Lib/encodings/iso8859_5.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.iso8859_5 $(srcdir)/Lib/encodings/iso8859_5.py Python/frozen_modules/encodings.iso8859_5.h
+
+Python/frozen_modules/encodings.iso8859_6.h: Lib/encodings/iso8859_6.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.iso8859_6 $(srcdir)/Lib/encodings/iso8859_6.py Python/frozen_modules/encodings.iso8859_6.h
+
+Python/frozen_modules/encodings.iso8859_7.h: Lib/encodings/iso8859_7.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.iso8859_7 $(srcdir)/Lib/encodings/iso8859_7.py Python/frozen_modules/encodings.iso8859_7.h
+
+Python/frozen_modules/encodings.iso8859_8.h: Lib/encodings/iso8859_8.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.iso8859_8 $(srcdir)/Lib/encodings/iso8859_8.py Python/frozen_modules/encodings.iso8859_8.h
+
+Python/frozen_modules/encodings.iso8859_9.h: Lib/encodings/iso8859_9.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.iso8859_9 $(srcdir)/Lib/encodings/iso8859_9.py Python/frozen_modules/encodings.iso8859_9.h
+
+Python/frozen_modules/encodings.johab.h: Lib/encodings/johab.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.johab $(srcdir)/Lib/encodings/johab.py Python/frozen_modules/encodings.johab.h
+
+Python/frozen_modules/encodings.koi8_r.h: Lib/encodings/koi8_r.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.koi8_r $(srcdir)/Lib/encodings/koi8_r.py Python/frozen_modules/encodings.koi8_r.h
+
+Python/frozen_modules/encodings.koi8_t.h: Lib/encodings/koi8_t.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.koi8_t $(srcdir)/Lib/encodings/koi8_t.py Python/frozen_modules/encodings.koi8_t.h
+
+Python/frozen_modules/encodings.koi8_u.h: Lib/encodings/koi8_u.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.koi8_u $(srcdir)/Lib/encodings/koi8_u.py Python/frozen_modules/encodings.koi8_u.h
+
+Python/frozen_modules/encodings.kz1048.h: Lib/encodings/kz1048.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.kz1048 $(srcdir)/Lib/encodings/kz1048.py Python/frozen_modules/encodings.kz1048.h
+
+Python/frozen_modules/encodings.latin_1.h: Lib/encodings/latin_1.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.latin_1 $(srcdir)/Lib/encodings/latin_1.py Python/frozen_modules/encodings.latin_1.h
+
+Python/frozen_modules/encodings.mac_arabic.h: Lib/encodings/mac_arabic.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.mac_arabic $(srcdir)/Lib/encodings/mac_arabic.py Python/frozen_modules/encodings.mac_arabic.h
+
+Python/frozen_modules/encodings.mac_croatian.h: Lib/encodings/mac_croatian.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.mac_croatian $(srcdir)/Lib/encodings/mac_croatian.py Python/frozen_modules/encodings.mac_croatian.h
+
+Python/frozen_modules/encodings.mac_cyrillic.h: Lib/encodings/mac_cyrillic.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.mac_cyrillic $(srcdir)/Lib/encodings/mac_cyrillic.py Python/frozen_modules/encodings.mac_cyrillic.h
+
+Python/frozen_modules/encodings.mac_farsi.h: Lib/encodings/mac_farsi.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.mac_farsi $(srcdir)/Lib/encodings/mac_farsi.py Python/frozen_modules/encodings.mac_farsi.h
+
+Python/frozen_modules/encodings.mac_greek.h: Lib/encodings/mac_greek.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.mac_greek $(srcdir)/Lib/encodings/mac_greek.py Python/frozen_modules/encodings.mac_greek.h
+
+Python/frozen_modules/encodings.mac_iceland.h: Lib/encodings/mac_iceland.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.mac_iceland $(srcdir)/Lib/encodings/mac_iceland.py Python/frozen_modules/encodings.mac_iceland.h
+
+Python/frozen_modules/encodings.mac_latin2.h: Lib/encodings/mac_latin2.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.mac_latin2 $(srcdir)/Lib/encodings/mac_latin2.py Python/frozen_modules/encodings.mac_latin2.h
+
+Python/frozen_modules/encodings.mac_roman.h: Lib/encodings/mac_roman.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.mac_roman $(srcdir)/Lib/encodings/mac_roman.py Python/frozen_modules/encodings.mac_roman.h
+
+Python/frozen_modules/encodings.mac_romanian.h: Lib/encodings/mac_romanian.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.mac_romanian $(srcdir)/Lib/encodings/mac_romanian.py Python/frozen_modules/encodings.mac_romanian.h
+
+Python/frozen_modules/encodings.mac_turkish.h: Lib/encodings/mac_turkish.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.mac_turkish $(srcdir)/Lib/encodings/mac_turkish.py Python/frozen_modules/encodings.mac_turkish.h
+
+Python/frozen_modules/encodings.mbcs.h: Lib/encodings/mbcs.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.mbcs $(srcdir)/Lib/encodings/mbcs.py Python/frozen_modules/encodings.mbcs.h
+
+Python/frozen_modules/encodings.oem.h: Lib/encodings/oem.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.oem $(srcdir)/Lib/encodings/oem.py Python/frozen_modules/encodings.oem.h
+
+Python/frozen_modules/encodings.palmos.h: Lib/encodings/palmos.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.palmos $(srcdir)/Lib/encodings/palmos.py Python/frozen_modules/encodings.palmos.h
+
+Python/frozen_modules/encodings.ptcp154.h: Lib/encodings/ptcp154.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.ptcp154 $(srcdir)/Lib/encodings/ptcp154.py Python/frozen_modules/encodings.ptcp154.h
+
+Python/frozen_modules/encodings.punycode.h: Lib/encodings/punycode.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.punycode $(srcdir)/Lib/encodings/punycode.py Python/frozen_modules/encodings.punycode.h
+
+Python/frozen_modules/encodings.quopri_codec.h: Lib/encodings/quopri_codec.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.quopri_codec $(srcdir)/Lib/encodings/quopri_codec.py Python/frozen_modules/encodings.quopri_codec.h
+
+Python/frozen_modules/encodings.raw_unicode_escape.h: Lib/encodings/raw_unicode_escape.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.raw_unicode_escape $(srcdir)/Lib/encodings/raw_unicode_escape.py Python/frozen_modules/encodings.raw_unicode_escape.h
+
+Python/frozen_modules/encodings.rot_13.h: Lib/encodings/rot_13.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.rot_13 $(srcdir)/Lib/encodings/rot_13.py Python/frozen_modules/encodings.rot_13.h
+
+Python/frozen_modules/encodings.shift_jis.h: Lib/encodings/shift_jis.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.shift_jis $(srcdir)/Lib/encodings/shift_jis.py Python/frozen_modules/encodings.shift_jis.h
+
+Python/frozen_modules/encodings.shift_jis_2004.h: Lib/encodings/shift_jis_2004.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.shift_jis_2004 $(srcdir)/Lib/encodings/shift_jis_2004.py Python/frozen_modules/encodings.shift_jis_2004.h
+
+Python/frozen_modules/encodings.shift_jisx0213.h: Lib/encodings/shift_jisx0213.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.shift_jisx0213 $(srcdir)/Lib/encodings/shift_jisx0213.py Python/frozen_modules/encodings.shift_jisx0213.h
+
+Python/frozen_modules/encodings.tis_620.h: Lib/encodings/tis_620.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.tis_620 $(srcdir)/Lib/encodings/tis_620.py Python/frozen_modules/encodings.tis_620.h
+
+Python/frozen_modules/encodings.undefined.h: Lib/encodings/undefined.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.undefined $(srcdir)/Lib/encodings/undefined.py Python/frozen_modules/encodings.undefined.h
+
+Python/frozen_modules/encodings.unicode_escape.h: Lib/encodings/unicode_escape.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.unicode_escape $(srcdir)/Lib/encodings/unicode_escape.py Python/frozen_modules/encodings.unicode_escape.h
+
+Python/frozen_modules/encodings.utf_16.h: Lib/encodings/utf_16.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.utf_16 $(srcdir)/Lib/encodings/utf_16.py Python/frozen_modules/encodings.utf_16.h
+
+Python/frozen_modules/encodings.utf_16_be.h: Lib/encodings/utf_16_be.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.utf_16_be $(srcdir)/Lib/encodings/utf_16_be.py Python/frozen_modules/encodings.utf_16_be.h
+
+Python/frozen_modules/encodings.utf_16_le.h: Lib/encodings/utf_16_le.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.utf_16_le $(srcdir)/Lib/encodings/utf_16_le.py Python/frozen_modules/encodings.utf_16_le.h
+
+Python/frozen_modules/encodings.utf_32.h: Lib/encodings/utf_32.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.utf_32 $(srcdir)/Lib/encodings/utf_32.py Python/frozen_modules/encodings.utf_32.h
+
+Python/frozen_modules/encodings.utf_32_be.h: Lib/encodings/utf_32_be.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.utf_32_be $(srcdir)/Lib/encodings/utf_32_be.py Python/frozen_modules/encodings.utf_32_be.h
+
+Python/frozen_modules/encodings.utf_32_le.h: Lib/encodings/utf_32_le.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.utf_32_le $(srcdir)/Lib/encodings/utf_32_le.py Python/frozen_modules/encodings.utf_32_le.h
+
+Python/frozen_modules/encodings.utf_7.h: Lib/encodings/utf_7.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.utf_7 $(srcdir)/Lib/encodings/utf_7.py Python/frozen_modules/encodings.utf_7.h
+
+Python/frozen_modules/encodings.utf_8.h: Lib/encodings/utf_8.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.utf_8 $(srcdir)/Lib/encodings/utf_8.py Python/frozen_modules/encodings.utf_8.h
+
+Python/frozen_modules/encodings.utf_8_sig.h: Lib/encodings/utf_8_sig.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.utf_8_sig $(srcdir)/Lib/encodings/utf_8_sig.py Python/frozen_modules/encodings.utf_8_sig.h
+
+Python/frozen_modules/encodings.uu_codec.h: Lib/encodings/uu_codec.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.uu_codec $(srcdir)/Lib/encodings/uu_codec.py Python/frozen_modules/encodings.uu_codec.h
+
+Python/frozen_modules/encodings.zlib_codec.h: Lib/encodings/zlib_codec.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) encodings.zlib_codec $(srcdir)/Lib/encodings/zlib_codec.py Python/frozen_modules/encodings.zlib_codec.h
+
+Python/frozen_modules/importlib.h: Lib/importlib/__init__.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) importlib $(srcdir)/Lib/importlib/__init__.py Python/frozen_modules/importlib.h
+
+Python/frozen_modules/importlib._abc.h: Lib/importlib/_abc.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) importlib._abc $(srcdir)/Lib/importlib/_abc.py Python/frozen_modules/importlib._abc.h
+
+Python/frozen_modules/importlib.abc.h: Lib/importlib/abc.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) importlib.abc $(srcdir)/Lib/importlib/abc.py Python/frozen_modules/importlib.abc.h
+
+Python/frozen_modules/importlib.machinery.h: Lib/importlib/machinery.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) importlib.machinery $(srcdir)/Lib/importlib/machinery.py Python/frozen_modules/importlib.machinery.h
+
+Python/frozen_modules/importlib.metadata.h: Lib/importlib/metadata/__init__.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) importlib.metadata $(srcdir)/Lib/importlib/metadata/__init__.py Python/frozen_modules/importlib.metadata.h
+
+Python/frozen_modules/importlib.readers.h: Lib/importlib/readers.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) importlib.readers $(srcdir)/Lib/importlib/readers.py Python/frozen_modules/importlib.readers.h
+
+Python/frozen_modules/importlib.resources.h: Lib/importlib/resources/__init__.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) importlib.resources $(srcdir)/Lib/importlib/resources/__init__.py Python/frozen_modules/importlib.resources.h
+
+Python/frozen_modules/importlib.simple.h: Lib/importlib/simple.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) importlib.simple $(srcdir)/Lib/importlib/simple.py Python/frozen_modules/importlib.simple.h
+
+Python/frozen_modules/importlib.util.h: Lib/importlib/util.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) importlib.util $(srcdir)/Lib/importlib/util.py Python/frozen_modules/importlib.util.h
+
 Python/frozen_modules/io.h: Lib/io.py $(FREEZE_MODULE_DEPS)
 	$(FREEZE_MODULE) io $(srcdir)/Lib/io.py Python/frozen_modules/io.h
 
@@ -2046,12 +2757,6 @@ Python/frozen_modules/site.h: Lib/site.py $(FREEZE_MODULE_DEPS)
 
 Python/frozen_modules/stat.h: Lib/stat.py $(FREEZE_MODULE_DEPS)
 	$(FREEZE_MODULE) stat $(srcdir)/Lib/stat.py Python/frozen_modules/stat.h
-
-Python/frozen_modules/importlib.util.h: Lib/importlib/util.py $(FREEZE_MODULE_DEPS)
-	$(FREEZE_MODULE) importlib.util $(srcdir)/Lib/importlib/util.py Python/frozen_modules/importlib.util.h
-
-Python/frozen_modules/importlib.machinery.h: Lib/importlib/machinery.py $(FREEZE_MODULE_DEPS)
-	$(FREEZE_MODULE) importlib.machinery $(srcdir)/Lib/importlib/machinery.py Python/frozen_modules/importlib.machinery.h
 
 Python/frozen_modules/runpy.h: Lib/runpy.py $(FREEZE_MODULE_DEPS)
 	$(FREEZE_MODULE) runpy $(srcdir)/Lib/runpy.py Python/frozen_modules/runpy.h

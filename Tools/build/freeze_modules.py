@@ -50,10 +50,18 @@ FROZEN = [
     ('stdlib - startup, without site (python -S)', [
         'abc',
         'codecs',
-        # For now we do not freeze the encodings, due # to the noise all
-        # those extra modules add to the text printed during the build.
-        # (See https://github.com/python/cpython/pull/28398#pullrequestreview-756856469.)
-        #'<encodings.*>',
+        # tokenize + dependencies for source encoding detection
+        'tokenize',
+        'token',
+        '<re.*>',
+        'functools',
+        '<collections.*>',
+        'types',
+        'traceback',
+        # Freeze encodings so codec lookup works without filesystem access.
+        '<encodings.**.*>',
+        # Freeze importlib package so "import importlib" works without filesystem access.
+        '<importlib.*>',
         'io',
         ]),
     ('stdlib - startup, with site', [
@@ -67,8 +75,6 @@ FROZEN = [
         'stat',
         ]),
     ('runpy - run module with -m', [
-        "importlib.util",
-        "importlib.machinery",
         "runpy",
     ]),
     (TESTS_SECTION, [

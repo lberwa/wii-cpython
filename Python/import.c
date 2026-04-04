@@ -10,6 +10,7 @@
 #include "pycore_initconfig.h"    // _PyStatus_OK()
 #include "pycore_interp.h"        // struct _import_runtime_state
 #include "pycore_interpframe.h"
+#include "pycore_fileutils.h"     // _Py_stat()
 #include "pycore_lazyimportobject.h"
 #include "pycore_long.h"          // _PyLong_GetZero
 #include "pycore_magic_number.h"  // PYC_MAGIC_NUMBER_TOKEN
@@ -38,6 +39,7 @@
 
 #include "marshal.h"              // PyMarshal_ReadObjectFromString()
 #include "pycore_importdl.h"      // _PyImport_DynLoadFiletab
+#include <errno.h>
 #include "pydtrace.h"             // PyDTrace_IMPORT_FIND_LOAD_START_ENABLED()
 #include <stdbool.h>              // bool
 
@@ -4225,6 +4227,9 @@ _PyImport_GetAbsName(PyThreadState *tstate, PyObject *name,
     return get_abs_name(tstate, name, globals, level);
 }
 
+#ifndef TERMINAL_PRINT_DEBUG
+#define TERMINAL_PRINT_DEBUG 
+#endif
 
 PyObject *
 PyImport_ImportModuleLevelObject(PyObject *name, PyObject *globals,
@@ -4377,10 +4382,78 @@ PyImport_ImportModuleLevelObject(PyObject *name, PyObject *globals,
     Py_XDECREF(abs_name);
     Py_XDECREF(mod);
     if (final_mod == NULL) {
+#if defined(WII_BUILD) && defined(TERMINAL_PRINT_DEBUG)
+        if (_PyErr_Occurred(tstate) &&
+            PyErr_ExceptionMatches(PyExc_ModuleNotFoundError)) {
+            const char *name_c = NULL;
+            if (PyUnicode_Check(name)) {
+                name_c = PyUnicode_AsUTF8(name);
+            }
+            if (!name_c) {
+                name_c = "<non-unicode>";
+            }
+
+            /* Keep debug output short and focused. */
+            if (strcmp(name_c, "testg") == 0 || strcmp(name_c, "traceback") == 0) {
+                char buf[256];
+                snprintf(buf, sizeof(buf),
+                         "[IMPDBG] ModuleNotFound name=%s", name_c);
+                TP(buf);
+
+                PyObject *path = PySys_GetObject("path");
+                if (path && PyList_Check(path)) {
+                    Py_ssize_t n = PyList_GET_SIZE(path);
+                    for (Py_ssize_t i = 0; i < n; i++) {
+                        PyObject *item = PyList_GET_ITEM(path, i);
+                        const char *p = NULL;
+                        if (PyUnicode_Check(item)) {
+                            p = PyUnicode_AsUTF8(item);
+                        }
+                        if (!p) {
+                            continue;
+                        }
+                        /* Only check sd:/ and usb:/ entries. */
+                        if (strncmp(p, "sd:", 3) != 0 && strncmp(p, "usb:", 4) != 0) {
+                            continue;
+                        }
+
+                        const char *sep = "";
+                        size_t plen = strlen(p);
+                        if (plen > 0) {
+                            char last = p[plen - 1];
+                            if (last != '/') {
+                                sep = "/";
+                            }
+                        }
+
+                        char cand[256];
+                        snprintf(cand, sizeof(cand), "%s%s%s.py", p, sep, name_c);
+                        struct _Py_stat_struct st;
+                        PyObject *candobj = PyUnicode_FromString(cand);
+                        int rc = -1;
+                        int err = 0;
+                        if (candobj) {
+                            rc = _Py_stat(candobj, &st);
+                            err = errno;
+                            Py_DECREF(candobj);
+                        }
+                        if (rc == 0 || err != ENOENT) {
+                            snprintf(buf, sizeof(buf),
+                                     "[IMPDBG]   %s -> %s (errno=%d)",
+                                     cand, (rc == 0 ? "FOUND" : "miss"), err);
+                            TP(buf);
+                        }
+                    }
+                }
+            }
+        }
+#endif
         remove_importlib_frames(tstate);
     }
     return final_mod;
 }
+
+#undef TERMINAL_PRINT_DEBUG 
 
 static PyObject *
 get_mod_dict(PyObject *module)
@@ -4915,11 +4988,7 @@ _PyImport_InitExternal(PyThreadState *tstate)
     TP("32.2");
     // XXX Initialize here: sys.path_hooks and sys.path_importer_cache.
     TP("32.3");
-#if defined(WII_BUILD)
-    /* Wii notloesung: skip external importers to avoid hang */
-    (void)verbose;
-    return _PyStatus_OK();
-#endif
+/* Wii: allow external importers (for filesystem imports). */
     if (init_importlib_external(tstate->interp) != 0) {
         TP("32.4");
         #if defined(WII_BUILD)

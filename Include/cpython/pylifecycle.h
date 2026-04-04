@@ -19,6 +19,12 @@ PyAPI_FUNC(PyStatus) Py_PreInitializeFromArgs(
     Py_ssize_t argc,
     wchar_t **argv);
 
+/*
+   Py_Init_Custom is a function where you can but in just the
+   pathes and run it without any other configuration.
+*/
+PyAPI_FUNC(PyStatus)
+Py_Init_Custom(const char** import_paths, size_t *count);
 
 /* Initialization and finalization */
 

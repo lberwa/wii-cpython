@@ -1539,6 +1539,166 @@ pyinit_main(PyThreadState *tstate)
     return _PyStatus_OK();
 }
 
+#include "../fat/include/pyfat.h"
+#include "../bitmap/include/render_text.h"
+
+/* Minimal stdout/stderr bridge for Python 3 (PyFile_SetTerminalPrintHook was removed) */
+static PyObject *wiiio_write(PyObject *self, PyObject *args) {
+    (void)self;
+    PyObject *obj;
+    const char *data = NULL;
+    Py_ssize_t len = 0;
+    PyObject *tmp = NULL;
+
+    if (!PyArg_ParseTuple(args, "O", &obj)) {
+        return NULL;
+    }
+
+    if (PyUnicode_Check(obj)) {
+        data = PyUnicode_AsUTF8AndSize(obj, &len);
+        if (!data) return NULL;
+    } else if (PyBytes_Check(obj)) {
+        if (PyBytes_AsStringAndSize(obj, (char **)&data, &len) < 0) return NULL;
+    } else {
+        tmp = PyObject_Str(obj);
+        if (!tmp) return NULL;
+        data = PyUnicode_AsUTF8AndSize(tmp, &len);
+        if (!data) {
+            Py_DECREF(tmp);
+            return NULL;
+        }
+    }
+
+    if (len > 0 && data) {
+        char *buf = (char *)PyMem_Malloc((size_t)len + 1);
+        if (!buf) {
+            Py_XDECREF(tmp);
+            return PyErr_NoMemory();
+        }
+        memcpy(buf, data, (size_t)len);
+        buf[len] = '\0';
+        terminal_print(buf);
+        PyMem_Free(buf);
+    }
+
+    Py_XDECREF(tmp);
+    return PyLong_FromSsize_t(len);
+}
+
+static PyObject *wiiio_flush(PyObject *self, PyObject *args) {
+    (void)self;
+    (void)args;
+    Py_RETURN_NONE;
+}
+
+static PyMethodDef WiiIOMethods[] = {
+    {"write", wiiio_write, METH_VARARGS, "Write to Wii terminal"},
+    {"flush", wiiio_flush, METH_VARARGS, "Flush (no-op)"},
+    {NULL, NULL, 0, NULL}
+};
+
+static struct PyModuleDef WiiIOModule = {
+    PyModuleDef_HEAD_INIT,
+    "wiiio",
+    NULL,
+    -1,
+    WiiIOMethods,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+};
+
+PyStatus
+Py_Init_Custom(const char** import_paths, size_t *count)
+{
+    char *script;
+    size_t script_len;
+    int rc;
+
+    if (!fatInitDefault()) {
+        PyStatus s;
+        s._type = _PyStatus_TYPE_ERROR;
+        s.func = "Check your SD/USB-Stick";
+        s.err_msg = "fatInitDefault returned ERROR!";
+        s.exitcode = 0;
+        return s;
+    }
+    
+    PyConfig config;
+    PyConfig_InitIsolatedConfig(&config);
+    config.use_environment = 0;
+    config.site_import = 0;
+    config.user_site_directory = 0;
+    config.install_signal_handlers = 0;
+    config.use_hash_seed = 1;
+    config.hash_seed = 0;
+    /* Ensure frozen importlib bootstrap is enabled. */
+    config.use_frozen_modules = 1;
+    config._install_importlib = 1;
+    //config.utf8_mode = 1;
+
+    // Minimal filesystem/stdlib setup (match your SD layout)
+    PyConfig_SetString(&config, &config.program_name, L"python");
+    PyConfig_SetString(&config, &config.home, L"sd:/python");
+    config.module_search_paths_set = 1;
+    PyWideStringList_Append(&config.module_search_paths, L"sd:/python");
+    PyWideStringList_Append(&config.module_search_paths, L"sd:/python/Lib");
+    PyWideStringList_Append(&config.module_search_paths, L"sd:/python/lib/");
+    PyWideStringList_Append(&config.module_search_paths, L"usb:/python");
+    PyWideStringList_Append(&config.module_search_paths, L"usb:/python/Lib");
+    PyWideStringList_Append(&config.module_search_paths, L"usb:/python/lib/");
+
+    if (import_paths && count) {
+        for (size_t i = 0; i < *count; i++) {
+            wchar_t *wpath = Py_DecodeLocale(import_paths[i], NULL);
+            if (!wpath) {
+                return (PyStatus){
+                    _PyStatus_TYPE_ERROR,
+                    "Py_Init_Custom",
+                    "path decode failed",
+                    0
+                };
+            }
+            PyWideStringList_Append(&config.module_search_paths, wpath);
+            PyMem_RawFree(wpath);
+        }
+    }
+
+    PyConfig_SetString(&config, &config.filesystem_encoding, L"utf-8");
+    PyConfig_SetString(&config, &config.filesystem_errors, L"surrogatepass");
+
+    {
+        PyStatus status = Py_InitializeFromConfig(&config);
+        
+        if (PyStatus_Exception(status)) {
+            PyConfig_Clear(&config);
+            return status;
+        }
+    }
+    PyConfig_Clear(&config);
+
+    if (!Py_IsInitialized()) {
+        PyStatus s;
+        s._type = _PyStatus_TYPE_ERROR;
+        s.func = "ERROR";
+        s.err_msg = "Python is not initalized!";
+        s.exitcode = 0;
+        return s;
+    }
+
+    {
+        PyObject *wiiio = PyModule_Create(&WiiIOModule);
+        if (wiiio) {
+            PySys_SetObject("stdout", wiiio);
+            PySys_SetObject("stderr", wiiio);
+            Py_DECREF(wiiio);
+        }
+    }
+
+    return _PyStatus_OK();
+}
+
 PyStatus
 Py_InitializeFromConfig(const PyConfig *config)
 {

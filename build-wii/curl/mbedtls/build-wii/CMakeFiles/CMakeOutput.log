@@ -17,13 +17,13 @@ Compilation of the C compiler identification source "CMakeCCompilerId.c" produce
 The C compiler identification is GNU, found in "/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/3.25.1/CompilerIdC/a.out"
 
 Detecting C compiler ABI info compiled with the following output:
-Change Dir: /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-2K58Mh
+Change Dir: /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-EIGLIv
 
-Run Build Command(s):/usr/bin/make -f Makefile cmTC_f3233/fast && make[2]: Entering directory '/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-2K58Mh'
-/usr/bin/make  -f CMakeFiles/cmTC_f3233.dir/build.make CMakeFiles/cmTC_f3233.dir/build
-make[3]: Entering directory '/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-2K58Mh'
-Building C object CMakeFiles/cmTC_f3233.dir/CMakeCCompilerABI.c.obj
-/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc   -DNDEBUG -g -O3 -Wall -I/opt/devkitpro/libogc/include -I/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../curl/mbedtls/wii/include -DMBEDTLS_USER_CONFIG_FILE=\"mbedtls_wii_user_config.h\" -DTF_PSA_CRYPTO_USER_CONFIG_FILE=\"mbedtls_wii_user_config.h\"    -v -o CMakeFiles/cmTC_f3233.dir/CMakeCCompilerABI.c.obj -c /usr/share/cmake-3.25/Modules/CMakeCCompilerABI.c
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_d5825/fast && make[2]: Entering directory '/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-EIGLIv'
+/usr/bin/make  -f CMakeFiles/cmTC_d5825.dir/build.make CMakeFiles/cmTC_d5825.dir/build
+make[3]: Entering directory '/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-EIGLIv'
+Building C object CMakeFiles/cmTC_d5825.dir/CMakeCCompilerABI.c.obj
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc   -DNDEBUG -g -O3 -Wall -I/opt/devkitpro/libogc/include -I/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../curl/mbedtls/wii/include -DMBEDTLS_USER_CONFIG_FILE=\"mbedtls_wii_user_config.h\" -DTF_PSA_CRYPTO_USER_CONFIG_FILE=\"mbedtls_wii_user_config.h\"    -v -o CMakeFiles/cmTC_d5825.dir/CMakeCCompilerABI.c.obj -c /usr/share/cmake-3.25/Modules/CMakeCCompilerABI.c
 Using built-in specs.
 COLLECT_GCC=/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc
 Target: powerpc-eabi
@@ -31,8 +31,8 @@ Configured with: /home/davem/projects/devkitpro/tool-packages/devkitppc/gcc/src/
 Thread model: dkp
 Supported LTO compression algorithms: zlib zstd
 gcc version 15.2.0 (devkitPPC) 
-COLLECT_GCC_OPTIONS='-D' 'NDEBUG' '-g' '-O3' '-Wall' '-I' '/opt/devkitpro/libogc/include' '-I' '/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../curl/mbedtls/wii/include' '-D' 'MBEDTLS_USER_CONFIG_FILE="mbedtls_wii_user_config.h"' '-D' 'TF_PSA_CRYPTO_USER_CONFIG_FILE="mbedtls_wii_user_config.h"' '-v' '-o' 'CMakeFiles/cmTC_f3233.dir/CMakeCCompilerABI.c.obj' '-c' '-mcpu=750' '-dumpdir' 'CMakeFiles/cmTC_f3233.dir/'
- /opt/devkitpro/devkitPPC/libexec/gcc/powerpc-eabi/15.2.0/cc1 -quiet -v -I /opt/devkitpro/libogc/include -I /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../curl/mbedtls/wii/include -D NDEBUG -D MBEDTLS_USER_CONFIG_FILE="mbedtls_wii_user_config.h" -D TF_PSA_CRYPTO_USER_CONFIG_FILE="mbedtls_wii_user_config.h" /usr/share/cmake-3.25/Modules/CMakeCCompilerABI.c -quiet -dumpdir CMakeFiles/cmTC_f3233.dir/ -dumpbase CMakeCCompilerABI.c.c -dumpbase-ext .c -mcpu=750 -g -O3 -Wall -version -o /tmp/cctgysaj.s
+COLLECT_GCC_OPTIONS='-D' 'NDEBUG' '-g' '-O3' '-Wall' '-I' '/opt/devkitpro/libogc/include' '-I' '/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../curl/mbedtls/wii/include' '-D' 'MBEDTLS_USER_CONFIG_FILE="mbedtls_wii_user_config.h"' '-D' 'TF_PSA_CRYPTO_USER_CONFIG_FILE="mbedtls_wii_user_config.h"' '-v' '-o' 'CMakeFiles/cmTC_d5825.dir/CMakeCCompilerABI.c.obj' '-c' '-mcpu=750' '-dumpdir' 'CMakeFiles/cmTC_d5825.dir/'
+ /opt/devkitpro/devkitPPC/libexec/gcc/powerpc-eabi/15.2.0/cc1 -quiet -v -I /opt/devkitpro/libogc/include -I /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../curl/mbedtls/wii/include -D NDEBUG -D MBEDTLS_USER_CONFIG_FILE="mbedtls_wii_user_config.h" -D TF_PSA_CRYPTO_USER_CONFIG_FILE="mbedtls_wii_user_config.h" /usr/share/cmake-3.25/Modules/CMakeCCompilerABI.c -quiet -dumpdir CMakeFiles/cmTC_d5825.dir/ -dumpbase CMakeCCompilerABI.c.c -dumpbase-ext .c -mcpu=750 -g -O3 -Wall -version -o /tmp/ccGsq9fn.s
 GNU C23 (devkitPPC) version 15.2.0 (powerpc-eabi)
 	compiled by GNU C version 12.2.0, GMP version 6.2.1, MPFR version 4.1.0, MPC version 1.2.1, isl version isl-0.18-GMP
 
@@ -48,14 +48,14 @@ ignoring duplicate directory "/opt/devkitpro/devkitPPC/powerpc-eabi/include"
  /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/include
 End of search list.
 Compiler executable checksum: 90e0b5b5e0eeb7070152c1682ba436c2
-COLLECT_GCC_OPTIONS='-D' 'NDEBUG' '-g' '-O3' '-Wall' '-I' '/opt/devkitpro/libogc/include' '-I' '/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../curl/mbedtls/wii/include' '-D' 'MBEDTLS_USER_CONFIG_FILE="mbedtls_wii_user_config.h"' '-D' 'TF_PSA_CRYPTO_USER_CONFIG_FILE="mbedtls_wii_user_config.h"' '-v' '-o' 'CMakeFiles/cmTC_f3233.dir/CMakeCCompilerABI.c.obj' '-c' '-mcpu=750' '-dumpdir' 'CMakeFiles/cmTC_f3233.dir/'
- /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/as -mppc -many -mbig -o CMakeFiles/cmTC_f3233.dir/CMakeCCompilerABI.c.obj /tmp/cctgysaj.s
+COLLECT_GCC_OPTIONS='-D' 'NDEBUG' '-g' '-O3' '-Wall' '-I' '/opt/devkitpro/libogc/include' '-I' '/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../curl/mbedtls/wii/include' '-D' 'MBEDTLS_USER_CONFIG_FILE="mbedtls_wii_user_config.h"' '-D' 'TF_PSA_CRYPTO_USER_CONFIG_FILE="mbedtls_wii_user_config.h"' '-v' '-o' 'CMakeFiles/cmTC_d5825.dir/CMakeCCompilerABI.c.obj' '-c' '-mcpu=750' '-dumpdir' 'CMakeFiles/cmTC_d5825.dir/'
+ /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/as -mppc -many -mbig -o CMakeFiles/cmTC_d5825.dir/CMakeCCompilerABI.c.obj /tmp/ccGsq9fn.s
 COMPILER_PATH=/opt/devkitpro/devkitPPC/libexec/gcc/powerpc-eabi/15.2.0/:/opt/devkitpro/devkitPPC/libexec/gcc/powerpc-eabi/15.2.0/:/opt/devkitpro/devkitPPC/libexec/gcc/powerpc-eabi/:/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/:/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/:/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/
 LIBRARY_PATH=/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/:/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/lib/:/opt/devkitpro/devkitPPC/powerpc-eabi/lib/
-COLLECT_GCC_OPTIONS='-D' 'NDEBUG' '-g' '-O3' '-Wall' '-I' '/opt/devkitpro/libogc/include' '-I' '/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../curl/mbedtls/wii/include' '-D' 'MBEDTLS_USER_CONFIG_FILE="mbedtls_wii_user_config.h"' '-D' 'TF_PSA_CRYPTO_USER_CONFIG_FILE="mbedtls_wii_user_config.h"' '-v' '-o' 'CMakeFiles/cmTC_f3233.dir/CMakeCCompilerABI.c.obj' '-c' '-mcpu=750' '-dumpdir' 'CMakeFiles/cmTC_f3233.dir/CMakeCCompilerABI.c.'
-Linking C executable cmTC_f3233
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_f3233.dir/link.txt --verbose=1
-/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -DNDEBUG -g -O3 -Wall -I/opt/devkitpro/libogc/include -I/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../curl/mbedtls/wii/include -DMBEDTLS_USER_CONFIG_FILE=\"mbedtls_wii_user_config.h\" -DTF_PSA_CRYPTO_USER_CONFIG_FILE=\"mbedtls_wii_user_config.h\"   -v CMakeFiles/cmTC_f3233.dir/CMakeCCompilerABI.c.obj -o cmTC_f3233 
+COLLECT_GCC_OPTIONS='-D' 'NDEBUG' '-g' '-O3' '-Wall' '-I' '/opt/devkitpro/libogc/include' '-I' '/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../curl/mbedtls/wii/include' '-D' 'MBEDTLS_USER_CONFIG_FILE="mbedtls_wii_user_config.h"' '-D' 'TF_PSA_CRYPTO_USER_CONFIG_FILE="mbedtls_wii_user_config.h"' '-v' '-o' 'CMakeFiles/cmTC_d5825.dir/CMakeCCompilerABI.c.obj' '-c' '-mcpu=750' '-dumpdir' 'CMakeFiles/cmTC_d5825.dir/CMakeCCompilerABI.c.'
+Linking C executable cmTC_d5825
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_d5825.dir/link.txt --verbose=1
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -DNDEBUG -g -O3 -Wall -I/opt/devkitpro/libogc/include -I/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../curl/mbedtls/wii/include -DMBEDTLS_USER_CONFIG_FILE=\"mbedtls_wii_user_config.h\" -DTF_PSA_CRYPTO_USER_CONFIG_FILE=\"mbedtls_wii_user_config.h\"   -v CMakeFiles/cmTC_d5825.dir/CMakeCCompilerABI.c.obj -o cmTC_d5825 
 Using built-in specs.
 COLLECT_GCC=/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc
 COLLECT_LTO_WRAPPER=/opt/devkitpro/devkitPPC/libexec/gcc/powerpc-eabi/15.2.0/lto-wrapper
@@ -66,8 +66,8 @@ Supported LTO compression algorithms: zlib zstd
 gcc version 15.2.0 (devkitPPC) 
 COMPILER_PATH=/opt/devkitpro/devkitPPC/libexec/gcc/powerpc-eabi/15.2.0/:/opt/devkitpro/devkitPPC/libexec/gcc/powerpc-eabi/15.2.0/:/opt/devkitpro/devkitPPC/libexec/gcc/powerpc-eabi/:/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/:/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/:/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/
 LIBRARY_PATH=/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/:/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/lib/:/opt/devkitpro/devkitPPC/powerpc-eabi/lib/
-COLLECT_GCC_OPTIONS='-D' 'NDEBUG' '-g' '-O3' '-Wall' '-I' '/opt/devkitpro/libogc/include' '-I' '/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../curl/mbedtls/wii/include' '-D' 'MBEDTLS_USER_CONFIG_FILE="mbedtls_wii_user_config.h"' '-D' 'TF_PSA_CRYPTO_USER_CONFIG_FILE="mbedtls_wii_user_config.h"' '-v' '-o' 'cmTC_f3233' '-mcpu=750' '-dumpdir' 'cmTC_f3233.'
- /opt/devkitpro/devkitPPC/libexec/gcc/powerpc-eabi/15.2.0/collect2 -plugin /opt/devkitpro/devkitPPC/libexec/gcc/powerpc-eabi/15.2.0/liblto_plugin.so -plugin-opt=/opt/devkitpro/devkitPPC/libexec/gcc/powerpc-eabi/15.2.0/lto-wrapper -plugin-opt=-fresolution=/tmp/cc52A4KP.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lsysbase -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc --sysroot=/opt/devkitpro/devkitPPC/powerpc-eabi --eh-frame-hdr -V -dn -Bstatic -o cmTC_f3233 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/ecrti.o /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/crtbegin.o -L/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0 -L/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/lib -L/opt/devkitpro/devkitPPC/powerpc-eabi/lib CMakeFiles/cmTC_f3233.dir/CMakeCCompilerABI.c.obj -lgcc --start-group -lsysbase -lc --end-group -lgcc /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/crtend.o /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/ecrtn.o
+COLLECT_GCC_OPTIONS='-D' 'NDEBUG' '-g' '-O3' '-Wall' '-I' '/opt/devkitpro/libogc/include' '-I' '/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../curl/mbedtls/wii/include' '-D' 'MBEDTLS_USER_CONFIG_FILE="mbedtls_wii_user_config.h"' '-D' 'TF_PSA_CRYPTO_USER_CONFIG_FILE="mbedtls_wii_user_config.h"' '-v' '-o' 'cmTC_d5825' '-mcpu=750' '-dumpdir' 'cmTC_d5825.'
+ /opt/devkitpro/devkitPPC/libexec/gcc/powerpc-eabi/15.2.0/collect2 -plugin /opt/devkitpro/devkitPPC/libexec/gcc/powerpc-eabi/15.2.0/liblto_plugin.so -plugin-opt=/opt/devkitpro/devkitPPC/libexec/gcc/powerpc-eabi/15.2.0/lto-wrapper -plugin-opt=-fresolution=/tmp/ccgL0X9j.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lsysbase -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc --sysroot=/opt/devkitpro/devkitPPC/powerpc-eabi --eh-frame-hdr -V -dn -Bstatic -o cmTC_d5825 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/ecrti.o /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/crtbegin.o -L/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0 -L/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/lib -L/opt/devkitpro/devkitPPC/powerpc-eabi/lib CMakeFiles/cmTC_d5825.dir/CMakeCCompilerABI.c.obj -lgcc --start-group -lsysbase -lc --end-group -lgcc /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/crtend.o /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/ecrtn.o
 GNU ld (GNU Binutils) 2.45.1
   Supported emulations:
    elf32ppc
@@ -79,9 +79,9 @@ GNU ld (GNU Binutils) 2.45.1
    elf64ppc
    elf64lppc
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-COLLECT_GCC_OPTIONS='-D' 'NDEBUG' '-g' '-O3' '-Wall' '-I' '/opt/devkitpro/libogc/include' '-I' '/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../curl/mbedtls/wii/include' '-D' 'MBEDTLS_USER_CONFIG_FILE="mbedtls_wii_user_config.h"' '-D' 'TF_PSA_CRYPTO_USER_CONFIG_FILE="mbedtls_wii_user_config.h"' '-v' '-o' 'cmTC_f3233' '-mcpu=750' '-dumpdir' 'cmTC_f3233.'
-make[3]: Leaving directory '/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-2K58Mh'
-make[2]: Leaving directory '/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-2K58Mh'
+COLLECT_GCC_OPTIONS='-D' 'NDEBUG' '-g' '-O3' '-Wall' '-I' '/opt/devkitpro/libogc/include' '-I' '/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../curl/mbedtls/wii/include' '-D' 'MBEDTLS_USER_CONFIG_FILE="mbedtls_wii_user_config.h"' '-D' 'TF_PSA_CRYPTO_USER_CONFIG_FILE="mbedtls_wii_user_config.h"' '-v' '-o' 'cmTC_d5825' '-mcpu=750' '-dumpdir' 'cmTC_d5825.'
+make[3]: Leaving directory '/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-EIGLIv'
+make[2]: Leaving directory '/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-EIGLIv'
 
 
 
@@ -104,13 +104,13 @@ Parsed C implicit include dir info from above output: rv=done
 
 Parsed C implicit link information from above output:
   link line regex: [^( *|.*[/\])(powerpc-eabi-ld|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\]+-)?ld|collect2)[^/\]*( |$)]
-  ignore line: [Change Dir: /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-2K58Mh]
+  ignore line: [Change Dir: /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-EIGLIv]
   ignore line: []
-  ignore line: [Run Build Command(s):/usr/bin/make -f Makefile cmTC_f3233/fast && make[2]: Entering directory '/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-2K58Mh']
-  ignore line: [/usr/bin/make  -f CMakeFiles/cmTC_f3233.dir/build.make CMakeFiles/cmTC_f3233.dir/build]
-  ignore line: [make[3]: Entering directory '/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-2K58Mh']
-  ignore line: [Building C object CMakeFiles/cmTC_f3233.dir/CMakeCCompilerABI.c.obj]
-  ignore line: [/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc   -DNDEBUG -g -O3 -Wall -I/opt/devkitpro/libogc/include -I/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../curl/mbedtls/wii/include -DMBEDTLS_USER_CONFIG_FILE=\"mbedtls_wii_user_config.h\" -DTF_PSA_CRYPTO_USER_CONFIG_FILE=\"mbedtls_wii_user_config.h\"    -v -o CMakeFiles/cmTC_f3233.dir/CMakeCCompilerABI.c.obj -c /usr/share/cmake-3.25/Modules/CMakeCCompilerABI.c]
+  ignore line: [Run Build Command(s):/usr/bin/make -f Makefile cmTC_d5825/fast && make[2]: Entering directory '/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-EIGLIv']
+  ignore line: [/usr/bin/make  -f CMakeFiles/cmTC_d5825.dir/build.make CMakeFiles/cmTC_d5825.dir/build]
+  ignore line: [make[3]: Entering directory '/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-EIGLIv']
+  ignore line: [Building C object CMakeFiles/cmTC_d5825.dir/CMakeCCompilerABI.c.obj]
+  ignore line: [/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc   -DNDEBUG -g -O3 -Wall -I/opt/devkitpro/libogc/include -I/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../curl/mbedtls/wii/include -DMBEDTLS_USER_CONFIG_FILE=\"mbedtls_wii_user_config.h\" -DTF_PSA_CRYPTO_USER_CONFIG_FILE=\"mbedtls_wii_user_config.h\"    -v -o CMakeFiles/cmTC_d5825.dir/CMakeCCompilerABI.c.obj -c /usr/share/cmake-3.25/Modules/CMakeCCompilerABI.c]
   ignore line: [Using built-in specs.]
   ignore line: [COLLECT_GCC=/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc]
   ignore line: [Target: powerpc-eabi]
@@ -118,8 +118,8 @@ Parsed C implicit link information from above output:
   ignore line: [Thread model: dkp]
   ignore line: [Supported LTO compression algorithms: zlib zstd]
   ignore line: [gcc version 15.2.0 (devkitPPC) ]
-  ignore line: [COLLECT_GCC_OPTIONS='-D' 'NDEBUG' '-g' '-O3' '-Wall' '-I' '/opt/devkitpro/libogc/include' '-I' '/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../curl/mbedtls/wii/include' '-D' 'MBEDTLS_USER_CONFIG_FILE="mbedtls_wii_user_config.h"' '-D' 'TF_PSA_CRYPTO_USER_CONFIG_FILE="mbedtls_wii_user_config.h"' '-v' '-o' 'CMakeFiles/cmTC_f3233.dir/CMakeCCompilerABI.c.obj' '-c' '-mcpu=750' '-dumpdir' 'CMakeFiles/cmTC_f3233.dir/']
-  ignore line: [ /opt/devkitpro/devkitPPC/libexec/gcc/powerpc-eabi/15.2.0/cc1 -quiet -v -I /opt/devkitpro/libogc/include -I /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../curl/mbedtls/wii/include -D NDEBUG -D MBEDTLS_USER_CONFIG_FILE="mbedtls_wii_user_config.h" -D TF_PSA_CRYPTO_USER_CONFIG_FILE="mbedtls_wii_user_config.h" /usr/share/cmake-3.25/Modules/CMakeCCompilerABI.c -quiet -dumpdir CMakeFiles/cmTC_f3233.dir/ -dumpbase CMakeCCompilerABI.c.c -dumpbase-ext .c -mcpu=750 -g -O3 -Wall -version -o /tmp/cctgysaj.s]
+  ignore line: [COLLECT_GCC_OPTIONS='-D' 'NDEBUG' '-g' '-O3' '-Wall' '-I' '/opt/devkitpro/libogc/include' '-I' '/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../curl/mbedtls/wii/include' '-D' 'MBEDTLS_USER_CONFIG_FILE="mbedtls_wii_user_config.h"' '-D' 'TF_PSA_CRYPTO_USER_CONFIG_FILE="mbedtls_wii_user_config.h"' '-v' '-o' 'CMakeFiles/cmTC_d5825.dir/CMakeCCompilerABI.c.obj' '-c' '-mcpu=750' '-dumpdir' 'CMakeFiles/cmTC_d5825.dir/']
+  ignore line: [ /opt/devkitpro/devkitPPC/libexec/gcc/powerpc-eabi/15.2.0/cc1 -quiet -v -I /opt/devkitpro/libogc/include -I /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../curl/mbedtls/wii/include -D NDEBUG -D MBEDTLS_USER_CONFIG_FILE="mbedtls_wii_user_config.h" -D TF_PSA_CRYPTO_USER_CONFIG_FILE="mbedtls_wii_user_config.h" /usr/share/cmake-3.25/Modules/CMakeCCompilerABI.c -quiet -dumpdir CMakeFiles/cmTC_d5825.dir/ -dumpbase CMakeCCompilerABI.c.c -dumpbase-ext .c -mcpu=750 -g -O3 -Wall -version -o /tmp/ccGsq9fn.s]
   ignore line: [GNU C23 (devkitPPC) version 15.2.0 (powerpc-eabi)]
   ignore line: [	compiled by GNU C version 12.2.0  GMP version 6.2.1  MPFR version 4.1.0  MPC version 1.2.1  isl version isl-0.18-GMP]
   ignore line: []
@@ -135,14 +135,14 @@ Parsed C implicit link information from above output:
   ignore line: [ /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/include]
   ignore line: [End of search list.]
   ignore line: [Compiler executable checksum: 90e0b5b5e0eeb7070152c1682ba436c2]
-  ignore line: [COLLECT_GCC_OPTIONS='-D' 'NDEBUG' '-g' '-O3' '-Wall' '-I' '/opt/devkitpro/libogc/include' '-I' '/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../curl/mbedtls/wii/include' '-D' 'MBEDTLS_USER_CONFIG_FILE="mbedtls_wii_user_config.h"' '-D' 'TF_PSA_CRYPTO_USER_CONFIG_FILE="mbedtls_wii_user_config.h"' '-v' '-o' 'CMakeFiles/cmTC_f3233.dir/CMakeCCompilerABI.c.obj' '-c' '-mcpu=750' '-dumpdir' 'CMakeFiles/cmTC_f3233.dir/']
-  ignore line: [ /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/as -mppc -many -mbig -o CMakeFiles/cmTC_f3233.dir/CMakeCCompilerABI.c.obj /tmp/cctgysaj.s]
+  ignore line: [COLLECT_GCC_OPTIONS='-D' 'NDEBUG' '-g' '-O3' '-Wall' '-I' '/opt/devkitpro/libogc/include' '-I' '/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../curl/mbedtls/wii/include' '-D' 'MBEDTLS_USER_CONFIG_FILE="mbedtls_wii_user_config.h"' '-D' 'TF_PSA_CRYPTO_USER_CONFIG_FILE="mbedtls_wii_user_config.h"' '-v' '-o' 'CMakeFiles/cmTC_d5825.dir/CMakeCCompilerABI.c.obj' '-c' '-mcpu=750' '-dumpdir' 'CMakeFiles/cmTC_d5825.dir/']
+  ignore line: [ /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/as -mppc -many -mbig -o CMakeFiles/cmTC_d5825.dir/CMakeCCompilerABI.c.obj /tmp/ccGsq9fn.s]
   ignore line: [COMPILER_PATH=/opt/devkitpro/devkitPPC/libexec/gcc/powerpc-eabi/15.2.0/:/opt/devkitpro/devkitPPC/libexec/gcc/powerpc-eabi/15.2.0/:/opt/devkitpro/devkitPPC/libexec/gcc/powerpc-eabi/:/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/:/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/:/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/]
   ignore line: [LIBRARY_PATH=/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/:/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/lib/:/opt/devkitpro/devkitPPC/powerpc-eabi/lib/]
-  ignore line: [COLLECT_GCC_OPTIONS='-D' 'NDEBUG' '-g' '-O3' '-Wall' '-I' '/opt/devkitpro/libogc/include' '-I' '/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../curl/mbedtls/wii/include' '-D' 'MBEDTLS_USER_CONFIG_FILE="mbedtls_wii_user_config.h"' '-D' 'TF_PSA_CRYPTO_USER_CONFIG_FILE="mbedtls_wii_user_config.h"' '-v' '-o' 'CMakeFiles/cmTC_f3233.dir/CMakeCCompilerABI.c.obj' '-c' '-mcpu=750' '-dumpdir' 'CMakeFiles/cmTC_f3233.dir/CMakeCCompilerABI.c.']
-  ignore line: [Linking C executable cmTC_f3233]
-  ignore line: [/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_f3233.dir/link.txt --verbose=1]
-  ignore line: [/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -DNDEBUG -g -O3 -Wall -I/opt/devkitpro/libogc/include -I/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../curl/mbedtls/wii/include -DMBEDTLS_USER_CONFIG_FILE=\"mbedtls_wii_user_config.h\" -DTF_PSA_CRYPTO_USER_CONFIG_FILE=\"mbedtls_wii_user_config.h\"   -v CMakeFiles/cmTC_f3233.dir/CMakeCCompilerABI.c.obj -o cmTC_f3233 ]
+  ignore line: [COLLECT_GCC_OPTIONS='-D' 'NDEBUG' '-g' '-O3' '-Wall' '-I' '/opt/devkitpro/libogc/include' '-I' '/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../curl/mbedtls/wii/include' '-D' 'MBEDTLS_USER_CONFIG_FILE="mbedtls_wii_user_config.h"' '-D' 'TF_PSA_CRYPTO_USER_CONFIG_FILE="mbedtls_wii_user_config.h"' '-v' '-o' 'CMakeFiles/cmTC_d5825.dir/CMakeCCompilerABI.c.obj' '-c' '-mcpu=750' '-dumpdir' 'CMakeFiles/cmTC_d5825.dir/CMakeCCompilerABI.c.']
+  ignore line: [Linking C executable cmTC_d5825]
+  ignore line: [/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_d5825.dir/link.txt --verbose=1]
+  ignore line: [/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -DNDEBUG -g -O3 -Wall -I/opt/devkitpro/libogc/include -I/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../curl/mbedtls/wii/include -DMBEDTLS_USER_CONFIG_FILE=\"mbedtls_wii_user_config.h\" -DTF_PSA_CRYPTO_USER_CONFIG_FILE=\"mbedtls_wii_user_config.h\"   -v CMakeFiles/cmTC_d5825.dir/CMakeCCompilerABI.c.obj -o cmTC_d5825 ]
   ignore line: [Using built-in specs.]
   ignore line: [COLLECT_GCC=/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc]
   ignore line: [COLLECT_LTO_WRAPPER=/opt/devkitpro/devkitPPC/libexec/gcc/powerpc-eabi/15.2.0/lto-wrapper]
@@ -153,13 +153,13 @@ Parsed C implicit link information from above output:
   ignore line: [gcc version 15.2.0 (devkitPPC) ]
   ignore line: [COMPILER_PATH=/opt/devkitpro/devkitPPC/libexec/gcc/powerpc-eabi/15.2.0/:/opt/devkitpro/devkitPPC/libexec/gcc/powerpc-eabi/15.2.0/:/opt/devkitpro/devkitPPC/libexec/gcc/powerpc-eabi/:/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/:/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/:/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/]
   ignore line: [LIBRARY_PATH=/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/:/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/lib/:/opt/devkitpro/devkitPPC/powerpc-eabi/lib/]
-  ignore line: [COLLECT_GCC_OPTIONS='-D' 'NDEBUG' '-g' '-O3' '-Wall' '-I' '/opt/devkitpro/libogc/include' '-I' '/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../curl/mbedtls/wii/include' '-D' 'MBEDTLS_USER_CONFIG_FILE="mbedtls_wii_user_config.h"' '-D' 'TF_PSA_CRYPTO_USER_CONFIG_FILE="mbedtls_wii_user_config.h"' '-v' '-o' 'cmTC_f3233' '-mcpu=750' '-dumpdir' 'cmTC_f3233.']
-  link line: [ /opt/devkitpro/devkitPPC/libexec/gcc/powerpc-eabi/15.2.0/collect2 -plugin /opt/devkitpro/devkitPPC/libexec/gcc/powerpc-eabi/15.2.0/liblto_plugin.so -plugin-opt=/opt/devkitpro/devkitPPC/libexec/gcc/powerpc-eabi/15.2.0/lto-wrapper -plugin-opt=-fresolution=/tmp/cc52A4KP.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lsysbase -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc --sysroot=/opt/devkitpro/devkitPPC/powerpc-eabi --eh-frame-hdr -V -dn -Bstatic -o cmTC_f3233 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/ecrti.o /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/crtbegin.o -L/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0 -L/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/lib -L/opt/devkitpro/devkitPPC/powerpc-eabi/lib CMakeFiles/cmTC_f3233.dir/CMakeCCompilerABI.c.obj -lgcc --start-group -lsysbase -lc --end-group -lgcc /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/crtend.o /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/ecrtn.o]
+  ignore line: [COLLECT_GCC_OPTIONS='-D' 'NDEBUG' '-g' '-O3' '-Wall' '-I' '/opt/devkitpro/libogc/include' '-I' '/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../curl/mbedtls/wii/include' '-D' 'MBEDTLS_USER_CONFIG_FILE="mbedtls_wii_user_config.h"' '-D' 'TF_PSA_CRYPTO_USER_CONFIG_FILE="mbedtls_wii_user_config.h"' '-v' '-o' 'cmTC_d5825' '-mcpu=750' '-dumpdir' 'cmTC_d5825.']
+  link line: [ /opt/devkitpro/devkitPPC/libexec/gcc/powerpc-eabi/15.2.0/collect2 -plugin /opt/devkitpro/devkitPPC/libexec/gcc/powerpc-eabi/15.2.0/liblto_plugin.so -plugin-opt=/opt/devkitpro/devkitPPC/libexec/gcc/powerpc-eabi/15.2.0/lto-wrapper -plugin-opt=-fresolution=/tmp/ccgL0X9j.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lsysbase -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc --sysroot=/opt/devkitpro/devkitPPC/powerpc-eabi --eh-frame-hdr -V -dn -Bstatic -o cmTC_d5825 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/ecrti.o /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/crtbegin.o -L/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0 -L/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/lib -L/opt/devkitpro/devkitPPC/powerpc-eabi/lib CMakeFiles/cmTC_d5825.dir/CMakeCCompilerABI.c.obj -lgcc --start-group -lsysbase -lc --end-group -lgcc /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/crtend.o /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/ecrtn.o]
     arg [/opt/devkitpro/devkitPPC/libexec/gcc/powerpc-eabi/15.2.0/collect2] ==> ignore
     arg [-plugin] ==> ignore
     arg [/opt/devkitpro/devkitPPC/libexec/gcc/powerpc-eabi/15.2.0/liblto_plugin.so] ==> ignore
     arg [-plugin-opt=/opt/devkitpro/devkitPPC/libexec/gcc/powerpc-eabi/15.2.0/lto-wrapper] ==> ignore
-    arg [-plugin-opt=-fresolution=/tmp/cc52A4KP.res] ==> ignore
+    arg [-plugin-opt=-fresolution=/tmp/ccgL0X9j.res] ==> ignore
     arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
     arg [-plugin-opt=-pass-through=-lsysbase] ==> ignore
     arg [-plugin-opt=-pass-through=-lc] ==> ignore
@@ -170,13 +170,13 @@ Parsed C implicit link information from above output:
     arg [-dn] ==> ignore
     arg [-Bstatic] ==> search static
     arg [-o] ==> ignore
-    arg [cmTC_f3233] ==> ignore
+    arg [cmTC_d5825] ==> ignore
     arg [/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/ecrti.o] ==> obj [/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/ecrti.o]
     arg [/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/crtbegin.o] ==> obj [/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/crtbegin.o]
     arg [-L/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0] ==> dir [/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0]
     arg [-L/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/lib] ==> dir [/opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/lib]
     arg [-L/opt/devkitpro/devkitPPC/powerpc-eabi/lib] ==> dir [/opt/devkitpro/devkitPPC/powerpc-eabi/lib]
-    arg [CMakeFiles/cmTC_f3233.dir/CMakeCCompilerABI.c.obj] ==> ignore
+    arg [CMakeFiles/cmTC_d5825.dir/CMakeCCompilerABI.c.obj] ==> ignore
     arg [-lgcc] ==> lib [gcc]
     arg [--start-group] ==> ignore
     arg [-lsysbase] ==> lib [sysbase]
@@ -195,19 +195,19 @@ Parsed C implicit link information from above output:
 
 
 Performing C SOURCE FILE Test C_COMPILER_SUPPORTS_WFORMAT_SIGNEDNESS succeeded with the following output:
-Change Dir: /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-HJd9Yz
+Change Dir: /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-BYzFWp
 
-Run Build Command(s):/usr/bin/make -f Makefile cmTC_eefa4/fast && make[2]: Entering directory '/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-HJd9Yz'
-/usr/bin/make  -f CMakeFiles/cmTC_eefa4.dir/build.make CMakeFiles/cmTC_eefa4.dir/build
-make[3]: Entering directory '/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-HJd9Yz'
-Building C object CMakeFiles/cmTC_eefa4.dir/src.c.obj
-/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -DC_COMPILER_SUPPORTS_WFORMAT_SIGNEDNESS  -DNDEBUG -g -O3 -Wall -I/opt/devkitpro/libogc/include -I/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../curl/mbedtls/wii/include -DMBEDTLS_USER_CONFIG_FILE=\"mbedtls_wii_user_config.h\" -DTF_PSA_CRYPTO_USER_CONFIG_FILE=\"mbedtls_wii_user_config.h\"    -Wformat-signedness -o CMakeFiles/cmTC_eefa4.dir/src.c.obj -c /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-HJd9Yz/src.c
-Linking C executable cmTC_eefa4
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_eefa4.dir/link.txt --verbose=1
-/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -DNDEBUG -g -O3 -Wall -I/opt/devkitpro/libogc/include -I/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../curl/mbedtls/wii/include -DMBEDTLS_USER_CONFIG_FILE=\"mbedtls_wii_user_config.h\" -DTF_PSA_CRYPTO_USER_CONFIG_FILE=\"mbedtls_wii_user_config.h\"  CMakeFiles/cmTC_eefa4.dir/src.c.obj -o cmTC_eefa4 
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_59e29/fast && make[2]: Entering directory '/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-BYzFWp'
+/usr/bin/make  -f CMakeFiles/cmTC_59e29.dir/build.make CMakeFiles/cmTC_59e29.dir/build
+make[3]: Entering directory '/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-BYzFWp'
+Building C object CMakeFiles/cmTC_59e29.dir/src.c.obj
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -DC_COMPILER_SUPPORTS_WFORMAT_SIGNEDNESS  -DNDEBUG -g -O3 -Wall -I/opt/devkitpro/libogc/include -I/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../curl/mbedtls/wii/include -DMBEDTLS_USER_CONFIG_FILE=\"mbedtls_wii_user_config.h\" -DTF_PSA_CRYPTO_USER_CONFIG_FILE=\"mbedtls_wii_user_config.h\"    -Wformat-signedness -o CMakeFiles/cmTC_59e29.dir/src.c.obj -c /opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-BYzFWp/src.c
+Linking C executable cmTC_59e29
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_59e29.dir/link.txt --verbose=1
+/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc -DNDEBUG -g -O3 -Wall -I/opt/devkitpro/libogc/include -I/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/../curl/mbedtls/wii/include -DMBEDTLS_USER_CONFIG_FILE=\"mbedtls_wii_user_config.h\" -DTF_PSA_CRYPTO_USER_CONFIG_FILE=\"mbedtls_wii_user_config.h\"  CMakeFiles/cmTC_59e29.dir/src.c.obj -o cmTC_59e29 
 /opt/devkitpro/devkitPPC/lib/gcc/powerpc-eabi/15.2.0/../../../../powerpc-eabi/bin/ld: warning: cannot find entry symbol _start; defaulting to 018000b8
-make[3]: Leaving directory '/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-HJd9Yz'
-make[2]: Leaving directory '/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-HJd9Yz'
+make[3]: Leaving directory '/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-BYzFWp'
+make[2]: Leaving directory '/opt/devkitpro/extras/cpython/3.15.0a7/build-wii/curl/mbedtls/build-wii/CMakeFiles/CMakeScratch/TryCompile-BYzFWp'
 
 
 Source file was:
