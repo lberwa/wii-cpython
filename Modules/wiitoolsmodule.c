@@ -10,7 +10,7 @@
 #endif
 
 #include <my_text_renderer.h>
-#include <pyfat.h>
+#include "../fat/include/pyfat.h"
 #include <gccore.h>
 #include <video.h>
 #include <wiiuse/wpad.h>
@@ -25,8 +25,8 @@
 #include <stdio.h>
 #include <errno.h>
 #include <math.h>
-#include <curl/curl.h>
-#include <mbedtls/platform.h>
+#include "../curl/include/curl/curl.h"
+#include "../build-wii/curl/mbedtls/install-wii/include/mbedtls/platform.h"
 #define NETWORK_H22
 #include <network.h>
 
@@ -35,7 +35,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <sys/types.h>
-#include <sys/socket.h>
+//#include <sys/socket.h>
 
 extern char font8x8_basic[128][8];
 
@@ -824,6 +824,89 @@ static PyObject* file_remove(PyObject *self, PyObject *args)
         return NULL;
     rc = remove(path);
     return PyLong_FromLong((long)rc);
+}
+
+static PyObject* file_read(PyObject *self, PyObject *args)
+{
+    const char *path;
+    FILE *f;
+    long size;
+    PyObject *bytes;
+    size_t nread;
+    (void)self;
+    if (!PyArg_ParseTuple(args, "s:read_file", &path))
+        return NULL;
+
+    f = fopen(path, "rb");
+    if (!f) {
+        return PyErr_SetFromErrnoWithFilename(PyExc_OSError, path);
+    }
+
+    if (fseek(f, 0, SEEK_END) != 0) {
+        fclose(f);
+        return PyErr_SetFromErrnoWithFilename(PyExc_OSError, path);
+    }
+    size = ftell(f);
+    if (size < 0) {
+        fclose(f);
+        return PyErr_SetFromErrnoWithFilename(PyExc_OSError, path);
+    }
+    rewind(f);
+
+    bytes = PyBytes_FromStringAndSize(NULL, (Py_ssize_t)size);
+    if (!bytes) {
+        fclose(f);
+        return NULL;
+    }
+
+    nread = fread(PyBytes_AS_STRING(bytes), 1, (size_t)size, f);
+    if (nread != (size_t)size && ferror(f)) {
+        fclose(f);
+        Py_DECREF(bytes);
+        return PyErr_SetFromErrnoWithFilename(PyExc_OSError, path);
+    }
+    fclose(f);
+
+    if (nread != (size_t)size) {
+        if (_PyBytes_Resize(&bytes, (Py_ssize_t)nread) != 0) {
+            return NULL;
+        }
+    }
+
+    return bytes;
+}
+
+static PyObject* file_write(PyObject *self, PyObject *args)
+{
+    const char *path;
+    PyObject *obj;
+    const char *data = NULL;
+    Py_ssize_t len = 0;
+    PyObject *temp = NULL;
+    FILE *f;
+    size_t nwritten;
+    (void)self;
+    if (!PyArg_ParseTuple(args, "sO:write_file", &path, &obj))
+        return NULL;
+
+    if (wiitools_get_bytes(obj, &data, &len, &temp) != 0)
+        return NULL;
+
+    f = fopen(path, "wb");
+    if (!f) {
+        Py_XDECREF(temp);
+        return PyErr_SetFromErrnoWithFilename(PyExc_OSError, path);
+    }
+
+    nwritten = fwrite(data, 1, (size_t)len, f);
+    fclose(f);
+    Py_XDECREF(temp);
+
+    if (nwritten != (size_t)len) {
+        return PyErr_SetFromErrnoWithFilename(PyExc_OSError, path);
+    }
+
+    return PyLong_FromSsize_t((Py_ssize_t)nwritten);
 }
 
 static PyObject* terminal_init(PyObject *self, PyObject *args) {
@@ -2927,6 +3010,8 @@ static PyMethodDef wiitools_methods[] = {
     {"VIDEO_WaitVSync", video_waitvsync, METH_VARARGS, "Wait one video frame"},
 	{ "usleep", usleep2, METH_VARARGS, "usleep"},
     {"remove", file_remove, METH_VARARGS, "remove(path) -> 0 on success"},
+    {"read_file", file_read, METH_VARARGS, "read_file(path) -> bytes"},
+    {"write_file", file_write, METH_VARARGS, "write_file(path, data) -> bytes_written"},
     {"png_use", png_use, METH_VARARGS, "png_use(name) selects active PNG"},
     {"png_load", png_load, METH_VARARGS, "png_load(path) -> (width, height), stored as '__default__'"},
     {"png_load_named", png_load_named, METH_VARARGS, "png_load_named(path, name) -> (width, height)"},

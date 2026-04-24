@@ -9,11 +9,21 @@
 extern const unsigned char test_py[];
 extern const unsigned char test_py_end[];
 
+// #define FIND_FILE3
 // #define FIND_FILE2
 // #define FIND_FILE
-//#define PNG
+// #define PNG
+
+ #define ON_DISPLAY
+
+#ifdef ON_DISPLAY
+ #define PRINT terminal_print
+#else
+ #define PRINT SYS_Report
+#endif
 
 #include "../../fat/include/pyfat.h"
+
 #ifdef PNG
 
 #include <stdio.h>
@@ -32,24 +42,24 @@ static int export_png_to_sd(const char *dst_path, const unsigned char *start, co
     if (!fatInitDefault()) {
         return -1; /* SD mount failed */
     }
-    terminal_print("1");
+    PRINT("1");
 
     f = fopen(dst_path, "wb");
     if (!f) {
         return -2; /* open failed */
     }
 
-    terminal_print("2");
+    PRINT("2");
 
     written = fwrite(start, 1, len, f);
     fclose(f);
 
-    terminal_print("3");
+    PRINT("3");
 
     if (written != len) {
         return -3; /* write failed */
     }
-    terminal_print("4");
+    PRINT("4");
     return 0;
 }
 #endif
@@ -70,20 +80,20 @@ void wait(int time) {
 void list_dir(const char *path, int level) {
     DIR *dir = opendir(path);
     if (!dir) {
-        //terminal_print("Kann %s nicht öffnen\n", path);
-        terminal_print("Kann");
-        terminal_print(path);
-        terminal_print("nicht öffnen\n");
+        //PRINT("Kann %s nicht öffnen\n", path);
+        PRINT("Kann");
+        PRINT(path);
+        PRINT("nicht öffnen\n");
         return;
     }
 
     struct dirent *entry;
     while ((entry = readdir(dir)) != NULL) {
-        for (int i = 0; i < level; i++) terminal_print("  "); // Einrückung
-//        terminal_print("%s%s\n", entry->d_name,
+        for (int i = 0; i < level; i++) PRINT("  "); // Einrückung
+//        PRINT("%s%s\n", entry->d_name,
 //                       (entry->d_type == DT_DIR) ? "/" : "");
-        terminal_print(entry->d_name);
-        terminal_print((entry->d_type == DT_DIR) ? "/" : "");
+        PRINT(entry->d_name);
+        PRINT((entry->d_type == DT_DIR) ? "/" : "");
 
         if (entry->d_type == DT_DIR && strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
             char subpath[256];
@@ -95,6 +105,8 @@ void list_dir(const char *path, int level) {
     closedir(dir);
 }
 #endif
+
+
 
 int main(void) {
     
@@ -108,37 +120,39 @@ int main(void) {
     video_init_custom();
     terminal_print("start");
 
+    SYS_STDIO_Report(true); // printf -> Dolphin LOG
+
     #ifdef PNG
     if (!fatInitDefault()) {
-        terminal_print("fatInitDefault failed before PNG export");
+        PRINT("fatInitDefault failed before PNG export");
     }
 
-    terminal_print("load test.png ...");
+    PRINT("load test.png ...");
     if (rc != 0) {
-        terminal_print("PNG export failed; sd:/test.png may be missing");
+        PRINT("PNG export failed; sd:/test.png may be missing");
     }
 
-    terminal_print("load brew.png ...");
+    terminal_prPRINTint("load brew.png ...");
     rc = export_png_to_sd("sd:/brew.png", brew_png, brew_png_end);
     snprintf(msg, sizeof(msg), "export_brew_png_to_sd rc=%d", rc);
-    terminal_print(msg);
+    PRINT(msg);
     if (rc != 0) {
-        terminal_print("PNG export failed; sd:/brew.png may be missing");
+        PRINT("PNG export failed; sd:/brew.png may be missing");
     }
     #endif
 
     if (!fatInitDefault()) {
-        terminal_print("fatInitDefault fehlgeschlagen!\n");
+        PRINT("fatInitDefault fehlgeschlagen!\n");
         return 1;
     }
 
 #ifdef FIND_FILE2
-    terminal_print("start 2\n");
+    PRINT("start 2\n");
 
     // Datei auf der SD-Karte erstellen / überschreiben
     FILE *f = fopen("sd:/text.txt", "w");
     if (!f) {
-        terminal_print("Fehler beim Öffnen der Datei!\n");
+        PRINT("Fehler beim Öffnen der Datei!\n");
         return 1;
     }
 
@@ -147,55 +161,94 @@ int main(void) {
     fprintf(f, "%s\n", text);
 
     fclose(f);
-    terminal_print("Datei erfolgreich geschrieben.\n");
-    terminal_print("-----------------------");
+    PRINT("Datei erfolgreich geschrieben.\n");
+    PRINT("-----------------------");
 
-    terminal_print("Inhalt von SD-Karte:\n");
+    PRINT("Inhalt von SD-Karte:\n");
     list_dir("sd:", 0);
-    terminal_print("-----------------------");
+    PRINT("-----------------------");
 
     wait(300); // 5 Sekunden warten
 #endif
 
 #ifdef FIND_FILE
-    const char *file_path = "sd:/hello/test2.py";
-    FILE *fp = fopen(file_path, "r");
-    if (!fp) {
-        terminal_print("Datei nicht gefunden: ");
-        terminal_print(file_path);
+
+
+
+
+
+FILE *fp = fopen("sd:/curl_test.py", "r");
+
+if (!fp) {
+    PRINT("Datei nicht gefunden\n");
+    return 1;
+}
+
+PRINT("Inhalt:\n--------------------\n");
+
+char line[512];
+int line_num = 0;
+
+while (fgets(line, sizeof(line), fp)) {
+
+    char out[600];
+
+    sprintf(out, "%d: %s", line_num, line);
+
+    PRINT(out);
+
+    line_num++;
+}
+
+fclose(fp);
+
+PRINT("Fertig.\n");
+
+wait(300); // 5 Sekunden warten
+
+#endif
+
+#ifdef FIND_FILE3
+    // Datei öffnen
+    FILE *f = fopen("sd:/curl_test.py", "r");
+    if (!f)
+    {
+        PRINT("Fehler: Datei konnte nicht geöffnet werden\n");
         return 1;
     }
 
-    terminal_print("Inhalt von ");
-    terminal_print(file_path);
-    terminal_print("--------------------\n");
+    PRINT("Inhalt von sd:/test.txt:");
 
-    char buffer[256];
-    while (fgets(buffer, sizeof(buffer), fp)) {
-        terminal_print(buffer);
+    // Datei zeilenweise lesen
+    char buffer[1000000];
+    while (fgets(buffer, sizeof(buffer), f))
+    {
+        PRINT(buffer);
     }
 
-    fclose(fp);
-    terminal_print("\nFertig.\n");
+    // Datei schließen
+    fclose(f);
+
+    PRINT("\n\nFertig.\n");
 #endif
 
     size_t count = 1;
 
-    //Py_Initalize_Custom(NULL); 
+    //Py_Initalize_Custom(NULL, NULL); 
     PyStatus status = Py_Init_Custom((const char*[]){ "sd:/", "sd:"}, &count);
 
     if (status._type != _PyStatus_TYPE_OK) {
         // Init ist fehlgeschlagen
-        terminal_print("Init failed in:");
-        terminal_print(status.func);
-        terminal_print(status.err_msg);
+        PRINT("Init failed in:");
+        PRINT(status.func);
+        PRINT(status.err_msg);
         return status.exitcode;  // ggf. Programm beenden
     }
     
     script_len = (size_t)(test_py_end - test_py);
     script = (char *)malloc(script_len + 1);
     if (script == NULL) {
-        terminal_print("malloc failed: exiting ...");
+        PRINT("malloc failed: exiting ...");
         Py_Finalize();
         return 1;
     }
@@ -203,12 +256,18 @@ int main(void) {
     memcpy(script, test_py, script_len);
     script[script_len] = '\0';
 
-    terminal_print("run source_py/test.py ...");
+    PRINT("run source_py/test.py ...");
     rc = PyRun_SimpleString(script);
 
     free(script);
     if (rc != 0) {
-        terminal_print("python script returned error");
+        //PRINT("python script returned error rc=%d\n", rc);
+        if (PyErr_Occurred()) {
+            PyErr_Print();
+        } else {
+            PRINT("PyErr_Occurred() == false\n");
+        }
+        PRINT("python script returned error");
         wait(600);
     }
 

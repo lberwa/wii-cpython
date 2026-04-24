@@ -15,3 +15,9 @@ wiitools wiitoolsmodule.c \
     -L$(srcdir)/../curl/build-wii/lib \
     -L$(srcdir)/../curl/mbedtls/install-wii/lib \
     -lcurl -lmbedtls -lmbedx509 -lmbedcrypto -ltfpsacrypto
+
+# Built-in math module
+math mathmodule.c
+
+# Integer math helpers (internal)
+_math_integer mathintegermodule.c

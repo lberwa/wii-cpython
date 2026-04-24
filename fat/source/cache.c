@@ -174,7 +174,7 @@ static CACHE_ENTRY* _FAT_cache_getPage(CACHE *cache,sec_t sector)
 	return &(cacheEntries[oldUsed]);
 }
 
-bool _FAT_cache_readSectors(CACHE *cache,sec_t sector,sec_t numSectors,void *buffer)
+/*bool _FAT_cache_readSectors(CACHE *cache,sec_t sector,sec_t numSectors,void *buffer)
 {
 	sec_t sec;
 	sec_t secs_to_read;
@@ -187,7 +187,7 @@ bool _FAT_cache_readSectors(CACHE *cache,sec_t sector,sec_t numSectors,void *buf
 
 		sec = sector - entry->sector;
 		if (sec >= entry->count) return false;
-		secs_to_read = entry->count - sec;
+		secs_to_read = ememcpyntry->count - sec;
 		if(secs_to_read>numSectors) secs_to_read = numSectors;
 
 		memcpy(dest,entry->cache + (sec*cache->bytesPerSector),(secs_to_read*cache->bytesPerSector));
@@ -198,6 +198,118 @@ bool _FAT_cache_readSectors(CACHE *cache,sec_t sector,sec_t numSectors,void *buf
 	}
 
 	return true;
+}*/
+
+bool _FAT_cache_readSectors(CACHE *cache,
+                            sec_t sector,
+                            sec_t numSectors,
+                            void *buffer)
+{
+    // HARD SAFETY: Check parameters immediately
+    if (numSectors <= 0 || numSectors > 1000000) {
+        return false;
+    }
+    
+    if (!cache || !buffer) {
+        return false;
+    }
+
+    // HARD SAFETY: Validate buffer pointer before use
+    // Check it's not in impossible memory ranges
+    if ((uintptr_t)buffer > 0x93400000) {
+        return false;
+    }
+    
+    // Check alignment if it matters for this platform
+    if (((uintptr_t)buffer & 0x3) != 0) {
+        return false;
+    }
+
+    if (cache->bytesPerSector == 0) {
+        return false;
+    }
+
+    uint8_t *dest = (uint8_t *)buffer;
+    
+    // HARD SAFETY: Check destination pointer is sane
+    // On Wii, heap/stack typically in lower memory ranges
+    if ((uintptr_t)dest > 0x90FFFFFF) {
+        return false;
+    }
+
+    while (numSectors > 0) {
+
+        // HARD SAFETY: sector muss gültig bleiben
+        if (sector == (sec_t)-1) {
+            return false;
+        }
+
+        CACHE_ENTRY *entry = _FAT_cache_getPage(cache, sector);
+
+        if (!entry || !entry->cache) {
+            return false;
+        }
+
+        // zusätzliche Schutzschicht gegen kaputte entries
+        if (entry->count == 0) {
+            return false;
+        }
+
+        if (sector < entry->sector) {
+            return false; // Underflow verhindert
+        }
+
+        sec_t sec = sector - entry->sector;
+
+        if (sec >= entry->count) {
+            return false;
+        }
+
+        sec_t secs_to_read = entry->count - sec;
+
+        if (secs_to_read > numSectors) {
+            secs_to_read = numSectors;
+        }
+
+        // Check multiplication overflow: sec * bytesPerSector
+        if (cache->bytesPerSector > 0 && sec > (SIZE_MAX / cache->bytesPerSector)) {
+            return false;
+        }
+        size_t offset = (size_t)sec * cache->bytesPerSector;
+
+        // Check multiplication overflow: secs_to_read * bytesPerSector  
+        if (cache->bytesPerSector > 0 && secs_to_read > (SIZE_MAX / cache->bytesPerSector)) {
+            return false;
+        }
+        size_t size = (size_t)secs_to_read * cache->bytesPerSector;
+
+        // Check addition overflow: offset + size
+        if (offset > (SIZE_MAX - size)) {
+            return false;
+        }
+
+        // Verify access is within allocated cache buffer
+        // entry->cache is allocated as: sectorsPerPage * bytesPerSector
+        // Check sectorsPerPage * bytesPerSector multiplication
+        if (cache->bytesPerSector > 0 && cache->sectorsPerPage > (SIZE_MAX / cache->bytesPerSector)) {
+            return false;
+        }
+        size_t max_cache_size = (size_t)cache->sectorsPerPage * cache->bytesPerSector;
+        
+        if ((offset + size) > max_cache_size) {
+            return false;
+        }
+
+        memcpy(dest,
+               entry->cache + offset,
+               size);
+
+        dest       += size;
+        sector     += secs_to_read;
+        numSectors -= secs_to_read;
+    }
+
+    return true;
 }
 
 /*
@@ -278,6 +390,32 @@ bool _FAT_cache_writePartialSector (CACHE* cache, const void* buffer, sec_t sect
 	if(entry==NULL) return false;
 
 	sec = sector - entry->sector;
+	
+	// Bounds check: verify sector is within entry
+	if(sec >= entry->count) return false;
+	
+	// Check multiplication overflow: sec * bytesPerSector
+	if (cache->bytesPerSector > 0 && sec > (SIZE_MAX / cache->bytesPerSector)) {
+		return false;
+	}
+	size_t offset_bytes = ((size_t)sec * cache->bytesPerSector) + offset;
+	
+	// Check overflow in offset addition
+	if (((size_t)sec * cache->bytesPerSector) > (SIZE_MAX - offset)) {
+		return false;
+	}
+	
+	// Check sectorsPerPage * bytesPerSector multiplication
+	if (cache->bytesPerSector > 0 && cache->sectorsPerPage > (SIZE_MAX / cache->bytesPerSector)) {
+		return false;
+	}
+	size_t max_cache_size = (size_t)cache->sectorsPerPage * cache->bytesPerSector;
+	
+	// Check write doesn't exceed buffer
+	if((offset_bytes + size) > max_cache_size) {
+		return false;
+	}
+	
 	memcpy(entry->cache + ((sec*cache->bytesPerSector) + offset),buffer,size);
 
 	entry->dirty = true;
@@ -311,8 +449,39 @@ bool _FAT_cache_eraseWritePartialSector (CACHE* cache, const void* buffer, sec_t
 	if(entry==NULL) return false;
 
 	sec = sector - entry->sector;
-	memset(entry->cache + (sec*cache->bytesPerSector),0,cache->bytesPerSector);
-	memcpy(entry->cache + ((sec*cache->bytesPerSector) + offset),buffer,size);
+	
+	// Check multiplication overflow: sec * bytesPerSector (for memset)
+	if (cache->bytesPerSector > 0 && sec > (SIZE_MAX / cache->bytesPerSector)) {
+		return false;
+	}
+	
+	// Check multiplication overflow: sec * bytesPerSector (for memcpy)
+	if (cache->bytesPerSector > 0 && sec > (SIZE_MAX / cache->bytesPerSector)) {
+		return false;
+	}
+	
+	// Check secotrsPerPage bounds for memset/memcpy
+	if (cache->bytesPerSector > 0 && cache->sectorsPerPage > (SIZE_MAX / cache->bytesPerSector)) {
+		return false;
+	}
+	size_t sector_offset = (size_t)sec * cache->bytesPerSector;
+	size_t max_cache_size = (size_t)cache->sectorsPerPage * cache->bytesPerSector;
+	
+	if (sector_offset >= max_cache_size) {
+		return false;
+	}
+	
+	memset(entry->cache + sector_offset, 0, cache->bytesPerSector);
+	
+	// Check memcpy offset doesn't overflow
+	if (sector_offset > (SIZE_MAX - offset)) {
+		return false;
+	}
+	if ((sector_offset + offset + size) > max_cache_size) {
+		return false;
+	}
+	
+	memcpy(entry->cache + (sector_offset + offset), buffer, size);
 
 	entry->dirty = true;
 	return true;
@@ -332,10 +501,36 @@ bool _FAT_cache_writeSectors (CACHE* cache, sec_t sector, sec_t numSectors, cons
 		if(entry==NULL) return false;
 
 		sec = sector - entry->sector;
+		
+		// Bounds check: sec must be within the entry
+		if(sec >= entry->count) return false;
+		
 		secs_to_write = entry->count - sec;
 		if(secs_to_write>numSectors) secs_to_write = numSectors;
 
-		memcpy(entry->cache + (sec*cache->bytesPerSector),src,(secs_to_write*cache->bytesPerSector));
+		// Check multiplication overflow: sec * bytesPerSector
+		if (cache->bytesPerSector > 0 && sec > (SIZE_MAX / cache->bytesPerSector)) {
+			return false;
+		}
+		size_t offset_bytes = (size_t)sec * cache->bytesPerSector;
+		
+		// Check multiplication overflow: secs_to_write * bytesPerSector
+		if (cache->bytesPerSector > 0 && secs_to_write > (SIZE_MAX / cache->bytesPerSector)) {
+			return false;
+		}
+		size_t write_bytes = (size_t)secs_to_write * cache->bytesPerSector;
+		
+		// Check sectorsPerPage * bytesPerSector multiplication
+		if (cache->bytesPerSector > 0 && cache->sectorsPerPage > (SIZE_MAX / cache->bytesPerSector)) {
+			return false;
+		}
+		size_t max_cache_size = (size_t)cache->sectorsPerPage * cache->bytesPerSector;
+		
+		if((offset_bytes + write_bytes) > max_cache_size) {
+			return false;
+		}
+
+		memcpy(entry->cache + offset_bytes, src, write_bytes);
 
 		src += (secs_to_write*cache->bytesPerSector);
 		sector += secs_to_write;

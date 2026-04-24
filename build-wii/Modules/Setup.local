@@ -1,1 +1,23 @@
-# Edit this file for local setup changes
+# Wii/devkitPPC local module config
+DEVKITPRO?=$(DEVKITPRO)
+
+# Wii helper module (+ libcurl HTTPS)
+wiitools wiitoolsmodule.c \
+    -I$(srcdir) \
+    -I$(DEVKITPRO)/extras/bitmap/include \
+    -I$(DEVKITPRO)/extras/mysd_sdkarte_mounten/include \
+    -I$(srcdir)/../curl/wii/include \
+    -I$(DEVKITPRO)/libogc/include \
+    -I$(DEVKITPRO)/libogc/gc \
+    -I$(DEVKITPRO)/libogc/gc/ogc \
+    -I$(srcdir)/../curl/include \
+    -I$(srcdir)/../curl/mbedtls/install-wii/include \
+    -L$(srcdir)/../curl/build-wii/lib \
+    -L$(srcdir)/../curl/mbedtls/install-wii/lib \
+    -lcurl -lmbedtls -lmbedx509 -lmbedcrypto -ltfpsacrypto
+
+# Built-in math module
+math mathmodule.c
+
+# Integer math helpers (internal)
+_math_integer mathintegermodule.c

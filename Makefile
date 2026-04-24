@@ -14,6 +14,7 @@ BUILD_HOST_DIR_ABS := $(abspath $(BUILD_HOST_DIR))
 BUILD_PYTHON ?= $(abspath $(BUILD_HOST_DIR))/python
 MAKEFILE_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 CPU_CORES := $(shell nproc)
+TMPDIR=$(MAKEFILE_DIR)tmp
 
 # Wii Cross-Tools (from current Makefile)
 CC := $(DEVKITPPC)/bin/powerpc-eabi-gcc
@@ -101,19 +102,25 @@ $(BUILD_PYTHON):
 configure: $(BUILD_DIR)/Makefile
 
 $(BUILD_DIR)/Makefile: $(BUILD_PYTHON)
+	@mkdir -p $(TMPDIR)
 	@mkdir -p "$(BUILD_DIR)"
 	cd "$(BUILD_DIR)" && \
 	$(CONFIGURE_ENV) \
 	../configure $(CONFIGURE_FLAGS)
 
-libpython: configure ssl curl wiitools-build
+libpython: configure ssl curl $(BUILD_DIR)/Modules/wiitoolsmodule.o
+	@# Ensure build-wii uses our local module setup (e.g. math)
+	@cmp -s "$(srcdir)/Modules/Setup.local" "$(BUILD_DIR)/Modules/Setup.local" 2>/dev/null || \
+		cp "$(srcdir)/Modules/Setup.local" "$(BUILD_DIR)/Modules/Setup.local"
 	$(MAKE) -j$(CPU_CORES) -C  "$(BUILD_DIR)" libpython$(VERSION).a
 	@# Add wiitools to the library
 	$(AR) rcs "$(BUILD_DIR)/libpython$(VERSION).a" "$(BUILD_DIR)/Modules/wiitoolsmodule.o"
 
 python: libpython
 
-wiitools-build: curl
+wiitools-build: $(BUILD_DIR)/Modules/wiitoolsmodule.o
+
+$(BUILD_DIR)/Modules/wiitoolsmodule.o: curl $(srcdir)/Modules/wiitoolsmodule.c
 	@mkdir -p "$(BUILD_DIR)/Modules"
 	$(CC) \
 		-I$(srcdir)/Modules \

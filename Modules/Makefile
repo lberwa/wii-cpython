@@ -1,7 +1,7 @@
 # Stub Makefile for Modules (add2lib only)
 CC = $(DEVKITPPC)/bin/powerpc-eabi-gcc
 OPT = -g -O2 -Wall -Wstrict-prototypes -fPIC -Os -Wall -msoft-float
-CFLAGS = $(OPT) -I../Include -I.. -DHAVE_CONFIG_H
+CFLAGS = $(OPT) -I../Include -I../build -I../curl/wii/include -I../curl/wii/include/sys/ -DHAVE_CONFIG_H
 AR = $(DEVKITPPC)/bin/powerpc-eabi-ar
 RANLIB = $(DEVKITPPC)/bin/powerpc-eabi-ranlib
 

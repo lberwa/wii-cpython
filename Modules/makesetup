@@ -68,6 +68,16 @@ do
 	esac
 done
 
+replace_if_changed() {
+	new="$1"
+	target="$2"
+	if [ -f "$target" ] && cmp -s "$new" "$target"; then
+		rm -f "$new"
+	else
+		mv -f "$new" "$target"
+	fi
+}
+
 # Set default libdir and config if not set by command line
 # (Not all systems have dirname)
 case $libdir in
@@ -306,13 +316,15 @@ sed -e 's/[ 	]*#.*//' -e '/^[ 	]*$/d' |
 
 	case $config in
 	-)  ;;
-	*)  sed -e "
+	*)  cfgnew="config.c.new.$$"
+	    sed -e "
 		1i$NL/* Generated automatically from $config by makesetup. */
 		/MARKER 1/i$NL$EXTDECLS
 
 		/MARKER 2/i$NL$INITBITS
 
-		" $config >config.c
+		" $config >"$cfgnew"
+	    replace_if_changed "$cfgnew" config.c
 	    ;;
 	esac
 
@@ -334,8 +346,10 @@ sed -e 's/[ 	]*#.*//' -e '/^[ 	]*$/d' |
 		echo "s%_MODOBJS_%$OBJS%" >>$sedf
 		echo "s%_MODLIBS_%$LIBS%" >>$sedf
 		echo "/Definitions added by makesetup/r $sedr" >>$sedf
-		sed -f $sedf $makepre >Makefile
-		cat $rulesf >>Makefile
+		mfnew="Makefile.new.$$"
+		sed -f $sedf $makepre >"$mfnew"
+		cat $rulesf >>"$mfnew"
+		replace_if_changed "$mfnew" Makefile
 		rm -f $sedf $sedr
 	    ;;
 	esac

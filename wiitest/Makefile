@@ -8,6 +8,8 @@ DATA       := data
 INCLUDES   :=
 
 MAKEFILE_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+WII_SD_SYNC ?= /home/lew/Dokumente/wii/dolphin/sd-karte/WiiSDSync
+WII_SD_SYNC_PY_GLOB := $(MAKEFILE_DIR)files/*.py
 
 INCLUDE += -I../build-wii
 INCLUDE += -I$(MAKEFILE_DIR)../Include
@@ -64,10 +66,30 @@ export OFILES := $(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(sFILES:.s=.o) $(SFILES:.S
 export INCLUDE += $(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
                   -I$(CURDIR)/$(BUILD)
 
-.PHONY: $(BUILD) clean
+.PHONY: $(BUILD) clean sync_sd
+.DEFAULT_GOAL := $(BUILD)
+
+sync_sd:
+	@if [ -z "$(WII_SD_SYNC)" ] || [ ! -d "$(WII_SD_SYNC)" ]; then \
+		echo "Note: skipping SD sync (set WII_SD_SYNC to an existing directory)"; \
+		exit 0; \
+	fi
+	@set -e; \
+	for f in $(WII_SD_SYNC_PY_GLOB); do \
+		base=$$(basename $$f); \
+		cp -f "$$f" "$(WII_SD_SYNC)/$$base"; \
+		src_sz=$$(wc -c <"$$f" | tr -d ' '); \
+		dst_sz=$$(wc -c <"$(WII_SD_SYNC)/$$base" | tr -d ' '); \
+		echo "SD sync: $$base ($$src_sz bytes) -> $$dst_sz bytes"; \
+		if [ "$$dst_sz" = "0" ]; then \
+			echo "ERROR: copied empty file to $(WII_SD_SYNC)/$$base"; \
+			exit 1; \
+		fi; \
+	done
 
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
+	@$(MAKE) --no-print-directory sync_sd
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
 
 clean:
@@ -84,6 +106,7 @@ $(OUTPUT).elf: $(OFILES)
 		exit 1; \
 	}
 	$(LD) $(LDFLAGS) $(CRTM) $(OFILES) $(LIBS) -o $@
+	@true
 
 pydata_%.o: %.py
 	@$(bin2o)

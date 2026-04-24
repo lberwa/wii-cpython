@@ -41,9 +41,15 @@
 #include "pycore_jit.h"           // _PyJIT_Fini()
 #endif
 
+//#define EXTERN_SD_IMPORT_TEST
+//#define OS_REPORT_PYTHON_PRINT
+
 #include "opcode.h"
 
 #include <locale.h>               // setlocale()
+#ifdef OS_REPORT_PYTHON_PRINT
+#include <stdio.h>                // printf(), fflush()
+#endif
 #include <stdlib.h>               // getenv()
 #ifdef HAVE_UNISTD_H
 #  include <unistd.h>             // isatty()
@@ -1542,6 +1548,18 @@ pyinit_main(PyThreadState *tstate)
 #include "../fat/include/pyfat.h"
 #include "../bitmap/include/render_text.h"
 
+#ifdef OS_REPORT_PYTHON_PRINT
+static void
+wiiio_write_stdout_raw(const char *data, Py_ssize_t len)
+{
+    if (len <= 0 || data == NULL) {
+        return;
+    }
+
+    SYS_Report("%.*s", (int)len, data);
+}
+#endif
+
 /* Minimal stdout/stderr bridge for Python 3 (PyFile_SetTerminalPrintHook was removed) */
 static PyObject *wiiio_write(PyObject *self, PyObject *args) {
     (void)self;
@@ -1570,6 +1588,9 @@ static PyObject *wiiio_write(PyObject *self, PyObject *args) {
     }
 
     if (len > 0 && data) {
+#ifdef OS_REPORT_PYTHON_PRINT
+        wiiio_write_stdout_raw(data, len);
+#else
         char *buf = (char *)PyMem_Malloc((size_t)len + 1);
         if (!buf) {
             Py_XDECREF(tmp);
@@ -1577,22 +1598,78 @@ static PyObject *wiiio_write(PyObject *self, PyObject *args) {
         }
         memcpy(buf, data, (size_t)len);
         buf[len] = '\0';
+               
         terminal_print(buf);
         PyMem_Free(buf);
+#endif
     }
 
     Py_XDECREF(tmp);
     return PyLong_FromSsize_t(len);
 }
+#ifdef EXTERN_SD_IMPORT_TEST
+static PyObject *wiiio_cprintf(PyObject *self, PyObject *args) {
+    (void)self;
+    PyObject *obj;
+    const char *data = NULL;
+    Py_ssize_t len = 0;
+    PyObject *tmp = NULL;
+
+    if (!PyArg_ParseTuple(args, "O", &obj)) {
+        return NULL;
+    }
+
+    if (PyUnicode_Check(obj)) {
+        data = PyUnicode_AsUTF8AndSize(obj, &len);
+        if (!data) return NULL;
+    } else if (PyBytes_Check(obj)) {
+        if (PyBytes_AsStringAndSize(obj, (char **)&data, &len) < 0) return NULL;
+    } else {
+        tmp = PyObject_Str(obj);
+        if (!tmp) return NULL;
+        data = PyUnicode_AsUTF8AndSize(tmp, &len);
+        if (!data) {
+            Py_DECREF(tmp);
+            return NULL;
+        }
+    }
+
+    if (len > 0 && data) {
+#ifdef OS_REPORT_PYTHON_PRINT
+        wiiio_write_stdout_raw(data, len);
+#else
+        char *buf = (char *)PyMem_Malloc((size_t)len + 1);
+        if (!buf) {
+            Py_XDECREF(tmp);
+            return PyErr_NoMemory();
+        }
+        memcpy(buf, data, (size_t)len);
+        buf[len] = '\0';
+
+        terminal_print(buf);
+        PyMem_Free(buf);
+#endif
+    }
+
+    Py_XDECREF(tmp);
+    return PyLong_FromSsize_t(len);
+}
+#endif
 
 static PyObject *wiiio_flush(PyObject *self, PyObject *args) {
     (void)self;
     (void)args;
+#ifdef OS_REPORT_PYTHON_PRINT
+    fflush(stdout);
+#endif
     Py_RETURN_NONE;
 }
 
 static PyMethodDef WiiIOMethods[] = {
     {"write", wiiio_write, METH_VARARGS, "Write to Wii terminal"},
+#ifdef EXTERN_SD_IMPORT_TEST
+    {"cprintf", wiiio_cprintf, METH_VARARGS, "Write with C printf"},
+#endif
     {"flush", wiiio_flush, METH_VARARGS, "Flush (no-op)"},
     {NULL, NULL, 0, NULL}
 };
@@ -1691,7 +1768,9 @@ Py_Init_Custom(const char** import_paths, size_t *count)
         PyObject *wiiio = PyModule_Create(&WiiIOModule);
         if (wiiio) {
             PySys_SetObject("stdout", wiiio);
+            PySys_SetObject("__stdout__", wiiio);
             PySys_SetObject("stderr", wiiio);
+            PySys_SetObject("__stderr__", wiiio);
             Py_DECREF(wiiio);
         }
     }
@@ -1701,7 +1780,14 @@ Py_Init_Custom(const char** import_paths, size_t *count)
         "import sys, os\n"
         "import importlib.abc\n"
         "import importlib.machinery\n"
-        "import importlib.util\n"
+        "\n"
+        "# Avoid importlib.util.spec_from_file_location() here.\n"
+        "# It normalizes non-POSIX paths like 'sd:/foo.py' via os.path.abspath(),\n"
+        "# which (with cwd='sd:/') becomes 'sd:/sd:/foo.py'.\n"
+        "def _wii_spec(fullname, loader, path):\n"
+        "    spec = importlib.machinery.ModuleSpec(fullname, loader, origin=path)\n"
+        "    spec.has_location = True\n"
+        "    return spec\n"
         "class WiiSourceLoader(importlib.abc.Loader):\n"
         "    def __init__(self, name, path):\n"
         "        self.name = name\n"
@@ -1709,13 +1795,80 @@ Py_Init_Custom(const char** import_paths, size_t *count)
         "    def create_module(self, spec):\n"
         "        return None\n"
         "    def exec_module(self, module):\n"
-        "        with open(self.path, 'r', encoding='utf-8') as f:\n"
-        "            code = compile(f.read(), self.path, 'exec')\n"
+        "        # Keep __file__/origin stable (see _wii_spec note above)\n"
+        "        module.__file__ = self.path\n"
+        "        try:\n"
+        "            if getattr(module, '__spec__', None) is not None:\n"
+        "                module.__spec__.origin = self.path\n"
+        "        except Exception:\n"
+        "            pass\n"
+        "        with open(self.path, 'rb') as _f:\n"
+        "            data = _f.read()\n"
+        "        if self.path.startswith(('sd:/', 'usb:/')):\n"
+        "            try:\n"
+        "                print('[WiiSourceLoader] read', len(data), 'bytes from', self.path)\n"
+        "            except Exception:\n"
+        "                pass\n"
+        "        if not data:\n"
+        "            raise ImportError('empty module source: ' + self.path)\n"
+        #ifdef EXTERN_SD_IMPORT_TEST
+        "        if self.path.startswith('sd:'):\n"
+        "            try:\n"
+        "                import wiiio as _wiiio\n"
+        "                _wiiio.cprintf('[WiiSourceLoader] sd import: ' + self.path + '\\n')\n"
+        "                _wiiio.cprintf('[WiiSourceLoader] byte length: ' + str(len(data)) + '\\n')\n"
+        "                _wiiio.cprintf('[WiiSourceLoader] first 128 bytes: ' + repr(data[:128]) + '\\n')\n"
+        "            except Exception:\n"
+        "                pass\n"
+#endif
+        "        # Sanity check for obviously corrupt data (debug only)\n"
+        "        stripped = data.lstrip(b' \\t\\r\\n')\n"
+        "        # Debug: show first bytes/line if syntax fails\n"
+        "        try:\n"
+        "            _first_line = data.splitlines()[0] if data else b''\n"
+        "        except Exception:\n"
+        "            _first_line = b''\n"
+        "        # Compile directly from bytes to honor PEP 263 encoding cookies\n"
+        "        try:\n"
+        "            code = compile(data, self.path, 'exec')\n"
+        "        except SyntaxError as e:\n"
+        "            print('[WiiSourceLoader] syntax error in', self.path)\n"
+        "            print('[WiiSourceLoader] first 32 bytes:', repr(data[:32]))\n"
+        "            try:\n"
+        "                print('[WiiSourceLoader] first line (utf-8):', _first_line.decode('utf-8', 'replace'))\n"
+        "            except Exception:\n"
+        "                print('[WiiSourceLoader] first line decode failed')\n"
+        "            try:\n"
+        "                _src = data.decode('utf-8', 'replace')\n"
+        "                print('[WiiSourceLoader] source dump begin')\n"
+        "                print(_src)\n"
+        "                print('[WiiSourceLoader] source dump end')\n"
+        "            except Exception:\n"
+        "                print('[WiiSourceLoader] source dump decode failed')\n"
+        "            raise\n"
         "        exec(code, module.__dict__)\n"
         "class WiiSourceFinder(importlib.abc.MetaPathFinder):\n"
         "    def find_spec(self, fullname, path=None, target=None):\n"
         "        if '.' in fullname:\n"
         "            return None\n"
+        "        # If sd:/<name>.py (or usb:/<name>.py) exists, always prefer it.\n"
+        "        for _root in ('sd:/', 'usb:/'):\n"
+        "            _mod = _root + fullname + '.py'\n"
+        "            try:\n"
+        "                if os.path.isfile(_mod):\n"
+        "                    try:\n"
+        "                        with open(_mod, 'rb') as _f:\n"
+        "                            if _f.read(1) == b'':\n"
+        "                                print('[WiiSourceFinder] skipping empty', _mod)\n"
+        "                                continue\n"
+        "                    except Exception:\n"
+        "                        # If we can't probe, fall back to trying to load.\n"
+        "                        pass\n"
+        "                    print('[WiiSourceFinder] using root', _mod)\n"
+        "                    loader = WiiSourceLoader(fullname, _mod)\n"
+        "                    return _wii_spec(fullname, loader, _mod)\n"
+        "            except Exception:\n"
+        "                pass\n"
         "        for base_path in sys.path:\n"
         "            if not (base_path.startswith('sd') or base_path.startswith('usb')):\n"
         "                continue\n"
@@ -1724,10 +1877,17 @@ Py_Init_Custom(const char** import_paths, size_t *count)
         "            mod_file = base_path + fullname + '.py'\n"
         "            try:\n"
         "                if os.path.isfile(mod_file):\n"
+        "                    try:\n"
+        "                        with open(mod_file, 'rb') as _f:\n"
+        "                            if _f.read(1) == b'':\n"
+        "                                print('[WiiSourceFinder] skipping empty', mod_file)\n"
+        "                                continue\n"
+        "                    except Exception:\n"
+        "                        # If we can't probe, fall back to trying to load.\n"
+        "                        pass\n"
+        "                    print('[WiiSourceFinder] using path', mod_file)\n"
         "                    loader = WiiSourceLoader(fullname, mod_file)\n"
-        "                    spec = importlib.util.spec_from_file_location(fullname, mod_file, loader=loader)\n"
-        "                    if spec:\n"
-        "                        return spec\n"
+        "                    return _wii_spec(fullname, loader, mod_file)\n"
         "            except Exception:\n"
         "                pass\n"
         "        return None\n"

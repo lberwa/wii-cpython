@@ -13,6 +13,9 @@ extern "C" {
 #endif
 
 
+extern PyObject* PyInit_wiitools(void);
+extern PyObject* PyInit_math(void);
+extern PyObject* PyInit__math_integer(void);
 extern PyObject* PyInit__asyncio(void);
 extern PyObject* PyInit_atexit(void);
 extern PyObject* PyInit_faulthandler(void);
@@ -54,9 +57,14 @@ extern PyObject* _PyWarnings_Init(void);
 extern PyObject* PyInit__string(void);
 extern PyObject* PyInit_posix(void);
 extern PyObject* PyInit__io(void);
+extern PyObject* PyInit_math(void);
+extern PyObject* PyInit__math_integer(void);
 
 struct _inittab _PyImport_Inittab[] = {
 
+    {"wiitools", PyInit_wiitools},
+    {"math", PyInit_math},
+    {"_math_integer", PyInit__math_integer},
     {"_asyncio", PyInit__asyncio},
     {"atexit", PyInit_atexit},
     {"faulthandler", PyInit_faulthandler},
@@ -121,6 +129,10 @@ struct _inittab _PyImport_Inittab[] = {
     /* POSIX + I/O (needed by importlib external) */
     {"posix", PyInit_posix},
     {"_io", PyInit__io},
+
+    /* Math */
+    {"math", PyInit_math},
+    {"_math_integer", PyInit__math_integer},
 
     /* Sentinel */
     {0, 0}
