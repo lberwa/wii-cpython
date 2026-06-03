@@ -11,7 +11,11 @@ BUILD_HOST_DIR ?= build-host
 BUILD_DIR_ABS := $(abspath $(BUILD_DIR))
 LIB_DIR_ABS := $(abspath $(LIB_DIR))
 BUILD_HOST_DIR_ABS := $(abspath $(BUILD_HOST_DIR))
-BUILD_PYTHON ?= $(abspath $(BUILD_HOST_DIR))/python
+HOST_BUILD_PYTHON := $(abspath $(BUILD_HOST_DIR))/python
+SYSTEM_PYTHON3 := $(shell command -v python3 2>/dev/null)
+BUILD_PYTHON ?= $(HOST_BUILD_PYTHON)
+CONFIG_SITE_FILE := $(abspath config.site)
+export CONFIG_SITE := $(CONFIG_SITE_FILE)
 MAKEFILE_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 CPU_CORES := $(shell nproc)
 TMPDIR=$(MAKEFILE_DIR)tmp
@@ -53,6 +57,7 @@ FILEMODE=		644
 CONFIGURE_ENV= \
 	DEVKITPRO="$(DEVKITPRO)" \
 	DEVKITPPC="$(DEVKITPPC)" \
+	CONFIG_SITE="$(CONFIG_SITE_FILE)" \
 	CC="$(CC)" CXX="$(CXX)" AR="$(AR)" RANLIB="$(RANLIB)" \
 	LD="$(LD)" NM="$(NM)" STRIP="$(STRIP)" OBJCOPY="$(OBJCOPY)" \
 	OBJDUMP="$(OBJDUMP)" READELF="$(READELF)" \
@@ -69,7 +74,7 @@ CONFIGURE_FLAGS= \
 	--without-ensurepip --disable-shared --disable-ipv6 --with-mimalloc=no
 
 .PHONY: all clean configure libpython build-host python curl ssl wiitest	\
- 		regen-importlib bitmap bitmap-clean fat fat-clean wiitest-clean
+ 		regen-importlib bitmap bitmap-clean fat fat-clean wiitest-clean py
 
 all: wiitest
 
@@ -91,9 +96,9 @@ cp-libs: python curl bitmap fat
 	@echo "Copied libraries to $(LIB_DIR)"
 
 
-build-host: $(BUILD_PYTHON)
+build-host: $(HOST_BUILD_PYTHON)
 
-$(BUILD_PYTHON):
+$(HOST_BUILD_PYTHON):
 	@mkdir -p "$(BUILD_HOST_DIR)"
 	cd "$(BUILD_HOST_DIR)" && \
 	../configure --without-ensurepip && \
@@ -159,6 +164,32 @@ regen-importlib:
 		cd "$(BUILD_HOST_DIR)" && ../configure --without-ensurepip; \
 	fi; \
 	$(MAKE) -j$(CPU_CORES) -C "$(BUILD_HOST_DIR)" PYTHON_FOR_REGEN="$$PYTHON_FOR_REGEN" regen-importlib
+
+py:
+	@if [ -x "$(HOST_BUILD_PYTHON)" ]; then \
+		echo "Using build-host python: $(HOST_BUILD_PYTHON)"; \
+		$(MAKE) BUILD_PYTHON="$(HOST_BUILD_PYTHON)" cp-libs; \
+	elif [ -n "$(SYSTEM_PYTHON3)" ]; then \
+		echo "Using system python3: $(SYSTEM_PYTHON3)"; \
+		$(MAKE) BUILD_PYTHON="$(SYSTEM_PYTHON3)" cp-libs; \
+	else \
+		echo "python3 not found and build-host/python missing"; \
+		exit 1; \
+	fi
+
+install: py
+	@if [ "$$(id -u)" != "0" ]; then \
+		echo ""; \
+		echo "please try "sudo make install""; \
+		echo ""; \
+		exit 1; \
+	fi
+	@mkdir -p $(DEVKITPRO)/portlibs/ppc/lib
+	@mkdir -p $(DEVKITPRO)/portlibs/ppc/include/Python
+	
+	@cp -r libs/* $(DEVKITPRO)/portlibs/ppc/lib
+	@cp -r Include/* $(DEVKITPRO)/portlibs/ppc/include/Python
+	@echo "Installation complete."
 
 wiitest: cp-libs 
 	@if [ -d "wiitest" ]; then \

@@ -1,0 +1,64 @@
+# Platform trees not needed for Wii builds
+Android/
+Apple/
+iOS/
+Mac/
+PC/
+PCbuild/
+
+aclocal.m4
+add2lib
+änderungen.txt
+build.log
+config.log
+hash_files.txt
+make.log
+make_progress.txt
+make_step.txt
+make_v2.log
+NEU.txt
+no_clean_make.txt
+parser_no_action.txt
+pyprogramm.py
+ssize_fix.txt
+sys
+!curl/include/sys/
+!curl/include/sys/socket.h
+!curl/wii/include/sys/
+!curl/wii/include/sys/socket.h
+TODO.md
+token_test.txt
+.run.sh
+libs/*
+
+# Docs and developer-only helpers not needed for compiling
+Doc/
+InternalDocs/
+
+# Local build output and logs
+build-host/libpython3.15.a
+#build-host/
+build-host3/
+build-wii/
+tmp/
+*.log
+make_progress.txt
+make_step.txt
+
+# Accidental nested git/tig metadata inside vendored trees
+curl/.tig/
+
+# Wii test build artifacts
+wiitest/curl_test/http/icon.png
+wiitest/curl_test/https/icon.png
+wiitest/curl_test/url/icon.png
+wiitest/tests/sd_probe/icon.png
+
+wiitest/build/
+wiitest/**/build/
+wiitest/*.elf
+wiitest/*.dol
+wiitest/**/*.elf
+wiitest/**/*.dol
+wiitest/**/*.o
+wiitest/**/*.d

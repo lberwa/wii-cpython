@@ -4,16 +4,14 @@ DEVKITPRO?=$(DEVKITPRO)
 # Wii helper module (+ libcurl HTTPS)
 wiitools wiitoolsmodule.c \
     -I$(srcdir) \
-    -I$(DEVKITPRO)/extras/bitmap/include \
-    -I$(DEVKITPRO)/extras/mysd_sdkarte_mounten/include \
-    -I$(srcdir)/../curl/wii/include \
+    -I$(abs_srcdir)/curl/wii/include \
     -I$(DEVKITPRO)/libogc/include \
     -I$(DEVKITPRO)/libogc/gc \
     -I$(DEVKITPRO)/libogc/gc/ogc \
-    -I$(srcdir)/../curl/include \
-    -I$(srcdir)/../curl/mbedtls/install-wii/include \
-    -L$(srcdir)/../curl/build-wii/lib \
-    -L$(srcdir)/../curl/mbedtls/install-wii/lib \
+    -I$(abs_srcdir)/curl/include \
+    -I$(abs_srcdir)/build-wii/curl/mbedtls/install-wii/include \
+    -L$(abs_srcdir)/build-wii/curl/build-wii/lib \
+    -L$(abs_srcdir)/build-wii/curl/mbedtls/install-wii/lib \
     -lcurl -lmbedtls -lmbedx509 -lmbedcrypto -ltfpsacrypto
 
 # Built-in math module

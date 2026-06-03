@@ -8,7 +8,7 @@ DATA       := data
 INCLUDES   :=
 
 MAKEFILE_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
-WII_SD_SYNC ?= /home/lew/Dokumente/wii/dolphin/sd-karte/WiiSDSync
+WII_SD_SYNC ?= ~/Dokumente/wii/dolphin/sd-karte/WiiSDSync
 WII_SD_SYNC_PY_GLOB := $(MAKEFILE_DIR)files/*.py
 
 INCLUDE += -I../build-wii
@@ -74,10 +74,17 @@ sync_sd:
 		echo "Note: skipping SD sync (set WII_SD_SYNC to an existing directory)"; \
 		exit 0; \
 	fi
+	@if [ ! -w "$(WII_SD_SYNC)" ]; then \
+		echo "Note: skipping SD sync ($(WII_SD_SYNC) is not writable)"; \
+		exit 0; \
+	fi
 	@set -e; \
 	for f in $(WII_SD_SYNC_PY_GLOB); do \
 		base=$$(basename $$f); \
-		cp -f "$$f" "$(WII_SD_SYNC)/$$base"; \
+		if ! cp -f "$$f" "$(WII_SD_SYNC)/$$base"; then \
+			echo "Note: skipping SD sync for $$base (copy failed)"; \
+			exit 0; \
+		fi; \
 		src_sz=$$(wc -c <"$$f" | tr -d ' '); \
 		dst_sz=$$(wc -c <"$(WII_SD_SYNC)/$$base" | tr -d ' '); \
 		echo "SD sync: $$base ($$src_sz bytes) -> $$dst_sz bytes"; \
