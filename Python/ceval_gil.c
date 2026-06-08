@@ -50,11 +50,8 @@
      (Note: this mechanism is enabled with FORCE_SWITCHING above)
 */
 
-#ifndef __PPC__
-#define __PPC__
-#endif
-#ifndef WII_SINGLE_THREAD
-#define WII_SINGLE_THREAD 
+#if defined(WII_BUILD) && !defined(WII_SINGLE_THREAD)
+#  define WII_SINGLE_THREAD
 #endif
 
 // Atomically copy the bits indicated by mask between two values.

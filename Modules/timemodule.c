@@ -41,15 +41,11 @@
 #  include <sanitizer/msan_interface.h>
 #endif
 
-#ifndef __wii__
-#define __wii__
-#endif
-
 #ifdef _MSC_VER
 #  define _Py_timezone _timezone
 #  define _Py_daylight _daylight
 #  define _Py_tzname _tzname
-#elif defined(__WII__) || defined(__wii__) || defined(__ppc__) || defined(__powerpc__)
+#elif defined(WII_BUILD)
 #  define _Py_timezone 0
 #  define _Py_daylight 0
 #  define _Py_tzname ((const char *[]){"UTC", "UTC"})

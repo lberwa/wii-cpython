@@ -114,13 +114,6 @@ static void call_ll_exitfuncs(_PyRuntimeState *runtime);
 
 #define TP(msg) ((void)0)
 
-#ifndef __powerpc__
-#define __powerpc__
-#endif
-#ifndef __PPC__
-#define __PPC__
-#endif
-
 /* The following places the `_PyRuntime` structure in a location that can be
  * found without any external information. This is meant to ease access to the
  * interpreter state for various runtime debugging tools, but is *not* an
@@ -1545,8 +1538,10 @@ pyinit_main(PyThreadState *tstate)
     return _PyStatus_OK();
 }
 
+#ifdef __WII__
 #include "../fat/include/pyfat.h"
 #include "../bitmap/include/render_text.h"
+#endif
 
 #ifdef OS_REPORT_PYTHON_PRINT
 static void
@@ -1598,8 +1593,10 @@ static PyObject *wiiio_write(PyObject *self, PyObject *args) {
         }
         memcpy(buf, data, (size_t)len);
         buf[len] = '\0';
-               
+        
+        #ifdef __WII__
         terminal_print(buf);
+        #endif
         PyMem_Free(buf);
 #endif
     }
@@ -1693,6 +1690,7 @@ Py_Init_Custom(const char** import_paths, size_t *count)
     size_t script_len;
     int rc;
 
+#if defined(WII_BUILD)
     if (!fatInitDefault()) {
         PyStatus s;
         s._type = _PyStatus_TYPE_ERROR;
@@ -1701,6 +1699,7 @@ Py_Init_Custom(const char** import_paths, size_t *count)
         s.exitcode = 0;
         return s;
     }
+#endif
     
     PyConfig config;
     PyConfig_InitIsolatedConfig(&config);

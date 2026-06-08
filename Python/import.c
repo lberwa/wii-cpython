@@ -15,11 +15,7 @@
 #include "pycore_long.h"          // _PyLong_GetZero
 #include "pycore_magic_number.h"  // PYC_MAGIC_NUMBER_TOKEN
 
-#ifdef TERMINAL_PRINT_DEBUG
-#undef TERMINAL_PRINT_DEBUG
-#endif
-
-#if defined(TERMINAL_PRINT_DEBUG)
+#if defined(WII_BUILD) && defined(TERMINAL_PRINT_DEBUG)
 #  include <my_text_renderer.h>
 #  define TP(msg) terminal_print(msg)
 #else
@@ -4231,10 +4227,6 @@ _PyImport_GetAbsName(PyThreadState *tstate, PyObject *name,
     return get_abs_name(tstate, name, globals, level);
 }
 
-#ifndef TERMINAL_PRINT_DEBUG
-#define TERMINAL_PRINT_DEBUG 
-#endif
-
 PyObject *
 PyImport_ImportModuleLevelObject(PyObject *name, PyObject *globals,
                                  PyObject *locals, PyObject *fromlist,
@@ -4456,8 +4448,6 @@ PyImport_ImportModuleLevelObject(PyObject *name, PyObject *globals,
     }
     return final_mod;
 }
-
-#undef TERMINAL_PRINT_DEBUG 
 
 static PyObject *
 get_mod_dict(PyObject *module)

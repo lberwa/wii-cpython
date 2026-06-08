@@ -30,6 +30,9 @@ TODO.md
 token_test.txt
 .run.sh
 libs/*
+Lib/__pycache__/
+Lib/*/__pycache__/
+Lib/*/*/__pycache__/
 
 # Docs and developer-only helpers not needed for compiling
 Doc/
@@ -38,7 +41,12 @@ InternalDocs/
 # Local build output and logs
 build-host/libpython3.15.a
 #build-host/
+build-host2
 build-host3/
+build-host/
+
+CLAUDE.md
+
 build-wii/
 tmp/
 *.log

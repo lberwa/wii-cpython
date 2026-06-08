@@ -14,7 +14,11 @@ extern "C" {
 
 /* -- ADDMODULE MARKER 1 -- */
 
+#ifdef WII_BUILD
 extern PyObject* PyInit_wiitools(void);
+extern PyObject* PyInit_math(void);
+extern PyObject* PyInit__math_integer(void);
+#endif
 extern PyObject* PyMarshal_Init(void);
 extern PyObject* PyInit__imp(void);
 extern PyObject* PyInit_gc(void);
@@ -25,15 +29,15 @@ extern PyObject* _PyWarnings_Init(void);
 extern PyObject* PyInit__string(void);
 extern PyObject* PyInit_posix(void);
 extern PyObject* PyInit__io(void);
-extern PyObject* PyInit_math(void);
-extern PyObject* PyInit__math_integer(void);
 
 struct _inittab _PyImport_Inittab[] = {
 
 /* -- ADDMODULE MARKER 2 -- */
 
+#ifdef WII_BUILD
     /* Wii helper module */
     {"wiitools", PyInit_wiitools},
+#endif
 
     /* This module lives in marshal.c */
     {"marshal", PyMarshal_Init},
@@ -67,9 +71,11 @@ struct _inittab _PyImport_Inittab[] = {
     {"posix", PyInit_posix},
     {"_io", PyInit__io},
 
+#ifdef WII_BUILD
     /* Math */
     {"math", PyInit_math},
     {"_math_integer", PyInit__math_integer},
+#endif
 
     /* Sentinel */
     {0, 0}

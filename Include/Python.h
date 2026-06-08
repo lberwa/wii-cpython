@@ -5,29 +5,21 @@
 #ifndef Py_PYTHON_H
 #define Py_PYTHON_H
 
-#ifndef __powerpc__
-#define __powerpc__
-#endif
-#ifndef __PPC__
-#define __PPC__
-#endif
-#ifndef __WII__
-#define __WII__
-#endif
-#ifndef __wii__
-#define __wii__
-#endif
-#ifndef WII_BUILD
-#define WII_BUILD
-#endif
- 
 // Since this is a "meta-include" file, "#ifdef __cplusplus / extern "C" {"
 // is not needed.
 
 
 // Include Python header files
 #include "patchlevel.h"
-#include "../build-wii/pyconfig.h"
+#if defined(__has_include)
+#  if __has_include("../build-wii/pyconfig.h")
+#    include "../build-wii/pyconfig.h"
+#  else
+#    include "pyconfig.h"
+#  endif
+#else
+#  include "../build-wii/pyconfig.h"
+#endif
 #include "pymacconfig.h"
 
 

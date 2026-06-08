@@ -15,7 +15,6 @@ HOST_BUILD_PYTHON := $(abspath $(BUILD_HOST_DIR))/python
 SYSTEM_PYTHON3 := $(shell command -v python3 2>/dev/null)
 BUILD_PYTHON ?= $(HOST_BUILD_PYTHON)
 CONFIG_SITE_FILE := $(abspath config.site)
-export CONFIG_SITE := $(CONFIG_SITE_FILE)
 MAKEFILE_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 CPU_CORES := $(shell nproc)
 TMPDIR=$(MAKEFILE_DIR)tmp
@@ -33,8 +32,24 @@ OBJDUMP := $(DEVKITPPC)/bin/powerpc-eabi-objdump
 READELF := $(DEVKITPPC)/bin/powerpc-eabi-readelf
 
 OPT=			-mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC
-CFLAGS_WII := -Os -Wall -DTERMINAL_PRINT_DEBUG
-CFLAGS=			$(OPT) -I. -I$(MAKEFILE_DIR)bitmap/include $(CFLAGS_WII)
+CFLAGS=			$(OPT)
+WII_DEFINES := \
+	-DWII_BUILD \
+	-D__WII__ \
+	-D__wii__ \
+	-D__PPC__ \
+	-D__powerpc__ \
+	-DWII_SINGLE_THREAD=1 \
+	-DTERMINAL_PRINT_DEBUG
+WII_INCLUDE_DIRS := \
+	-I. \
+	-I$(MAKEFILE_DIR)bitmap/include \
+	-I$(MAKEFILE_DIR)fat/include \
+	-I$(DEVKITPRO)/libogc/include \
+	-I$(DEVKITPRO)/libogc/gc \
+	-I$(DEVKITPRO)/libogc/gc/ogc
+CFLAGS_WII := -Os -Wall $(WII_DEFINES) $(WII_INCLUDE_DIRS)
+CPPFLAGS_WII := $(WII_DEFINES) $(WII_INCLUDE_DIRS)
 MACHDEP=		wii
 prefix=			/usr/local
 exec_prefix=		${prefix}
@@ -61,8 +76,8 @@ CONFIGURE_ENV= \
 	CC="$(CC)" CXX="$(CXX)" AR="$(AR)" RANLIB="$(RANLIB)" \
 	LD="$(LD)" NM="$(NM)" STRIP="$(STRIP)" OBJCOPY="$(OBJCOPY)" \
 	OBJDUMP="$(OBJDUMP)" READELF="$(READELF)" \
-	CFLAGS="$(CFLAGS) -DWII_BUILD" \
-	CPPFLAGS="$(CPPFLAGS) -DWII_BUILD" \
+	CFLAGS="$(CFLAGS) $(CFLAGS_WII)" \
+	CPPFLAGS="$(CPPFLAGS) $(CPPFLAGS_WII)" \
 	ax_cv_c_float_words_bigendian=yes \
 	ac_cv_file__dev_ptmx=no ac_cv_file__dev_ptc=no \
 	ac_cv_header_sys_resource_h=no ac_cv_func_getrlimit=no ac_cv_func_setrlimit=no \
@@ -101,7 +116,8 @@ build-host: $(HOST_BUILD_PYTHON)
 $(HOST_BUILD_PYTHON):
 	@mkdir -p "$(BUILD_HOST_DIR)"
 	cd "$(BUILD_HOST_DIR)" && \
-	../configure --without-ensurepip && \
+	CONFIG_SITE= ../configure --without-ensurepip && \
+	: > Modules/Setup.local && \
 	$(MAKE) -j$(CPU_CORES)
 
 configure: $(BUILD_DIR)/Makefile
@@ -132,18 +148,13 @@ $(BUILD_DIR)/Modules/wiitoolsmodule.o: curl $(srcdir)/Modules/wiitoolsmodule.c
 		-I$(srcdir) \
 		-I$(srcdir)/Include \
 		-I$(BUILD_DIR) \
-		-I$(MAKEFILE_DIR)bitmap/include \
-		-I$(MAKEFILE_DIR)fat/include \
 		-I$(srcdir)/curl/wii/include \
-		-I$(DEVKITPRO)/libogc/include \
-		-I$(DEVKITPRO)/libogc/gc \
-		-I$(DEVKITPRO)/libogc/gc/ogc \
 		-I$(srcdir)/curl/include \
 		-I$(srcdir)/curl/mbedtls/include \
 		-I$(srcdir)/curl/mbedtls/wii/include \
 		-I$(srcdir)/curl/mbedtls/tf-psa-crypto/include \
 		-I$(srcdir)/curl/mbedtls/tf-psa-crypto/drivers/builtin/include \
-		$(CFLAGS) -DWII_BUILD -DPy_BUILD_CORE \
+		$(CFLAGS) $(CFLAGS_WII) -DPy_BUILD_CORE \
 		-c "$(srcdir)/Modules/wiitoolsmodule.c" \
 		-o "$(BUILD_DIR)/Modules/wiitoolsmodule.o"
 
@@ -161,11 +172,11 @@ regen-importlib:
 	fi; \
 	if [ ! -f "$(BUILD_HOST_DIR)/Makefile" ]; then \
 		mkdir -p "$(BUILD_HOST_DIR)"; \
-		cd "$(BUILD_HOST_DIR)" && ../configure --without-ensurepip; \
+		cd "$(BUILD_HOST_DIR)" && CONFIG_SITE= ../configure --without-ensurepip && : > Modules/Setup.local; \
 	fi; \
 	$(MAKE) -j$(CPU_CORES) -C "$(BUILD_HOST_DIR)" PYTHON_FOR_REGEN="$$PYTHON_FOR_REGEN" regen-importlib
 
-py:
+py: 
 	@if [ -x "$(HOST_BUILD_PYTHON)" ]; then \
 		echo "Using build-host python: $(HOST_BUILD_PYTHON)"; \
 		$(MAKE) BUILD_PYTHON="$(HOST_BUILD_PYTHON)" cp-libs; \
@@ -191,7 +202,7 @@ install: py
 	@cp -r Include/* $(DEVKITPRO)/portlibs/ppc/include/Python
 	@echo "Installation complete."
 
-wiitest: cp-libs 
+wiitest: py
 	@if [ -d "wiitest" ]; then \
 		cd wiitest && $(MAKE) clean && $(MAKE) -j$(CPU_CORES); \
 	else \

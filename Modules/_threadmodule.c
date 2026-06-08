@@ -20,10 +20,6 @@
 
 #include <my_text_renderer.h>
 
-#ifndef WII_BUILD
-#define WII_BUILD
-#endif
-
 // ThreadError is just an alias to PyExc_RuntimeError
 #define ThreadError PyExc_RuntimeError
 
@@ -2908,4 +2904,3 @@ PyInit__thread(void)
 {
     return PyModuleDef_Init(&thread_module);
 }
-
