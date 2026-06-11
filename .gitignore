@@ -44,6 +44,7 @@ build-host/libpython3.15.a
 build-host2
 build-host3/
 build-host/
+fat/source_fork_backup/
 
 CLAUDE.md
 

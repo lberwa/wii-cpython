@@ -66,7 +66,7 @@ export OFILES := $(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(sFILES:.s=.o) $(SFILES:.S
 export INCLUDE += $(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
                   -I$(CURDIR)/$(BUILD)
 
-.PHONY: $(BUILD) clean sync_sd
+.PHONY: $(BUILD) clean sync_sd run
 .DEFAULT_GOAL := $(BUILD)
 
 sync_sd:
@@ -93,6 +93,20 @@ sync_sd:
 			exit 1; \
 		fi; \
 	done
+
+ifdef SD_APP_PATH
+
+run: clean
+	@$(MAKE) $(BUILD) -j$(nproc) 
+	cp $(OUTPUT).dol $(SD_APP_PATH)/boot.dol
+	sync
+
+else
+
+run : $(BUILD)
+	@echo "no path!"
+
+endif
 
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@

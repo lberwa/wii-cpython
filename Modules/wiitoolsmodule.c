@@ -33,6 +33,7 @@
 #define __XSI_VISIBLE 600
 #define __POSIX_VISIBLE 200112
 #include <unistd.h>
+#include <fcntl.h>
 #include <time.h>
 #include <sys/types.h>
 //#include <sys/socket.h>
@@ -272,12 +273,12 @@ static int wiitools_curl_debug_cb(CURL *handle, curl_infotype type,
 
 static int wiitools_curl_ensure_runtime(void)
 {
-    s32 r;
     CURLcode cc;
     if (!g_net_inited) {
-        r = net_init();
-        if (r < 0) {
-            PyErr_Format(PyExc_RuntimeError, "net_init failed: %ld", (long)r);
+        /* net_thread runs net_init() in the background; calling it again hangs.
+           Caller (Python) must ensure IsNetReady() == 1 before using curl. */
+        if (!net_ready) {
+            PyErr_SetString(PyExc_RuntimeError, "Network not ready — call wiitools.IsNetReady() first");
             return -1;
         }
         g_net_inited = 1;
@@ -464,14 +465,14 @@ static PyObject *wiitools_curl_perform(const char *method, const char *url,
     }
 
     if (timeout_ms > 0) {
-#ifdef CURLOPT_TIMEOUT_MS
-        curl_easy_setopt(easy, CURLOPT_TIMEOUT_MS, (long)timeout_ms);
-#else
-        curl_easy_setopt(easy, CURLOPT_TIMEOUT, (long)((timeout_ms + 999) / 1000));
-#endif
+        /* On Wii, CURLOPT_TIMEOUT_MS does not work reliably.
+           Use only CURLOPT_CONNECTTIMEOUT like the working C curl examples. */
+        curl_easy_setopt(easy, CURLOPT_CONNECTTIMEOUT, (long)((timeout_ms + 999) / 1000));
     }
 
     if (is_head) {
+        /* CURLOPT_NOBODY hangs on Wii libcurl; use CUSTOMREQUEST instead */
+        //curl_easy_setopt(easy, CURLOPT_CUSTOMREQUEST, "HEAD");
         curl_easy_setopt(easy, CURLOPT_NOBODY, 1L);
     } else if (is_post) {
         curl_easy_setopt(easy, CURLOPT_POST, 1L);
@@ -838,10 +839,8 @@ static PyObject* file_read(PyObject *self, PyObject *args)
         return NULL;
 
     f = fopen(path, "rb");
-    if (!f) {
+    if (!f)
         return PyErr_SetFromErrnoWithFilename(PyExc_OSError, path);
-    }
-
     if (fseek(f, 0, SEEK_END) != 0) {
         fclose(f);
         return PyErr_SetFromErrnoWithFilename(PyExc_OSError, path);
@@ -854,25 +853,14 @@ static PyObject* file_read(PyObject *self, PyObject *args)
     rewind(f);
 
     bytes = PyBytes_FromStringAndSize(NULL, (Py_ssize_t)size);
-    if (!bytes) {
-        fclose(f);
-        return NULL;
-    }
+    if (!bytes) { fclose(f); return NULL; }
 
     nread = fread(PyBytes_AS_STRING(bytes), 1, (size_t)size, f);
-    if (nread != (size_t)size && ferror(f)) {
-        fclose(f);
+    fclose(f);
+    if (nread != (size_t)size) {
         Py_DECREF(bytes);
         return PyErr_SetFromErrnoWithFilename(PyExc_OSError, path);
     }
-    fclose(f);
-
-    if (nread != (size_t)size) {
-        if (_PyBytes_Resize(&bytes, (Py_ssize_t)nread) != 0) {
-            return NULL;
-        }
-    }
-
     return bytes;
 }
 
@@ -897,15 +885,11 @@ static PyObject* file_write(PyObject *self, PyObject *args)
         Py_XDECREF(temp);
         return PyErr_SetFromErrnoWithFilename(PyExc_OSError, path);
     }
-
     nwritten = fwrite(data, 1, (size_t)len, f);
     fclose(f);
     Py_XDECREF(temp);
-
-    if (nwritten != (size_t)len) {
+    if (nwritten != (size_t)len)
         return PyErr_SetFromErrnoWithFilename(PyExc_OSError, path);
-    }
-
     return PyLong_FromSsize_t((Py_ssize_t)nwritten);
 }
 
@@ -1529,11 +1513,54 @@ static PyObject* png_unload(PyObject *self, PyObject *args)
     return py_none();
 }
 
+/* Encodes rgba to PNG and writes it to path.
+   Returns 0 on success. On error sets a Python exception and returns -1. */
+static int wiitools_png_write_file(const char *path, const unsigned char *rgba, unsigned w, unsigned h)
+{
+    unsigned char *buf = NULL;
+    size_t buf_size = 0;
+    unsigned err;
+    FILE *f;
+    size_t nwritten;
+
+    err = lodepng_encode32(&buf, &buf_size, rgba, w, h);
+    if (err != 0) {
+        PyErr_Format(PyExc_IOError, "png encode failed: %s", lodepng_error_text(err));
+        return -1;
+    }
+
+    errno = 0;
+    f = fopen(path, "wb");
+    if (!f) {
+        PyErr_Format(PyExc_OSError, "fopen('%s','wb') failed: errno=%d (%s)",
+                     path, errno, strerror(errno));
+        free(buf);
+        return -1;
+    }
+    setvbuf(f, NULL, _IONBF, 0);
+    errno = 0;
+    nwritten = fwrite(buf, 1, buf_size, f);
+    if (nwritten != buf_size) {
+        PyErr_Format(PyExc_OSError, "fwrite('%s') wrote %u/%u bytes: errno=%d (%s)",
+                     path, (unsigned)nwritten, (unsigned)buf_size, errno, strerror(errno));
+        fclose(f);
+        free(buf);
+        return -1;
+    }
+    if (fclose(f) != 0) {
+        PyErr_Format(PyExc_OSError, "fclose('%s') failed: errno=%d (%s)",
+                     path, errno, strerror(errno));
+        free(buf);
+        return -1;
+    }
+    free(buf);
+    return 0;
+}
+
 static PyObject* png_save_named(PyObject *self, PyObject *args)
 {
     const char *name;
     const char *path;
-    unsigned err;
     wiitools_png_image *img;
     (void)self;
     if (!PyArg_ParseTuple(args, "ss:png_save_named", &name, &path))
@@ -1543,10 +1570,8 @@ static PyObject* png_save_named(PyObject *self, PyObject *args)
         PyErr_Format(PyExc_KeyError, "PNG name not found: '%s'", name);
         return NULL;
     }
-    err = lodepng_encode32_file(path, img->rgba, img->w, img->h);
-    if (err != 0) {
-        PyErr_SetString(PyExc_IOError, lodepng_error_text(err));
-        return NULL;
+    if (wiitools_png_write_file(path, img->rgba, img->w, img->h) != 0) {
+        return NULL; /* exception already set */
     }
     return PyLong_FromLong(0);
 }
@@ -1554,7 +1579,6 @@ static PyObject* png_save_named(PyObject *self, PyObject *args)
 static PyObject* png_save(PyObject *self, PyObject *args)
 {
     const char *path;
-    unsigned err;
     wiitools_png_image *img;
     (void)self;
     if (!PyArg_ParseTuple(args, "s:png_save", &path))
@@ -1562,10 +1586,8 @@ static PyObject* png_save(PyObject *self, PyObject *args)
     img = png_require_current();
     if (img == NULL)
         return NULL;
-    err = lodepng_encode32_file(path, img->rgba, img->w, img->h);
-    if (err != 0) {
-        PyErr_SetString(PyExc_IOError, lodepng_error_text(err));
-        return NULL;
+    if (wiitools_png_write_file(path, img->rgba, img->w, img->h) != 0) {
+        return NULL; /* exception already set */
     }
     return PyLong_FromLong(0);
 }
