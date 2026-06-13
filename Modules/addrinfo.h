@@ -27,6 +27,9 @@
  * SUCH DAMAGE.
  */
 
+#ifndef _ADDRINFO_H_INCLUDED
+#define _ADDRINFO_H_INCLUDED
+
 #ifndef HAVE_GETADDRINFO
 
 /*
@@ -170,3 +173,5 @@ extern void freehostent(struct hostent *);
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* _ADDRINFO_H_INCLUDED */

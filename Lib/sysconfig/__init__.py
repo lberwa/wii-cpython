@@ -2,8 +2,14 @@
 
 import os
 import sys
-import threading
 from os.path import realpath
+
+# Wii: single-threaded — kein echter Lock noetig
+class _NoOpRLock:
+    def acquire(self, *a, **k): return True
+    def release(self): pass
+    def __enter__(self): return self
+    def __exit__(self, *a): pass
 
 __all__ = [
     'get_config_h_filename',
@@ -129,8 +135,8 @@ def _getuserbase():
         base = os.environ.get("APPDATA") or "~"
         return joinuser(base,  _get_implementation())
 
-    if sys.platform == "darwin" and sys._framework:
-        return joinuser("~", "Library", sys._framework,
+    if sys.platform == "darwin" and getattr(sys,"_framework",""):
+        return joinuser("~", "Library", getattr(sys,"_framework",""),
                         f"{sys.version_info[0]}.{sys.version_info[1]}")
 
     return joinuser("~", ".local")
@@ -175,10 +181,12 @@ _SCHEME_KEYS = ('stdlib', 'platstdlib', 'purelib', 'platlib', 'include',
 _PY_VERSION = sys.version.split()[0]
 _PY_VERSION_SHORT = f'{sys.version_info[0]}.{sys.version_info[1]}'
 _PY_VERSION_SHORT_NO_DOT = f'{sys.version_info[0]}{sys.version_info[1]}'
-_BASE_PREFIX = os.path.normpath(sys.base_prefix)
-_BASE_EXEC_PREFIX = os.path.normpath(sys.base_exec_prefix)
+_PREFIX      = getattr(sys, 'prefix',           '/')
+_EXEC_PREFIX = getattr(sys, 'exec_prefix',      '/')
+_BASE_PREFIX      = os.path.normpath(getattr(sys, 'base_prefix',      _PREFIX))
+_BASE_EXEC_PREFIX = os.path.normpath(getattr(sys, 'base_exec_prefix', _EXEC_PREFIX))
 # Mutex guarding initialization of _CONFIG_VARS.
-_CONFIG_VARS_LOCK = threading.RLock()
+_CONFIG_VARS_LOCK = _NoOpRLock()
 _CONFIG_VARS = None
 # True iff _CONFIG_VARS has been fully initialized.
 _CONFIG_VARS_INITIALIZED = False
@@ -191,14 +199,14 @@ def _safe_realpath(path):
     except OSError:
         return path
 
-if sys.executable:
-    _PROJECT_BASE = os.path.dirname(_safe_realpath(sys.executable))
+if getattr(sys,"executable",""):
+    _PROJECT_BASE = os.path.dirname(_safe_realpath(getattr(sys, "executable", "")))
 else:
-    # sys.executable can be empty if argv[0] has been changed and Python is
+    # getattr(sys, "executable", "") can be empty if argv[0] has been changed and Python is
     # unable to retrieve the real program name
     _PROJECT_BASE = _safe_realpath(os.getcwd())
 
-# In a virtual environment, `sys._home` gives us the target directory
+# In a virtual environment, `getattr(sys,"_home",None)` gives us the target directory
 # `_PROJECT_BASE` for the executable that created it when the virtual
 # python is an actual executable ('venv --copies' or Windows).
 _sys_home = getattr(sys, '_home', None)
@@ -282,7 +290,7 @@ def _get_preferred_schemes():
             'home': 'posix_home',
             'user': 'nt_user',
         }
-    if sys.platform == 'darwin' and sys._framework:
+    if sys.platform == 'darwin' and getattr(sys,"_framework",""):
         return {
             'prefix': 'posix_prefix',
             'home': 'posix_home',
@@ -297,7 +305,7 @@ def _get_preferred_schemes():
 
 
 def get_preferred_scheme(key):
-    if key == 'prefix' and sys.prefix != sys.base_prefix:
+    if key == 'prefix' and getattr(sys,"prefix","/") != getattr(sys, "base_prefix", "/"):
         return 'venv'
     scheme = _get_preferred_schemes()[key]
     if scheme not in _INSTALL_SCHEMES:
@@ -323,12 +331,12 @@ def get_makefile_filename():
         return os.path.join(_PROJECT_BASE, "Makefile")
 
     if hasattr(sys, 'abiflags'):
-        config_dir_name = f'config-{_PY_VERSION_SHORT}{sys.abiflags}'
+        config_dir_name = f'config-{_PY_VERSION_SHORT}{getattr(sys,"abiflags","")}'
     else:
         config_dir_name = 'config'
 
     if hasattr(sys.implementation, '_multiarch'):
-        config_dir_name += f'-{sys.implementation._multiarch}'
+        config_dir_name += f'-{getattr(sys.implementation, "_multiarch", "")}'
 
     return os.path.join(get_path('stdlib'), config_dir_name, 'Makefile')
 
@@ -349,7 +357,7 @@ def _get_sysconfigdata_name():
     multiarch = getattr(sys.implementation, '_multiarch', '')
     return os.environ.get(
         '_PYTHON_SYSCONFIGDATA_NAME',
-        f'_sysconfigdata_{sys.abiflags}_{sys.platform}_{multiarch}',
+        f'_sysconfigdata_{getattr(sys,"abiflags","")}_{sys.platform}_{multiarch}',
     )
 
 
@@ -358,8 +366,10 @@ def _get_sysconfigdata():
 
     name = _get_sysconfigdata_name()
     path = os.environ.get('_PYTHON_SYSCONFIGDATA_PATH')
-    module = _import_from_directory(path, name) if path else importlib.import_module(name)
-
+    try:
+        module = _import_from_directory(path, name) if path else importlib.import_module(name)
+    except Exception:
+        return {}
     return module.build_time_vars
 
 
@@ -394,7 +404,7 @@ def _init_non_posix(vars):
     vars.update(_sysconfig.config_vars())
 
     # NOTE: ABIFLAGS is only an emulated value. It is not present during build
-    #       on Windows. sys.abiflags is absent on Windows and vars['abiflags']
+    #       on Windows. getattr(sys,"abiflags","") is absent on Windows and vars['abiflags']
     #       is already widely used to calculate paths, so it should remain an
     #       empty string.
     vars['ABIFLAGS'] = ''.join(
@@ -406,12 +416,12 @@ def _init_non_posix(vars):
 
     vars['LIBDIR'] = _safe_realpath(os.path.join(get_config_var('installed_base'), 'libs'))
     if hasattr(sys, 'dllhandle'):
-        dllhandle = _winapi.GetModuleFileName(sys.dllhandle)
+        dllhandle = _winapi.GetModuleFileName(getattr(sys,"dllhandle",None))
         vars['LIBRARY'] = os.path.basename(_safe_realpath(dllhandle))
         vars['LDLIBRARY'] = vars['LIBRARY']
     vars['EXE'] = '.exe'
     vars['VERSION'] = _PY_VERSION_SHORT_NO_DOT
-    vars['BINDIR'] = os.path.dirname(_safe_realpath(sys.executable))
+    vars['BINDIR'] = os.path.dirname(_safe_realpath(getattr(sys, "executable", "")))
     # No standard path exists on Windows for this, but we'll check
     # whether someone is imitating a POSIX-like layout
     check_tzpath = os.path.join(vars['prefix'], 'share', 'zoneinfo')
@@ -505,18 +515,21 @@ def _init_config_vars():
     global _CONFIG_VARS
     _CONFIG_VARS = {}
 
-    prefix = os.path.normpath(sys.prefix)
-    exec_prefix = os.path.normpath(sys.exec_prefix)
+    prefix = os.path.normpath(getattr(sys, "prefix", "/"))
+    exec_prefix = os.path.normpath(getattr(sys, "exec_prefix", "/"))
     base_prefix = _BASE_PREFIX
     base_exec_prefix = _BASE_EXEC_PREFIX
 
     try:
-        abiflags = sys.abiflags
+        abiflags = getattr(sys,"abiflags","")
     except AttributeError:
         abiflags = ''
 
     if os.name == 'posix':
-        _init_posix(_CONFIG_VARS)
+        try:
+            _init_posix(_CONFIG_VARS)
+        except Exception:
+            pass
         # If we are cross-compiling, load the prefixes from the Makefile instead.
         if '_PYTHON_PROJECT_BASE' in os.environ:
             prefix = _CONFIG_VARS['host_prefix']
@@ -538,18 +551,18 @@ def _init_config_vars():
     _CONFIG_VARS['installed_platbase'] = base_exec_prefix
     _CONFIG_VARS['platbase'] = exec_prefix
     _CONFIG_VARS['projectbase'] = _PROJECT_BASE
-    _CONFIG_VARS['platlibdir'] = sys.platlibdir
+    _CONFIG_VARS['platlibdir'] = getattr(sys,"platlibdir","lib")
     _CONFIG_VARS['implementation'] = _get_implementation()
     _CONFIG_VARS['implementation_lower'] = _get_implementation().lower()
     _CONFIG_VARS['abiflags'] = abiflags
     try:
-        _CONFIG_VARS['py_version_nodot_plat'] = sys.winver.replace('.', '')
+        _CONFIG_VARS['py_version_nodot_plat'] = getattr(sys,"winver","").replace('.', '')
     except AttributeError:
         _CONFIG_VARS['py_version_nodot_plat'] = ''
 
     if os.name == 'nt':
         _init_non_posix(_CONFIG_VARS)
-        _CONFIG_VARS['VPATH'] = sys._vpath
+        _CONFIG_VARS['VPATH'] = getattr(sys,"_vpath","")
     if _HAS_USER_BASE:
         # Setting 'userbase' is done below the call to the
         # init function to enable using 'get_config_var' in
@@ -600,9 +613,9 @@ def get_config_vars(*args):
 
     # Avoid claiming the lock once initialization is complete.
     if _CONFIG_VARS_INITIALIZED:
-        # GH-126789: If sys.prefix or sys.exec_prefix were updated, invalidate the cache.
-        prefix = os.path.normpath(sys.prefix)
-        exec_prefix = os.path.normpath(sys.exec_prefix)
+        # GH-126789: If getattr(sys, "prefix", "/") or getattr(sys, "exec_prefix", "/") were updated, invalidate the cache.
+        prefix = os.path.normpath(getattr(sys, "prefix", "/"))
+        exec_prefix = os.path.normpath(getattr(sys, "exec_prefix", "/"))
         if _CONFIG_VARS['prefix'] != prefix or _CONFIG_VARS['exec_prefix'] != exec_prefix:
             with _CONFIG_VARS_LOCK:
                 _CONFIG_VARS_INITIALIZED = False
@@ -731,7 +744,7 @@ def get_platform():
         if sys.platform == "ios":
             release = get_config_vars().get("IPHONEOS_DEPLOYMENT_TARGET", "13.0")
             osname = sys.platform
-            machine = sys.implementation._multiarch
+            machine = getattr(sys.implementation, "_multiarch", "")
         else:
             import _osx_support
             osname, release, machine = _osx_support.get_platform_osx(

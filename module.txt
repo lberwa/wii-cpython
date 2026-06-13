@@ -1,0 +1,54 @@
+| Modul              | Beschreibung                         | (✅)
+| ------------------ | ------------------------------------ | 
+| `_asyncio`         | C-Beschleuniger für asyncio          |  ❌
+| `array`            | Speicheroptimierte Arrays            |  ✅
+| `binascii`         | Hex-, Base64- und Binärkonvertierung |  ✅
+| `_bisect`          | Binäre Suche in sortierten Listen    |  ✅
+| `_bz2`             | BZip2-Kompression                    |  ✅
+| `cmath`            | Mathematik mit komplexen Zahlen      |  ✅
+| `_csv`             | Schneller CSV-Parser                 |  ✅
+| `_dbm`             | DBM-Datenbanken                      |  ✅
+| `_elementtree`     | XML-Verarbeitung                     |  ✅
+| `fcntl`            | Unix-Dateideskriptor-Steuerung       |  ❌
+| `_gdbm`            | GNU DBM-Datenbanken                  |  ✅
+| `grp`              | Unix-Gruppeninformationen            |  ❌
+| `hashlib`          | Hashfunktionen (SHA, MD5, ...)       |  ✅ (pure Python, nutzt _md5/_sha*)
+| `_heapq`           | Prioritätswarteschlangen             |  ✅
+| `hmac`             | HMAC-Signaturen                      |  ✅
+| `_interpchannels`  | Interpreter-Kommunikation            |  ❌
+| `_interpqueues`    | Interpreter-Warteschlangen           |  ❌
+| `_interpreters`    | Mehrere Python-Interpreter           |  ❌
+| `_json`            | Schneller JSON-Parser                |  ✅
+| `_lsprof`          | Profiler (`cProfile`)                |  ✅
+| `_lzma`            | LZMA/XZ-Kompression                  |  ✅
+| `md5`              | Altes MD5-Modul                      |  ✅ (als `_md5`)
+| `mmap`             | Memory-Mapped Files                  |  ❌
+| `_pickle`          | Schneller Pickle-Serializer          |  ✅
+| `_posixsubprocess` | Prozessstart-Unterstützung           |  ❌ (TODO: implement a bash terminal for the Wii)
+| `pwd`              | Unix-Benutzerinformationen           |  ❌
+| `pyexpat`          | XML-Parser Expat                     |  ✅
+| `_queue`           | Thread-Warteschlangen                |  ❌
+| `_random`          | Schneller Zufallszahlengenerator     |  ✅
+| `readline`         | Kommandozeilen-Editing               |  ❌
+| `_scproxy`         | macOS Proxy-Unterstützung            |  ❌
+| `select`           | Socket-/Datei-Multiplexing           |  ❌
+| `sha1`             | SHA-1 Implementierung                |  ✅ (als `_sha1`)
+| `sha2`             | SHA-2 Implementierung                |  ✅ (als `_sha2`)
+| `sha3`             | SHA-3 Implementierung                |  ✅ (als `_sha3`)
+| `signal`           | Signalbehandlung                     |  ✅ (bereits built-in)
+| `socket`           | Netzwerk-Sockets                     |  ✅ (lwIP via libogc)
+| `_ssl`             | TLS/SSL-Unterstützung                |  ✅ (stub; import ssl ok, RAND_bytes via PSA)
+| `_statistics`      | Statistik-Hilfsfunktionen            |  ✅
+| `_struct`          | Binärdaten packen/entpacken          |  ✅
+| `symtable`         | Python-Symboltabellen                |  ✅ (bereits built-in)
+| `syslog`           | Unix-Systemlog                       |  ❌
+| `termios`          | Terminal-Steuerung                   |  ❌ (TODO: implement a bash terminal for the Wii)
+| `_tkinter`         | Tk-GUI                               |  ❌ (TODO: implement tkinter for the wii)
+| `unicodedata`      | Unicode-Datenbank                    |  ✅
+| `_uuid`            | UUID-Erzeugung                       |  ✅ (libuuid aus ./uuid/)
+| `_winapi`          | Windows-API                          |  ❌
+| `xxlimited`        | CPython-Testmodul                    |  ❌
+| `xxlimited_35`     | CPython-Testmodul                    |  ❌
+| `xxsubtype`        | CPython-Testmodul                    |  ❌
+| `zlib`             | Deflate-/ZIP-Kompression             |  ✅
+| `_zoneinfo`        | Zeitzonen-Datenbank                  |  ✅

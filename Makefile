@@ -89,7 +89,8 @@ CONFIGURE_FLAGS= \
 	--without-ensurepip --disable-shared --disable-ipv6 --with-mimalloc=no
 
 .PHONY: all clean configure libpython build-host python curl ssl wiitest	\
- 		regen-importlib bitmap bitmap-clean fat fat-clean wiitest-clean py
+ 		regen-importlib bitmap bitmap-clean fat fat-clean wiitest-clean py \
+ 		gdbm gdbm-clean xz xz-clean uuid uuid-clean
 
 all: wiitest
 
@@ -99,7 +100,105 @@ bitmap:
 bitmap-clean:
 	@$(MAKE) -C $(MAKEFILE_DIR)bitmap clean
 
-cp-libs: python curl bitmap fat
+GDBM_DIR     := $(MAKEFILE_DIR)gdbm
+GDBM_SRC     := $(GDBM_DIR)/src
+GDBM_BUILD   := $(GDBM_DIR)/build-wii
+GDBM_INSTALL := $(GDBM_DIR)/install-wii
+
+gdbm: $(GDBM_INSTALL)/lib/libgdbm.a
+
+$(GDBM_INSTALL)/lib/libgdbm.a:
+	@mkdir -p "$(GDBM_BUILD)"
+	cd "$(GDBM_BUILD)" && \
+	CC="$(CC)" AR="$(AR)" RANLIB="$(RANLIB)" \
+	CFLAGS="$(CFLAGS) $(CFLAGS_WII)" \
+	"$(GDBM_SRC)/configure" \
+		--host=powerpc-eabi \
+		--build=$$($(GDBM_SRC)/build-aux/config.guess) \
+		--prefix="$(GDBM_INSTALL)" \
+		--enable-libgdbm-compat \
+		--disable-shared \
+		--enable-static \
+		--disable-nls \
+		--without-readline \
+		--disable-memory-mapped-io \
+		ac_cv_func_flock=no \
+		ac_cv_func_lockf=no && \
+	$(MAKE) -j$(CPU_CORES) -C "$(GDBM_BUILD)/src" && \
+	$(MAKE) install -C "$(GDBM_BUILD)/src" && \
+	$(MAKE) -j$(CPU_CORES) -C "$(GDBM_BUILD)/compat" && \
+	$(MAKE) install -C "$(GDBM_BUILD)/compat"
+
+gdbm-clean:
+	@-rm -rf "$(GDBM_BUILD)" "$(GDBM_INSTALL)"
+
+XZ_DIR     := $(MAKEFILE_DIR)xz
+XZ_SRC     := $(XZ_DIR)/src
+XZ_BUILD   := $(XZ_DIR)/build-wii
+XZ_INSTALL := $(XZ_DIR)/install-wii
+
+xz: $(XZ_INSTALL)/lib/liblzma.a
+
+$(XZ_INSTALL)/lib/liblzma.a:
+	@mkdir -p "$(XZ_BUILD)"
+	cd "$(XZ_BUILD)" && \
+	CC="$(CC)" AR="$(AR)" RANLIB="$(RANLIB)" \
+	CFLAGS="$(CFLAGS) $(CFLAGS_WII)" \
+	"$(XZ_SRC)/configure" \
+		--host=powerpc-eabi \
+		--build=$$($(XZ_SRC)/build-aux/config.guess) \
+		--prefix="$(XZ_INSTALL)" \
+		--disable-shared \
+		--enable-static \
+		--disable-nls \
+		--disable-xz \
+		--disable-xzdec \
+		--disable-lzmadec \
+		--disable-lzmainfo \
+		--disable-lzma-links \
+		--disable-scripts \
+		--disable-doc \
+		--disable-threads \
+		ac_cv_func_futimens=no \
+		ac_cv_func_clock_gettime=no && \
+	$(MAKE) -j$(CPU_CORES) -C "$(XZ_BUILD)/src/liblzma" && \
+	$(MAKE) install -C "$(XZ_BUILD)/src/liblzma"
+
+xz-clean:
+	@-rm -rf "$(XZ_BUILD)" "$(XZ_INSTALL)"
+
+UUID_DIR     := $(MAKEFILE_DIR)uuid
+UUID_SRC     := $(UUID_DIR)/src
+UUID_BUILD   := $(UUID_DIR)/build-wii
+UUID_INSTALL := $(UUID_DIR)/install-wii
+
+uuid: $(UUID_INSTALL)/lib/libuuid.a
+
+$(UUID_INSTALL)/lib/libuuid.a:
+	@mkdir -p "$(UUID_BUILD)"
+	cd "$(UUID_BUILD)" && \
+	CC="$(CC)" AR="$(AR)" RANLIB="$(RANLIB)" \
+	CFLAGS="$(CFLAGS) $(CFLAGS_WII)" \
+	"$(UUID_SRC)/configure" \
+		--host=powerpc-eabi \
+		--build=$$($(UUID_SRC)/config.guess) \
+		--prefix="$(UUID_INSTALL)" \
+		--disable-shared \
+		--enable-static \
+		ac_cv_header_net_if_h=no \
+		ac_cv_header_sys_un_h=no \
+		ac_cv_header_net_if_dl_h=no \
+		ac_cv_func_uuidd=no \
+		ac_cv_func_clock_gettime=no && \
+	$(MAKE) -j$(CPU_CORES) libuuid.la && \
+	$(MAKE) install-libLTLIBRARIES && \
+	mkdir -p "$(UUID_INSTALL)/include/uuid" && \
+	cp "$(UUID_SRC)/uuid.h" "$(UUID_INSTALL)/include/uuid/uuid.h"
+
+uuid-clean:
+	@-rm -rf "$(UUID_BUILD)" "$(UUID_INSTALL)"
+
+cp-libs: python curl bitmap fat gdbm xz uuid
 	@rm -rf "$(LIB_DIR)"
 	@mkdir -p "$(LIB_DIR)"
 	@find "$(MAKEFILE_DIR)" \
@@ -133,6 +232,14 @@ libpython: configure ssl curl $(BUILD_DIR)/Modules/wiitoolsmodule.o
 	@# Ensure build-wii uses our local module setup (e.g. math)
 	@cmp -s "$(srcdir)/Modules/Setup.local" "$(BUILD_DIR)/Modules/Setup.local" 2>/dev/null || \
 		cp "$(srcdir)/Modules/Setup.local" "$(BUILD_DIR)/Modules/Setup.local"
+	@# frozen.o has no header dependency in the generated Makefile; invalidate it
+	@# whenever frozen.c or any frozen_modules/*.h changed, so re-frozen stdlib
+	@# modules actually make it into libpython.
+	@if [ -f "$(BUILD_DIR)/Python/frozen.o" ] && \
+	    [ -n "$$(find $(srcdir)/Python/frozen.c $(srcdir)/Python/frozen_modules -newer $(BUILD_DIR)/Python/frozen.o 2>/dev/null)" ]; then \
+		echo "frozen sources changed -> rebuilding frozen.o"; \
+		rm -f "$(BUILD_DIR)/Python/frozen.o"; \
+	fi
 	$(MAKE) -j$(CPU_CORES) -C  "$(BUILD_DIR)" libpython$(VERSION).a
 	@# Add wiitools to the library
 	$(AR) rcs "$(BUILD_DIR)/libpython$(VERSION).a" "$(BUILD_DIR)/Modules/wiitoolsmodule.o"

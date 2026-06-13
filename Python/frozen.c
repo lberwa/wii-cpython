@@ -199,6 +199,25 @@
 #include "frozen_modules/site.h"
 #include "frozen_modules/stat.h"
 #include "frozen_modules/runpy.h"
+#include "frozen_modules/enum.h"
+#include "frozen_modules/keyword.h"
+#include "frozen_modules/operator.h"
+#include "frozen_modules/copyreg.h"
+#include "frozen_modules/reprlib.h"
+#include "frozen_modules/warnings.h"
+#include "frozen_modules/threading.h"
+#include "frozen_modules/weakref.h"
+#include "frozen_modules/_weakrefset.h"
+#include "frozen_modules/copy.h"
+#include "frozen_modules/_compat_pickle.h"
+#include "frozen_modules/xml.h"
+#include "frozen_modules/xml.etree.h"
+#include "frozen_modules/xml.etree.ElementPath.h"
+#include "frozen_modules/sysconfig.h"
+#include "frozen_modules/struct.h"
+#include "frozen_modules/zoneinfo.h"
+#include "frozen_modules/zoneinfo._tzpath.h"
+#include "frozen_modules/zoneinfo._common.h"
 #include "frozen_modules/__hello__.h"
 #include "frozen_modules/__phello__.h"
 #include "frozen_modules/__phello__.ham.h"
@@ -380,6 +399,28 @@ static const struct _frozen stdlib_modules[] = {
 
     /* runpy - run module with -m */
     {"runpy", _Py_M__runpy, (int)sizeof(_Py_M__runpy), false},
+
+    /* Wii extra frozen modules (keine .py-Dateien auf SD verfuegbar) */
+    {"enum",            _Py_M__enum,            (int)sizeof(_Py_M__enum),            false},
+    {"threading",       _Py_M__threading,       (int)sizeof(_Py_M__threading),       false},
+    {"keyword",         _Py_M__keyword,         (int)sizeof(_Py_M__keyword),         false},
+    {"operator",        _Py_M__operator,        (int)sizeof(_Py_M__operator),        false},
+    {"copyreg",         _Py_M__copyreg,         (int)sizeof(_Py_M__copyreg),         false},
+    {"reprlib",         _Py_M__reprlib,         (int)sizeof(_Py_M__reprlib),         false},
+    {"warnings",        _Py_M__warnings,        (int)sizeof(_Py_M__warnings),        false},
+    {"weakref",              _Py_M__weakref,              (int)sizeof(_Py_M__weakref),              false},
+    {"_weakrefset",          _Py_M___weakrefset,          (int)sizeof(_Py_M___weakrefset),          false},
+    {"copy",                 _Py_M__copy,                 (int)sizeof(_Py_M__copy),                 false},
+    {"_compat_pickle",       _Py_M___compat_pickle,       (int)sizeof(_Py_M___compat_pickle),       false},
+    {"xml",                  _Py_M__xml,                  (int)sizeof(_Py_M__xml),                  true},
+    {"xml.etree",            _Py_M__xml_etree,            (int)sizeof(_Py_M__xml_etree),            true},
+    {"xml.etree.ElementPath", _Py_M__xml_etree_ElementPath, (int)sizeof(_Py_M__xml_etree_ElementPath), false},
+    {"sysconfig",            _Py_M__sysconfig,            (int)sizeof(_Py_M__sysconfig),            true},
+    {"struct",               _Py_M__struct,               (int)sizeof(_Py_M__struct),               false},
+    {"zoneinfo",             _Py_M__zoneinfo,             (int)sizeof(_Py_M__zoneinfo),             true},
+    {"zoneinfo._tzpath",     _Py_M__zoneinfo__tzpath,     (int)sizeof(_Py_M__zoneinfo__tzpath),     false},
+    {"zoneinfo._common",     _Py_M__zoneinfo__common,     (int)sizeof(_Py_M__zoneinfo__common),     false},
+
     {0, 0, 0} /* stdlib sentinel */
 };
 static const struct _frozen test_modules[] = {

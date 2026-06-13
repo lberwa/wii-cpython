@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: 0BSD
+# Author: Lasse Collin
+
+prefix=/opt/devkitpro/extras/cpython/3.15.0a7/xz/install-wii
+exec_prefix=/opt/devkitpro/extras/cpython/3.15.0a7/xz/install-wii
+libdir=/opt/devkitpro/extras/cpython/3.15.0a7/xz/install-wii/lib
+includedir=/opt/devkitpro/extras/cpython/3.15.0a7/xz/install-wii/include
+
+Name: liblzma
+Description: General purpose data compression library
+URL: https://tukaani.org/xz/
+Version: 5.6.4
+Cflags: -I${includedir}
+Cflags.private: -DLZMA_API_STATIC
+Libs: -L${libdir} -llzma
+Libs.private:  

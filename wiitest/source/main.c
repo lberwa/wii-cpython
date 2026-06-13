@@ -3,8 +3,34 @@
 #include "../../bitmap/include/render_text.h"
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 
 #include <gccore.h>
+
+/* POSIX stubs — referenced by gdbm/newlib but not available on Wii */
+int sigprocmask(int how, const sigset_t *set, sigset_t *oldset)
+{ (void)how; (void)set; (void)oldset; return 0; }
+
+int sigaction(int sig, const struct sigaction *act, struct sigaction *old)
+{ (void)sig; (void)act; (void)old; return 0; }
+
+#include <sys/time.h>
+int setitimer(int which, const struct itimerval *v, struct itimerval *old)
+{ (void)which; (void)v; (void)old; return 0; }
+
+long sysconf(int name) { (void)name; return 4096; }
+
+#include <unistd.h>
+int fchown(int fd, uid_t uid, gid_t gid)
+{ (void)fd; (void)uid; (void)gid; return 0; }
+
+uid_t getuid(void) { return 0; }
+#include <sys/stat.h>
+mode_t umask(mode_t m) { (void)m; return 0; }
+#include <sys/file.h>
+int flock(int fd, int op) { (void)fd; (void)op; return 0; }
+int ftruncate(int fd, off_t len) { (void)fd; (void)len; return 0; }
+int fsync(int fd) { (void)fd; return 0; }
 
 extern const unsigned char test_py[];
 extern const unsigned char test_py_end[];

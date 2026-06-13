@@ -19,3 +19,103 @@ math mathmodule.c
 
 # Integer math helpers (internal)
 _math_integer mathintegermodule.c
+
+# General-purpose C extensions
+array arraymodule.c
+binascii binascii.c
+_bisect _bisectmodule.c
+_pickle _pickle.c
+_random _randommodule.c
+_statistics _statisticsmodule.c
+_struct _struct.c
+unicodedata unicodedata.c
+zlib zlibmodule.c
+_zoneinfo _zoneinfo.c
+_uuid _uuidmodule.c \
+    -DHAVE_UUID_UUID_H \
+    -I$(abs_srcdir)/uuid/install-wii/include \
+    -L$(abs_srcdir)/uuid/install-wii/lib \
+    -luuid
+
+# Networking
+_socket socketmodule.c \
+    -I$(abs_srcdir)/curl/wii/include \
+    -I$(DEVKITPRO)/libogc/include \
+    -DHAVE_SOCKET \
+    -DHAVE_GETHOSTBYNAME \
+    -DHAVE_INET_ATON \
+    -DHAVE_GETADDRINFO
+
+# TLS stub (import ssl works; operations raise NotImplementedError)
+_ssl _ssl_wii.c \
+    -I$(abs_builddir)/curl/mbedtls/install-wii/include \
+    -L$(abs_builddir)/curl/mbedtls/install-wii/lib \
+    -lmbedtls -lmbedx509 -lmbedcrypto -ltfpsacrypto
+_bz2 _bz2module.c \
+    -I$(DEVKITPRO)/portlibs/ppc/include \
+    -L$(DEVKITPRO)/portlibs/ppc/lib \
+    -lbz2
+cmath cmathmodule.c
+_csv _csv.c
+_dbm _dbmmodule.c \
+    -DUSE_NDBM \
+    -I$(abs_srcdir)/gdbm/install-wii/include \
+    -L$(abs_srcdir)/gdbm/install-wii/lib \
+    -lgdbm_compat -lgdbm
+
+# gdbm native API
+_gdbm _gdbmmodule.c \
+    -I$(abs_srcdir)/gdbm/install-wii/include \
+    -I$(abs_srcdir)/gdbm/src/src \
+    -L$(abs_srcdir)/gdbm/install-wii/lib \
+    -lgdbm
+
+# Priority queue / JSON / profiler
+_heapq _heapqmodule.c
+_json _json.c
+_lsprof _lsprof.c rotatingtree.c
+
+# Hash modules (HACL* — each .c compiled exactly once)
+_md5 md5module.c \
+    _hacl/Hacl_Hash_MD5.c \
+    -I$(abs_srcdir)/Modules/_hacl/include \
+    -I$(abs_srcdir)/Modules/_hacl \
+    -D_BSD_SOURCE -D_DEFAULT_SOURCE
+_sha1 sha1module.c \
+    _hacl/Hacl_Hash_SHA1.c \
+    -I$(abs_srcdir)/Modules/_hacl/include \
+    -I$(abs_srcdir)/Modules/_hacl \
+    -D_BSD_SOURCE -D_DEFAULT_SOURCE
+_sha2 sha2module.c \
+    _hacl/Hacl_Hash_SHA2.c \
+    -I$(abs_srcdir)/Modules/_hacl/include \
+    -I$(abs_srcdir)/Modules/_hacl \
+    -D_BSD_SOURCE -D_DEFAULT_SOURCE
+_sha3 sha3module.c \
+    _hacl/Hacl_Hash_SHA3.c \
+    -I$(abs_srcdir)/Modules/_hacl/include \
+    -I$(abs_srcdir)/Modules/_hacl \
+    -D_BSD_SOURCE -D_DEFAULT_SOURCE
+# hmac: includes HMAC + Blake2 (non-SIMD) since Hacl_HMAC.c references Blake2
+_hmac hmacmodule.c \
+    _hacl/Hacl_HMAC.c \
+    _hacl/Hacl_Streaming_HMAC.c \
+    _hacl/Hacl_Hash_Blake2b.c \
+    _hacl/Hacl_Hash_Blake2s.c \
+    _hacl/Lib_Memzero0.c \
+    -I$(abs_srcdir)/Modules/_hacl/include \
+    -I$(abs_srcdir)/Modules/_hacl \
+    -D_BSD_SOURCE -D_DEFAULT_SOURCE
+
+# LZMA/XZ compression
+_lzma _lzmamodule.c \
+    -I$(abs_srcdir)/xz/install-wii/include \
+    -L$(abs_srcdir)/xz/install-wii/lib \
+    -llzma
+
+# XML
+pyexpat pyexpat.c \
+    expat/xmlparse.c expat/xmlrole.c expat/xmltok.c \
+    -I$(abs_srcdir)/Modules/expat \
+    -DXML_STATIC
+_elementtree _elementtree.c -I$(abs_srcdir)/Modules/expat

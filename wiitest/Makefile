@@ -28,12 +28,16 @@ LDFLAGS += -T$(DEVKITPPC)/powerpc-eabi/lib/rvl.ld
 LDFLAGS    += -L$(DEVKITPRO)/libogc/lib/wii
 LDFLAGS    += -L$(MAKEFILE_DIR)../libs
 LDFLAGS    += -L$(MAKEFILE_DIR)..+
+LDFLAGS    += -L$(MAKEFILE_DIR)../gdbm/install-wii/lib
+LDFLAGS    += -L$(MAKEFILE_DIR)../xz/install-wii/lib
+LDFLAGS    += -L$(MAKEFILE_DIR)../uuid/install-wii/lib
 
 CPYTHON_BUILD := $(MAKEFILE_DIR)../libs
 
 
 #LIBS       := -lpython3.15 -lfatpy -lwiiuse -lbte -lbitmap -logc -lcurl -lmbedtls -lmbedx509 -lmbedcrypto -ltfpsacrypto
-LIBS := -lpython3.15 -lcurl -lmbedtls -lmbedx509 -lmbedcrypto -ltfpsacrypto -lz -lfatpy -lwiiuse -lbte -lbitmap -logc -lm
+LIBS := -lpython3.15 -lcurl -lmbedtls -lmbedx509 -lmbedcrypto -ltfpsacrypto -lz -lgdbm_compat -lgdbm -llzma -lbz2 -luuid -lfatpy -lwiiuse -lbte -lbitmap -logc -lm
+LDFLAGS    += -L$(DEVKITPRO)/portlibs/ppc/lib
 
 
 include $(DEVKITPPC)/wii_rules
@@ -98,12 +102,15 @@ ifdef SD_APP_PATH
 
 run: clean
 	@$(MAKE) $(BUILD) -j$(nproc) 
+	
 	cp $(OUTPUT).dol $(SD_APP_PATH)/boot.dol
 	sync
 
 else
 
-run : $(BUILD)
+run : clean
+	@$(MAKE) $(BUILD) -j$(nproc) 
+
 	@echo "no path!"
 
 endif

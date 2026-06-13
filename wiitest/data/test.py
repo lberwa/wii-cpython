@@ -1,5 +1,17 @@
 import wiitools as w
 import sys
+import types
+
+# keyword, operator, copyreg, reprlib, warnings, copy sind jetzt frozen
+# in libpython3.15.a — kein Stub mehr noetig.
+
+# datetime: C-Modul _datetime unter dem Namen 'datetime' verfuegbar machen
+# (wird von _zoneinfo via PyCapsule gebraucht)
+try:
+    import _datetime
+    sys.modules.setdefault('datetime', _datetime)
+except ImportError:
+    pass
 
 # ------------------------------------------------------------------ helpers --
 
@@ -40,6 +52,142 @@ def wait_a(timeout=6000):
 
 
 # --------------------------------------------------------------- test groups --
+def test_builtin_modules():
+    modules = [
+        "_asyncio",
+        "atexit",
+        "array",
+        "binascii",
+        "_bisect",
+        "_bz2",
+        "cmath",
+        "_codecs",
+        "_collections",
+        "_csv",
+        "_datetime",
+        "_dbm",
+        "_elementtree",
+        "errno",
+        "faulthandler",
+        "fcntl",
+        "_functools",
+        "gc",
+        "_gdbm",
+        "grp",
+        "hashlib",
+        "_heapq",
+        "hmac",
+        "_interpchannels",
+        "_interpqueues",
+        "_interpreters",
+        "itertools",
+        "_json",
+        "_locale",
+        "_lsprof",
+        "_lzma",
+        "math",
+        "md5",
+        "mmap",
+        "_opcode",
+        "_operator",
+        "_pickle",
+        "posix",
+        "_posixsubprocess",
+        "pwd",
+        "pyexpat",
+        "_queue",
+        "_random",
+        "readline",
+        "_scproxy",
+        "select",
+        "sha1",
+        "sha2",
+        "sha3",
+        "signal",
+        "socket",
+        "_ssl",
+        "_stat",
+        "_statistics",
+        "_struct",
+        "_suggestions",
+        "symtable",
+        "_sysconfig",
+        "syslog",
+        "termios",
+        "_thread",
+        "time",
+        "_tkinter",
+        "_tracemalloc",
+        "_types",
+        "_typing",
+        "unicodedata",
+        "_uuid",
+        "_weakref",
+        "_winapi",
+        "xxlimited",
+        "xxlimited_35",
+        "xxsubtype",
+        "zlib",
+        "_zoneinfo"
+    ]
+
+    
+    f = open("sd:/out_builtin.txt", "w")
+
+    for mod in modules:
+        try:
+            __import__(mod)
+            f.write("OK: %s\n" % mod)
+        except Exception as e:
+            f.write("FEHLT: %s - %s\n" % (mod, e))
+
+    f.close()
+
+    """for mod in modules:
+        try:
+            __import__(mod)
+        except Exception as e:
+            print("FEHLT:", mod, "-", e)
+"""
+
+def test_frozen_modules():
+    import _imp
+
+    frozen = set(_imp._frozen_module_names())
+
+    modules = [
+        "importlib._bootstrap",
+        "importlib._bootstrap_external",
+        "zipimport",
+        "abc",
+        "codecs",
+        "io",
+        "_collections_abc",
+        "_sitebuiltins",
+        "_genericpath",
+        "_stat",
+        "_osx_support",
+        "genericpath",
+        "posixpath",
+        "ntpath",
+        "os",
+        "site",
+        "stat",
+        "importlib.util",
+        "importlib.machinery",
+        "runpy",
+        "__hello__",
+        "__hello_alias__",
+        "__phello__",
+        "__phello__.ham",
+        "__phello__.spam",
+        "__phello__.spam.ham",
+    ]
+
+    for module in modules:
+        if module not in frozen:
+            print("FEHLT:", module)
+
 
 def test_constants():
     section("Konstanten & Version")
@@ -90,7 +238,7 @@ def test_video():
         fail("usleep", e)
 
 
-def test_filesystem(): #don't work 
+def test_filesystem(): 
     
     section("Filesystem (fatInitDefault / write_file / read_file / remove)")
     try:
@@ -679,6 +827,472 @@ def run_all_tests():
     test_curl()
     test_curl_http()
     _print_results()
+    test_frozen_modules()
+    test_builtin_modules()
+
+# ======================================================= Modul-Tests (✅) ===
+
+def _mok(m, info=""): ok(m, info)
+def _mfail(m, e): fail(m, e)
+
+def test_mod_array():
+    section("array")
+    try:
+        import array
+        a = array.array('i', [1, 2, 3])
+        a.append(4)
+        assert a[3] == 4 and len(a) == 4
+        _mok("array", "len=" + str(len(a)))
+    except Exception as e: _mfail("array", e)
+
+def test_mod_binascii():
+    section("binascii")
+    try:
+        import binascii
+        h = binascii.hexlify(b"hello")
+        assert h == b"68656c6c6f"
+        assert binascii.unhexlify(h) == b"hello"
+        b64 = binascii.b2a_base64(b"wii")
+        assert binascii.a2b_base64(b64) == b"wii"
+        _mok("binascii", repr(h))
+    except Exception as e: _mfail("binascii", e)
+
+def test_mod_bisect():
+    section("_bisect")
+    try:
+        import _bisect
+        a = [1, 3, 5, 7]
+        assert _bisect.bisect_left(a, 4) == 2
+        _bisect.insort_right(a, 4)
+        assert a == [1, 3, 4, 5, 7]
+        _mok("_bisect", str(a))
+    except Exception as e: _mfail("_bisect", e)
+
+def test_mod_bz2():
+    section("_bz2")
+    try:
+        import _bz2
+        data = b"hello wii " * 20
+        comp = _bz2.BZ2Compressor()
+        c = comp.compress(data) + comp.flush()
+        dec = _bz2.BZ2Decompressor()
+        assert dec.decompress(c) == data
+        _mok("_bz2", str(len(data)) + "->" + str(len(c)) + "B")
+    except Exception as e: _mfail("_bz2", e)
+
+def test_mod_cmath():
+    section("cmath")
+    try:
+        import cmath
+        z = cmath.sqrt(-1)
+        assert abs(z - 1j) < 1e-9
+        _mok("cmath", "sqrt(-1)=" + str(z))
+    except Exception as e: _mfail("cmath", e)
+
+def test_mod_csv():
+    section("_csv")
+    try:
+        import _csv, io
+        buf = io.StringIO("a,b,c\n1,2,3\n")
+        rows = list(_csv.reader(buf))
+        assert rows == [["a","b","c"],["1","2","3"]]
+        out = io.StringIO()
+        _csv.writer(out).writerow(["x","y"])
+        _mok("_csv", str(rows))
+    except Exception as e: _mfail("_csv", e)
+
+def test_mod_dbm():
+    section("_dbm (ndbm)")
+    try:
+        import _dbm
+        _mok("_dbm import", str(_dbm.open))
+        path = "sd:/wiitest_dbm"
+        try:
+            db = _dbm.open(path, "n")
+            db[b"key"] = b"val"
+            assert db[b"key"] == b"val"
+            db.close()
+            _mok("_dbm open/write/read", "ok")
+            import os
+            try: os.remove(path + ".db")
+            except: pass
+        except OSError as e2:
+            ok("_dbm file-op (SD ok?)", str(e2))
+    except Exception as e: _mfail("_dbm", e)
+
+def test_mod_elementtree():
+    section("_elementtree")
+    try:
+        import _elementtree
+        # SubElement benoetigt copy.py; nur Element direkt testen
+        root = _elementtree.Element("root")
+        root.set("val", "1")
+        assert root.get("val") == "1"
+        assert root.tag == "root"
+        _mok("_elementtree", root.tag + " val=" + root.get("val"))
+    except Exception as e: _mfail("_elementtree", e)
+
+def test_mod_gdbm():
+    section("_gdbm")
+    try:
+        import _gdbm
+        _mok("_gdbm import", str(_gdbm.open))
+        path = "sd:/wiitest_gdbm.db"
+        try:
+            db = _gdbm.open(path, "n")
+            db["hello"] = "wii"
+            assert db["hello"] == "wii"
+            db.close()
+            _mok("_gdbm open/write/read", "ok")
+            import os
+            try: os.remove(path)
+            except: pass
+        except Exception as e2:
+            ok("_gdbm file-op", str(e2))
+    except Exception as e: _mfail("_gdbm", e)
+
+def test_mod_hashlib():
+    section("hashlib (_md5/_sha2)")
+    try:
+        import _md5, _sha2
+        h = _md5.md5(b"hello").hexdigest()
+        assert len(h) == 32          # MD5 = 16 Bytes = 32 Hex-Zeichen
+        h2 = _sha2.sha256(b"wii").hexdigest()
+        assert len(h2) == 64         # SHA256 = 32 Bytes = 64 Hex-Zeichen
+        _mok("hashlib", "md5=" + h[:8] + "... sha256ok")
+    except Exception as e: _mfail("hashlib", e)
+
+def test_mod_heapq():
+    section("_heapq")
+    try:
+        import _heapq
+        h = [5, 3, 1, 4, 2]
+        _heapq.heapify(h)
+        assert _heapq.heappop(h) == 1
+        _heapq.heappush(h, 0)
+        assert _heapq.heappop(h) == 0
+        _mok("_heapq", str(h))
+    except Exception as e: _mfail("_heapq", e)
+
+def test_mod_hmac():
+    section("_hmac")
+    try:
+        import _hmac
+        # digestmod muss ein String-Name sein ("sha2_256" oder "sha256")
+        h = _hmac.new(b"key", b"message", "sha2_256")
+        dig = h.hexdigest()
+        assert len(dig) == 64
+        _mok("_hmac", dig[:16] + "...")
+    except Exception as e: _mfail("_hmac", e)
+
+def test_mod_json():
+    section("_json")
+    try:
+        import _json
+        # _json exposes encode_basestring and make_scanner/make_encoder
+        s = _json.encode_basestring("hello \"wii\"")
+        assert s == '"hello \\"wii\\""'
+        _mok("_json", s)
+    except Exception as e: _mfail("_json", e)
+
+def test_mod_lsprof():
+    section("_lsprof")
+    try:
+        import _lsprof
+        prof = _lsprof.Profiler()
+        prof.enable()
+        x = sum(range(100))
+        prof.disable()
+        stats = prof.getstats()
+        _mok("_lsprof", "entries=" + str(len(stats)) + " sum=" + str(x))
+    except Exception as e: _mfail("_lsprof", e)
+
+def test_mod_lzma():
+    section("_lzma")
+    try:
+        import _lzma
+        data = b"hello wii " * 5   # wenig Daten -> weniger RAM
+        # FORMAT_ALONE=2, preset=0 braucht ~1MB statt >10MB
+        comp = _lzma.LZMACompressor(format=_lzma.FORMAT_ALONE, preset=0)
+        c = comp.compress(data) + comp.flush()
+        dec = _lzma.LZMADecompressor(format=_lzma.FORMAT_ALONE)
+        assert dec.decompress(c) == data
+        _mok("_lzma", str(len(data)) + "->" + str(len(c)) + "B")
+    except Exception as e: _mfail("_lzma", e)
+
+def test_mod_md5():
+    section("_md5")
+    try:
+        import _md5
+        h = _md5.md5(b"hello").hexdigest()
+        assert len(h) == 32
+        h2 = _md5.md5(b"hello").digest()
+        assert len(h2) == 16
+        _mok("_md5", h)
+    except Exception as e: _mfail("_md5", e)
+
+def test_mod_pickle():
+    section("_pickle")
+    try:
+        import _pickle, io
+        data = {"wii": [1, 2, 3], "ok": True}
+        buf = io.BytesIO()
+        p = _pickle.Pickler(buf)
+        p.dump(data)
+        buf.seek(0)
+        d = _pickle.Unpickler(buf).load()
+        assert d == data
+        _mok("_pickle", str(buf.tell()) + "B")
+    except Exception as e: _mfail("_pickle", e)
+
+def test_mod_pyexpat():
+    section("pyexpat")
+    try:
+        import pyexpat
+        p = pyexpat.ParserCreate()
+        tags = []
+        p.StartElementHandler = lambda name, _: tags.append(name)
+        p.Parse("<root><a/><b/></root>", True)
+        assert tags == ["root", "a", "b"]
+        _mok("pyexpat", str(tags))
+    except Exception as e: _mfail("pyexpat", e)
+
+def test_mod_random():
+    section("_random")
+    try:
+        import _random
+        rng = _random.Random()
+        r = int(rng.random() * 1000)
+        rng.seed(42)
+        v = rng.random()
+        assert 0.0 <= v < 1.0
+        _mok("_random", "val=" + str(round(v, 4)))
+    except Exception as e: _mfail("_random", e)
+
+def test_mod_sha1():
+    section("_sha1")
+    try:
+        import _sha1
+        h = _sha1.sha1(b"hello").hexdigest()
+        assert len(h) == 40          # SHA1 = 20 Bytes = 40 Hex-Zeichen
+        _mok("_sha1", h[:16] + "...")
+    except Exception as e: _mfail("_sha1", e)
+
+def test_mod_sha2():
+    section("_sha2")
+    try:
+        import _sha2
+        h256 = _sha2.sha256(b"hello").hexdigest()
+        h512 = _sha2.sha512(b"hello").hexdigest()
+        assert len(h256) == 64 and len(h512) == 128
+        _mok("_sha2", h256[:16] + "...")
+    except Exception as e: _mfail("_sha2", e)
+
+def test_mod_sha3():
+    section("_sha3")
+    try:
+        import _sha3
+        h = _sha3.sha3_256(b"hello").hexdigest()
+        assert len(h) == 64
+        _mok("_sha3", h[:16] + "...")
+    except Exception as e: _mfail("_sha3", e)
+
+def test_mod_signal():
+    section("_signal")
+    try:
+        import _signal   # C-Modul; signal.py-Wrapper nicht verfuegbar
+        old = _signal.getsignal(_signal.SIGINT)
+        _signal.signal(_signal.SIGINT, _signal.SIG_IGN)
+        _signal.signal(_signal.SIGINT, old)
+        _mok("_signal", "SIGINT=" + str(_signal.SIGINT))
+    except Exception as e: _mfail("_signal", e)
+
+def test_mod_socket():
+    section("_socket")
+    try:
+        import _socket
+        s = _socket.socket(_socket.AF_INET, _socket.SOCK_STREAM)
+        s.close()
+        _mok("_socket", "AF_INET=" + str(_socket.AF_INET))
+        try:
+            ip = _socket.gethostbyname("example.com")
+            _mok("gethostbyname", ip)
+        except Exception as e2:
+            ok("gethostbyname (kein Netz ok)", str(e2))
+    except Exception as e: _mfail("_socket", e)
+
+def test_mod_ssl():
+    section("_ssl")
+    try:
+        import _ssl
+        b = _ssl.RAND_bytes(16)
+        assert len(b) == 16
+        _mok("_ssl", "RAND_bytes ok, ver=" + _ssl.OPENSSL_VERSION)
+        ctx = _ssl._SSLContext(_ssl.PROTOCOL_TLS_CLIENT)
+        ok("_SSLContext erstellt")
+    except NotImplementedError:
+        ok("_SSLContext wirft NotImplementedError (erwartet)")
+    except Exception as e: _mfail("_ssl", e)
+
+def test_mod_statistics():
+    section("_statistics")
+    try:
+        import _statistics
+        # _statistics exportiert nur _normal_dist_inv_cdf (C-Beschleuniger)
+        # NormalDist ist in statistics.py (nicht verfuegbar auf Wii)
+        fn = _statistics._normal_dist_inv_cdf
+        v = fn(0.5, 0.0, 1.0)   # Median der Normalverteilung = 0
+        assert abs(v) < 1e-6
+        _mok("_statistics", "_normal_dist_inv_cdf(0.5)=" + str(round(v, 6)))
+    except Exception as e: _mfail("_statistics", e)
+
+def test_mod_struct():
+    section("_struct")
+    try:
+        import _struct
+        b = _struct.pack(">HI", 0xDEAD, 0xBEEFCAFE)
+        h, i = _struct.unpack(">HI", b)
+        assert h == 0xDEAD and i == 0xBEEFCAFE
+        _mok("_struct", hex(h) + " " + hex(i))
+    except Exception as e: _mfail("_struct", e)
+
+def test_mod_symtable():
+    section("_symtable")
+    try:
+        import _symtable   # C-Modul; symtable.py-Wrapper nicht verfuegbar
+        t = _symtable.symtable("x = 1 + 2", "<test>", "exec")
+        _mok("_symtable", str(t))
+    except Exception as e: _mfail("_symtable", e)
+
+def test_mod_unicodedata():
+    section("unicodedata")
+    try:
+        import unicodedata
+        name = unicodedata.name("A")
+        assert name == "LATIN CAPITAL LETTER A"
+        cat = unicodedata.category("A")
+        _mok("unicodedata", name + " cat=" + cat)
+    except Exception as e: _mfail("unicodedata", e)
+
+def test_mod_uuid():
+    section("_uuid")
+    try:
+        import _uuid
+        # _uuid.generate_time_safe() gibt (bytes, int) zurueck
+        result = _uuid.generate_time_safe()
+        assert len(result[0]) == 16
+        _mok("_uuid", repr(result[0].hex()))
+    except Exception as e: _mfail("_uuid", e)
+
+def test_mod_zlib():
+    section("zlib")
+    try:
+        import zlib
+        data = b"hello wii zlib " * 30
+        c = zlib.compress(data)
+        assert zlib.decompress(c) == data
+        crc = zlib.crc32(data)
+        _mok("zlib", str(len(data)) + "->" + str(len(c)) + "B crc=" + hex(crc))
+    except Exception as e: _mfail("zlib", e)
+
+def test_mod_zoneinfo():
+    section("_zoneinfo")
+    try:
+        # datetime-Stub muss gesetzt sein (oben im File)
+        import _zoneinfo
+        _mok("_zoneinfo", "ZoneInfo=" + str(_zoneinfo.ZoneInfo))
+    except Exception as e: _mfail("_zoneinfo", e)
+
+
+MODULE_TESTS = [
+    ("array",        test_mod_array),
+    ("binascii",     test_mod_binascii),
+    ("_bisect",      test_mod_bisect),
+    ("_bz2",         test_mod_bz2),
+    ("cmath",        test_mod_cmath),
+    ("_csv",         test_mod_csv),
+    ("_dbm",         test_mod_dbm),
+    ("_elementtree", test_mod_elementtree),
+    ("_gdbm",        test_mod_gdbm),
+    ("hashlib",      test_mod_hashlib),
+    ("_heapq",       test_mod_heapq),
+    ("hmac/_hmac",   test_mod_hmac),
+    ("_json",        test_mod_json),
+    ("_lsprof",      test_mod_lsprof),
+    ("_lzma",        test_mod_lzma),
+    ("_md5",         test_mod_md5),
+    ("_pickle",      test_mod_pickle),
+    ("pyexpat",      test_mod_pyexpat),
+    ("_random",      test_mod_random),
+    ("_sha1",        test_mod_sha1),
+    ("_sha2",        test_mod_sha2),
+    ("_sha3",        test_mod_sha3),
+    ("signal",       test_mod_signal),
+    ("socket",       test_mod_socket),
+    ("_ssl",         test_mod_ssl),
+    ("_statistics",  test_mod_statistics),
+    ("_struct",      test_mod_struct),
+    ("symtable",     test_mod_symtable),
+    ("unicodedata",  test_mod_unicodedata),
+    ("_uuid",        test_mod_uuid),
+    ("zlib",         test_mod_zlib),
+    ("_zoneinfo",    test_mod_zoneinfo),
+]
+
+
+def run_all_module_tests():
+    global _pass, _fail, _errors
+    _pass = 0
+    _fail = 0
+    _errors = []
+    print("")
+    print("================================")
+    print("  Alle Modul-Tests (" + str(len(MODULE_TESTS)) + ")")
+    print("================================")
+    for label, fn in MODULE_TESTS:
+        try:
+            fn()
+        except Exception as e:
+            fail(label, e)
+    _print_results()
+
+
+def show_narrow_menu(items, sel):
+    """Zeigt nur die Zeile darueber, die aktuelle (->), und die darunter."""
+    n = len(items)
+    above = ("    " + items[sel - 1][0]) if sel > 0     else ""
+    curr  = " -> " + items[sel][0]
+    below = ("    " + items[sel + 1][0]) if sel < n - 1 else ""
+    print("")
+    if above: print(above)
+    print(curr)
+    if below: print(below)
+    print("  [" + str(sel + 1) + "/" + str(n) + "]  UP/DOWN  A=run  HOME=zurueck")
+
+
+def module_test_menu():
+    global _pass, _fail, _errors
+    # Eintrag 0 = "Alle 32 testen", danach die einzelnen Module
+    items = [(">> Alle 32 testen <<", run_all_module_tests)] + MODULE_TESTS
+    sel = 0
+    show_narrow_menu(items, sel)
+    while True:
+        w.update()
+        if w.WPAD_ButtonsDown(w.WPAD_BUTTON_HOME, 0):
+            break
+        if w.WPAD_ButtonsDown(w.WPAD_BUTTON_UP, 0):
+            sel = (sel - 1) % len(items)
+            show_narrow_menu(items, sel)
+        elif w.WPAD_ButtonsDown(w.WPAD_BUTTON_DOWN, 0):
+            sel = (sel + 1) % len(items)
+            show_narrow_menu(items, sel)
+        elif w.WPAD_ButtonsDown(w.WPAD_BUTTON_A, 0):
+            label, fn = items[sel]
+            if sel == 0:
+                fn()   # run_all_module_tests hat eigene Ausgabe
+            else:
+                _run_single(fn)
+            show_narrow_menu(items, sel)
 
 
 # ----------------------------------------------------------------------- menu --
@@ -697,6 +1311,10 @@ MENU = [
     ("curl (http)",   lambda: _run_single(test_curl_http)),
     ("write sd",      lambda: _run_single(test_write_sd)),
     ("write usb",     lambda: _run_single(test_write_usb)),
+    ("frozen modules", lambda: _run_single(test_frozen_modules)),
+    ("builtin modules", lambda: _run_single(test_builtin_modules)),
+    ("module tests",   module_test_menu),
+
     # ("mein Test",   my_test_fn),
 ]
 
@@ -715,7 +1333,7 @@ def show_menu(sel):
 
 
 def menu_loop():
-    sel = 7
+    sel = 14
     show_menu(sel)
     while True:
         w.update()

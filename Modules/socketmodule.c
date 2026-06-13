@@ -105,6 +105,9 @@ Local naming conventions:
 # pragma weak inet_aton
 #endif
 
+#ifdef WII_BUILD
+#  include "wii_socket_compat.h"
+#endif
 #include "Python.h"
 #include "pycore_capsule.h"       // _PyCapsule_SetTraverse()
 #include "pycore_fileutils.h"     // _Py_set_inheritable()
