@@ -3,6 +3,8 @@ import wiitools
 
 w = wiitools
 
+w.init()
+
 import sys
 
 def test_curl():

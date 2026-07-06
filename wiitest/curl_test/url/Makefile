@@ -10,9 +10,9 @@ INCLUDES   :=
 INCLUDE += -I../Include
 INCLUDE += -I$(DEVKITPRO)/libogc/include
 
-CFLAGS     += -O0 -g -std=c99 -Wall -Wextra
+CFLAGS     += -Os -g -std=c99 -Wall -Wextra
 CXXFLAGS   := $(CFLAGS)
-CPPFLAGS   += -O0 -g
+CPPFLAGS   += -Os -g
 CFLAGS     += $(INCLUDE)
 CPPFLAGS   += $(INCLUDE)
 

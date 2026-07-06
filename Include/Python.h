@@ -11,14 +11,16 @@
 
 // Include Python header files
 #include "patchlevel.h"
-#if defined(__has_include)
-#  if __has_include("../build-wii/pyconfig.h")
-#    include "../build-wii/pyconfig.h"
-#  else
-#    include "pyconfig.h"
-#  endif
-#else
+/* Wii cross-build forces the hand-patched build-wii/pyconfig.h.  The native
+ * host build (build-host) must use its own configure-generated pyconfig.h,
+ * which the compiler finds via -I on the include path.  Do NOT probe with
+ * __has_include("../build-wii/pyconfig.h"): that path is relative to this
+ * header's location, so it always resolves to the Wii config and poisons the
+ * host build (socklen_t/LONG_BIT/pthread mismatch). */
+#if defined(WII_BUILD)
 #  include "../build-wii/pyconfig.h"
+#else
+#  include "pyconfig.h"
 #endif
 #include "pymacconfig.h"
 

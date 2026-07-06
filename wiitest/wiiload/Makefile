@@ -23,7 +23,7 @@ FILES := $(shell find $(DATA) -type f -size +0c ! -name '* *' 2>/dev/null)
 OFILES := $(foreach f,$(FILES),$(BUILD)/$(f).o)
 SRC_OFILES := $(patsubst $(SRC)/%.c,$(BUILD)/%.o,$(wildcard $(SRC)/*.c))
 
-CFLAGS += -O2 -Wall -I$(DEVKITPRO)/libogc/include
+CFLAGS += -Os -g -Wall -I$(DEVKITPRO)/libogc/include
 
 LDFLAGS += -T$(DEVKITPPC)/powerpc-eabi/lib/rvl.ld
 LDFLAGS += -L$(DEVKITPRO)/libogc/lib/wii

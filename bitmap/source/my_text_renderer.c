@@ -68,13 +68,25 @@ static void draw_string(uint32_t *fb, int fb_width, int x, int y, const char *te
 //custom variablen definieren
 GXRModeObj* rmode;
 void* framebuffer;
+int video_init_done = 0;
 
 void video_init_custom() {
-    VIDEO_Init();
-    
+    if (!video_init_done) {
+        VIDEO_Init();
+        video_init_done = 1;
+    } else {
+        /* After rendering_init() the retrace callback is still registered.
+           Deregister it before reconfiguring video to avoid a crash when
+           copy_buffers() fires on the next WaitVSync(). */
+        VIDEO_SetPreRetraceCallback(NULL);
+        VIDEO_SetPostRetraceCallback(NULL);
+    }
+
     rmode = VIDEO_GetPreferredMode(NULL);
-    framebuffer = MEM_K0_TO_K1(SYS_AllocateFramebuffer(rmode));
-    
+    void *raw = SYS_AllocateFramebuffer(rmode);
+    if (raw == NULL) return;
+    framebuffer = MEM_K0_TO_K1(raw);
+
     VIDEO_Configure(rmode);
     VIDEO_SetNextFramebuffer(framebuffer);
     VIDEO_SetBlack(FALSE);
@@ -91,14 +103,22 @@ void render_text(const char *text, int x, int y, const char *color_name) {
 }
 
 
+static void safe_clear_framebuffer(void *fb, GXRModeObj *rm, uint32_t color) {
+    if (fb == NULL || rm == NULL) return;
+    /* Direct CPU fill — avoids VIDEO DMA which conflicts with GX state */
+    uint32_t *p = (uint32_t *)fb;
+    uint32_t words = (VIDEO_PadFramebufferWidth(rm->fbWidth) * rm->xfbHeight * VI_DISPLAY_PIX_SZ) >> 2;
+    for (uint32_t i = 0; i < words; i++) p[i] = color;
+}
+
 void clear_screen(const char *color_name) {
-    VIDEO_ClearFrameBuffer(rmode, framebuffer, get_color_by_name(color_name));
+    safe_clear_framebuffer(framebuffer, rmode, get_color_by_name(color_name));
     VIDEO_Flush();
     VIDEO_WaitVSync();
 }
 
 void clear_screen_ohne_bild(const char *color_name) {
-    VIDEO_ClearFrameBuffer(rmode, framebuffer, get_color_by_name(color_name));
+    safe_clear_framebuffer(framebuffer, rmode, get_color_by_name(color_name));
 }
 
 void render_text_ohne_bild(const char *text, int x, int y, const char *color_name) {
@@ -146,7 +166,8 @@ void terminal_clear(void) {
     for (int i = 0; i < TERM_MAX_LINES; i++)
         term_buffer[i][0] = '\0';
     total_lines = 0;
-    clear_screen("black");
+    if (framebuffer != NULL)
+        clear_screen("black");
 }
 
 void terminal_set_autoscroll(bool enabled) {

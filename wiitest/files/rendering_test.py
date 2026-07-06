@@ -2,6 +2,8 @@ import wiitools
 import math
 import sys
 
+wiitools.init()
+
 def test_rendering():
     print("=== PNG load/render test start ===")
     print("wiitools.__version__:", getattr(wiitools, "__version__", "<none>"))

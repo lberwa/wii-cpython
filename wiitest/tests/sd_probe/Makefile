@@ -14,8 +14,8 @@ INCLUDE += -I$(DEVKITPRO)/libogc/include
 INCLUDE += -I$(MAKEFILE_DIR)../../../bitmap/include
 INCLUDE += -I$(MAKEFILE_DIR)../../../fat/include
 
-CFLAGS     += -O0 -g -std=c99 -Wall -Wextra
-CPPFLAGS   += -O0 -g
+CFLAGS     += -Os -g -std=c99 -Wall -Wextra
+CPPFLAGS   += -Os -g
 CFLAGS     += $(INCLUDE)
 CPPFLAGS   += $(INCLUDE)
 

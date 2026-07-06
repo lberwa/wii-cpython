@@ -7,11 +7,17 @@ import types
 
 # datetime: C-Modul _datetime unter dem Namen 'datetime' verfuegbar machen
 # (wird von _zoneinfo via PyCapsule gebraucht)
+
+w.init()
+
 try:
     import _datetime
     sys.modules.setdefault('datetime', _datetime)
 except ImportError:
     pass
+
+import runpy
+import warnings
 
 # ------------------------------------------------------------------ helpers --
 
@@ -50,7 +56,7 @@ def wait_a(timeout=6000):
             return True
     return False
 
-
+wait_a()
 # --------------------------------------------------------------- test groups --
 def test_builtin_modules():
     modules = [
@@ -1296,6 +1302,30 @@ def module_test_menu():
 
 
 # ----------------------------------------------------------------------- menu --
+def snake():
+  try:
+    import snake
+  except Exception as e:
+    w.terminal_init()
+    import io as _io
+    _buf = _io.StringIO()
+    _buf.write(type(e).__name__ + ": " + str(e) + "\n")
+    _tb = e.__traceback__
+    while _tb:
+      _buf.write("  File " + str(_tb.tb_frame.f_code.co_filename)
+                 + " line " + str(_tb.tb_lineno)
+                 + " in " + str(_tb.tb_frame.f_code.co_name) + "\n")
+      _tb = _tb.tb_next
+    _msg = _buf.getvalue()
+    try:
+      with open("sd:/out.snake.txt", "a") as _f:
+        _f.write(_msg)
+    except Exception:
+      pass
+    raise
+  finally:
+    w.terminal_init()
+
 
 # Hier neue Eintraege einfuegen: (Label, Funktion)
 MENU = [
@@ -1314,6 +1344,7 @@ MENU = [
     ("frozen modules", lambda: _run_single(test_frozen_modules)),
     ("builtin modules", lambda: _run_single(test_builtin_modules)),
     ("module tests",   module_test_menu),
+    ("snake",          snake),
 
     # ("mein Test",   my_test_fn),
 ]

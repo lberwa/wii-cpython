@@ -72,6 +72,8 @@ typedef struct wiitools_png_image {
 } wiitools_png_image;
 static wiitools_png_image *g_png_images = NULL;
 static wiitools_png_image *g_png_current = NULL;
+static wiitools_png_image *g_render_target = NULL;
+static int g_render_target_dirty = 0;
 extern const unsigned char test_png[] __attribute__((weak));
 extern const unsigned char test_png_end[] __attribute__((weak));
 static int g_ycbcr_lut_ready = 0;
@@ -927,9 +929,28 @@ static const int gfx_height = 480;
 
 static float gfx_texcoord_div = 256.0f;
 
+/* logical screen size set via set_screen_size(); 0 = use physical */
+static float g_logical_w = 0.0f;
+static float g_logical_h = 0.0f;
+static float g_vp_x = 0.0f;
+static float g_vp_y = 0.0f;
+static float g_vp_w = 0.0f;
+static float g_vp_h = 0.0f;
+
+static void get_logical_size(float *w, float *h) {
+    if (g_logical_w > 0.0f) { *w = g_logical_w; *h = g_logical_h; }
+    else if (screenMode) { *w = (float)screenMode->fbWidth; *h = (float)screenMode->xfbHeight; }
+    else { *w = 802.0f; *h = 460.0f; }
+}
+
 static volatile mqmsg_t current_frame = NULL;
 static mqmsg_t g_draw_target = NULL;
 static int g_frame_dirty = 0;
+
+/* 1, wenn wir das Rendering eines Hosts uebernommen haben (rendering_adopt).
+   Dann flippt do_render_flush direkt (VIDEO_SetNextFramebuffer) statt ueber die
+   frame_draw-MessageQueue, fuer die es hier keinen Consumer/Callback gibt. */
+static int g_adopt_mode = 0;
 
 static int png_get_render_target(u32 **out_fb, unsigned *out_w, unsigned *out_h)
 {
@@ -978,11 +999,230 @@ static void png_put_pixel_xfb(u32 *fb, unsigned fb_pairs_per_row, int dx, int dy
     fb[pair_idx] = ((u32)y1 << 24) | ((u32)p_cb << 16) | ((u32)y2 << 8) | (u32)p_cr;
 }
 
+/* ===== Software surface renderer ===== */
+
+static void surface_blend_pixel(wiitools_png_image *surf, int x, int y,
+                                 unsigned char sr, unsigned char sg,
+                                 unsigned char sb, unsigned char sa)
+{
+    unsigned idx;
+    unsigned char *dst;
+    if (x < 0 || y < 0 || (unsigned)x >= surf->w || (unsigned)y >= surf->h)
+        return;
+    idx = ((unsigned)y * surf->w + (unsigned)x) * 4u;
+    dst = surf->rgba + idx;
+    if (sa == 0) return;
+    if (sa == 255 || dst[3] == 0) {
+        dst[0] = sr; dst[1] = sg; dst[2] = sb; dst[3] = sa;
+        return;
+    }
+    {
+        unsigned inv = 255u - (unsigned)sa;
+        unsigned oa = (unsigned)sa + (unsigned)dst[3] * inv / 255u;
+        if (oa > 255u) oa = 255u;
+        dst[0] = (unsigned char)(((unsigned)sr * sa + (unsigned)dst[0] * (unsigned)dst[3] * inv / 255u) / oa);
+        dst[1] = (unsigned char)(((unsigned)sg * sa + (unsigned)dst[1] * (unsigned)dst[3] * inv / 255u) / oa);
+        dst[2] = (unsigned char)(((unsigned)sb * sa + (unsigned)dst[2] * (unsigned)dst[3] * inv / 255u) / oa);
+        dst[3] = (unsigned char)oa;
+    }
+}
+
+static void surface_sw_blit_img(wiitools_png_image *src,
+                                 int sx, int sy, int sw2, int sh2,
+                                 wiitools_png_image *dst,
+                                 int dx, int dy, int dw, int dh)
+{
+    int tx, ty;
+    unsigned sx_step_fp, sy_step_fp, sy_fp;
+    if (src == NULL || src->rgba == NULL || dst == NULL || dst->rgba == NULL)
+        return;
+    if (sw2 <= 0 || sh2 <= 0 || dw <= 0 || dh <= 0) return;
+    sx_step_fp = ((unsigned)sw2 << 16) / (unsigned)dw;
+    sy_step_fp = ((unsigned)sh2 << 16) / (unsigned)dh;
+    sy_fp = 0;
+    for (ty = 0; ty < dh; ty++) {
+        int dyi = dy + ty;
+        int syi = sy + (int)(sy_fp >> 16);
+        unsigned sx_fp2 = 0;
+        if (dyi < 0 || (unsigned)dyi >= dst->h) { sy_fp += sy_step_fp; continue; }
+        if (syi < 0 || (unsigned)syi >= src->h) { sy_fp += sy_step_fp; continue; }
+        for (tx = 0; tx < dw; tx++) {
+            int dxi = dx + tx;
+            int sxi = sx + (int)(sx_fp2 >> 16);
+            unsigned sidx;
+            if (dxi < 0 || (unsigned)dxi >= dst->w) { sx_fp2 += sx_step_fp; continue; }
+            if (sxi < 0 || (unsigned)sxi >= src->w) { sx_fp2 += sx_step_fp; continue; }
+            sidx = ((unsigned)syi * src->w + (unsigned)sxi) * 4u;
+            surface_blend_pixel(dst, dxi, dyi,
+                                src->rgba[sidx], src->rgba[sidx+1],
+                                src->rgba[sidx+2], src->rgba[sidx+3]);
+            sx_fp2 += sx_step_fp;
+        }
+        sy_fp += sy_step_fp;
+    }
+}
+
+static void surface_sw_draw_rect(wiitools_png_image *surf,
+                                  int x, int y, int w, int h,
+                                  unsigned char r, unsigned char g,
+                                  unsigned char b, unsigned char a,
+                                  float angle_deg)
+{
+    float cx = (float)x + (float)w * 0.5f;
+    float cy = (float)y + (float)h * 0.5f;
+    float hw = (float)w * 0.5f, hh = (float)h * 0.5f;
+    float rad = angle_deg * (3.14159265358979323846f / 180.0f);
+    float cs = cosf(rad), sn = sinf(rad);
+    float diag = sqrtf(hw*hw + hh*hh) + 1.5f;
+    int x0 = (int)(cx - diag), x1 = (int)(cx + diag) + 1;
+    int y0 = (int)(cy - diag), y1 = (int)(cy + diag) + 1;
+    int px, py;
+    if (x0 < 0) x0 = 0;
+    if (y0 < 0) y0 = 0;
+    if (x1 > (int)surf->w) x1 = (int)surf->w;
+    if (y1 > (int)surf->h) y1 = (int)surf->h;
+    for (py = y0; py < y1; py++) {
+        for (px = x0; px < x1; px++) {
+            float lx = ((float)px - cx) * cs + ((float)py - cy) * sn;
+            float ly = -((float)px - cx) * sn + ((float)py - cy) * cs;
+            if (lx >= -hw && lx <= hw && ly >= -hh && ly <= hh)
+                surface_blend_pixel(surf, px, py, r, g, b, a);
+        }
+    }
+}
+
+static void surface_sw_draw_circle(wiitools_png_image *surf,
+                                    int x, int y, int radius,
+                                    unsigned char r, unsigned char g,
+                                    unsigned char b, unsigned char a)
+{
+    float r2 = (float)radius * (float)radius;
+    int x0 = x - radius, x1 = x + radius + 1;
+    int y0 = y - radius, y1 = y + radius + 1;
+    int px, py;
+    if (x0 < 0) x0 = 0;
+    if (y0 < 0) y0 = 0;
+    if (x1 > (int)surf->w) x1 = (int)surf->w;
+    if (y1 > (int)surf->h) y1 = (int)surf->h;
+    for (py = y0; py < y1; py++) {
+        float dy = (float)py - (float)y;
+        for (px = x0; px < x1; px++) {
+            float dx = (float)px - (float)x;
+            if (dx*dx + dy*dy <= r2)
+                surface_blend_pixel(surf, px, py, r, g, b, a);
+        }
+    }
+}
+
+static void surface_sw_draw_oval(wiitools_png_image *surf,
+                                  int x, int y, int w, int h,
+                                  unsigned char r, unsigned char g,
+                                  unsigned char b, unsigned char a,
+                                  float angle_deg)
+{
+    float cx = (float)x + (float)w * 0.5f;
+    float cy = (float)y + (float)h * 0.5f;
+    float rx = (float)w * 0.5f, ry = (float)h * 0.5f;
+    float rad = angle_deg * (3.14159265358979323846f / 180.0f);
+    float cs = cosf(rad), sn = sinf(rad);
+    float diag = (rx > ry ? rx : ry) + 1.5f;
+    int x0 = (int)(cx - diag), x1 = (int)(cx + diag) + 1;
+    int y0 = (int)(cy - diag), y1 = (int)(cy + diag) + 1;
+    int px, py;
+    if (rx <= 0.0f || ry <= 0.0f) return;
+    if (x0 < 0) x0 = 0;
+    if (y0 < 0) y0 = 0;
+    if (x1 > (int)surf->w) x1 = (int)surf->w;
+    if (y1 > (int)surf->h) y1 = (int)surf->h;
+    for (py = y0; py < y1; py++) {
+        for (px = x0; px < x1; px++) {
+            float ddx = (float)px - cx, ddy = (float)py - cy;
+            float lx = ddx * cs + ddy * sn;
+            float ly = -ddx * sn + ddy * cs;
+            float ex = lx / rx, ey = ly / ry;
+            if (ex*ex + ey*ey <= 1.0f)
+                surface_blend_pixel(surf, px, py, r, g, b, a);
+        }
+    }
+}
+
+static void surface_sw_render_text(wiitools_png_image *surf,
+                                    int x, int y, const char *text,
+                                    int size, int shadow,
+                                    unsigned char r, unsigned char g,
+                                    unsigned char b, unsigned char a,
+                                    float angle_deg)
+{
+    int scale = (size <= 0) ? 1 : size;
+    int shadow_off = scale / 4;
+    float rad = angle_deg * (3.14159265358979323846f / 180.0f);
+    float cs = cosf(rad), sn = sinf(rad);
+    size_t len = strlen(text);
+    int cx, cy, i, row, col, dx2, dy2;
+    if (shadow_off < 1) shadow_off = 1;
+
+    if (shadow) {
+        cx = x; cy = y;
+        for (i = 0; i < (int)len; i++) {
+            unsigned char ch = (unsigned char)text[i];
+            if (ch == '\n') { cy += 9 * scale; cx = x; continue; }
+            if (ch > 127) ch = '?';
+            for (row = 0; row < 8; row++) {
+                unsigned char bits = (unsigned char)font8x8_basic[ch][row];
+                for (col = 0; col < 8; col++) {
+                    if (!(bits & (1u << col))) continue;
+                    for (dy2 = 0; dy2 < scale; dy2++) {
+                        for (dx2 = 0; dx2 < scale; dx2++) {
+                            float fx = (float)(cx + col*scale + shadow_off + dx2) - (float)x;
+                            float fy = (float)(cy + row*scale + shadow_off + dy2) - (float)y;
+                            float rx2 = fx*cs - fy*sn + (float)x;
+                            float ry2 = fx*sn + fy*cs + (float)y;
+                            surface_blend_pixel(surf, (int)rx2, (int)ry2, 0, 0, 0, a);
+                        }
+                    }
+                }
+            }
+            cx += 8 * scale;
+        }
+    }
+
+    cx = x; cy = y;
+    for (i = 0; i < (int)len; i++) {
+        unsigned char ch = (unsigned char)text[i];
+        if (ch == '\n') { cy += 9 * scale; cx = x; continue; }
+        if (ch > 127) ch = '?';
+        for (row = 0; row < 8; row++) {
+            unsigned char bits = (unsigned char)font8x8_basic[ch][row];
+            for (col = 0; col < 8; col++) {
+                if (!(bits & (1u << col))) continue;
+                for (dy2 = 0; dy2 < scale; dy2++) {
+                    for (dx2 = 0; dx2 < scale; dx2++) {
+                        float fx = (float)(cx + col*scale + dx2) - (float)x;
+                        float fy = (float)(cy + row*scale + dy2) - (float)y;
+                        float rx2 = fx*cs - fy*sn + (float)x;
+                        float ry2 = fx*sn + fy*cs + (float)y;
+                        surface_blend_pixel(surf, (int)rx2, (int)ry2, r, g, b, a);
+                    }
+                }
+            }
+        }
+        cx += 8 * scale;
+    }
+}
+
+/* ===== End software surface renderer ===== */
+
 static int png_blit_region_scaled(wiitools_png_image *img, int sx, int sy, int sw, int sh,
                                   int dx, int dy, int dw, int dh)
 {
     if (img == NULL || img->rgba == NULL)
         return -2;
+
+    if (g_render_target != NULL) {
+        surface_sw_blit_img(img, sx, sy, sw, sh, g_render_target, dx, dy, dw, dh);
+        g_render_target_dirty = 1;
+        return 0;
+    }
 
     if (screenMode != NULL && current_frame != NULL && img->tex_rgba8 != NULL) {
         Mtx model;
@@ -998,7 +1238,7 @@ static int png_blit_region_scaled(wiitools_png_image *img, int sx, int sy, int s
 
         guMtxIdentity(model);
         GX_LoadPosMtxImm(model, GX_PNMTX0);
-        guOrtho(proj, 0.0f, (float)screenMode->xfbHeight, 0.0f, (float)screenMode->fbWidth, -1.0f, 1.0f);
+        { float _lw, _lh; get_logical_size(&_lw, &_lh); guOrtho(proj, 0.0f, _lh, 0.0f, _lw, -1.0f, 1.0f); }
         GX_LoadProjectionMtx(proj, GX_ORTHOGRAPHIC);
 
         GX_SetNumChans(1);
@@ -1135,7 +1375,7 @@ static int png_blit_quad(wiitools_png_image *img,
 
     guMtxIdentity(model);
     GX_LoadPosMtxImm(model, GX_PNMTX0);
-    guOrtho(proj, 0.0f, (float)screenMode->xfbHeight, 0.0f, (float)screenMode->fbWidth, -1.0f, 1.0f);
+    { float _lw, _lh; get_logical_size(&_lw, &_lh); guOrtho(proj, 0.0f, _lh, 0.0f, _lw, -1.0f, 1.0f); }
     GX_LoadProjectionMtx(proj, GX_ORTHOGRAPHIC);
 
     GX_SetNumChans(1);
@@ -1203,6 +1443,7 @@ static PyObject* rendering_init(PyObject *self, PyObject *args) {
         return NULL;
 	
 	VIDEO_Init();
+	video_init_done = 1;
 	screenMode = VIDEO_GetPreferredMode(NULL);
 	frameBuffer[0] = MEM_K0_TO_K1(SYS_AllocateFramebuffer(screenMode));
 	frameBuffer[1] = MEM_K0_TO_K1(SYS_AllocateFramebuffer(screenMode));
@@ -1306,6 +1547,109 @@ static PyObject* rendering_init(PyObject *self, PyObject *args) {
 
 	GX_DrawDone();
 	return py_none();
+}
+
+/* --------------- Overlay-Bridge: Host-Rendering uebernehmen --------------- */
+/*
+ * Wenn dieses Modul als Overlay unter einem Host (z.B. ffCavEX) laeuft, der
+ * VIDEO, Framebuffer und GX bereits initialisiert hat, darf man NICHT
+ * rendering_init() aufrufen (das setzt alles neu auf und kollidiert mit dem
+ * Host). Stattdessen uebernimmt diese Funktion nur die Software-Globals
+ * dieses Moduls auf die Werte des Hosts. Danach besteht der Check in
+ * wiitools_begin_shape_draw() (screenMode/current_frame != NULL, Zeile 2118)
+ * und es wird in den Back-Buffer des Hosts gezeichnet -- ohne eigenen
+ * VSync/Flip.
+ *
+ * Aus C aufrufbar (nicht static), z.B. aus ext_main(api):
+ *     extern void wiitools_adopt_host_gfx(GXRModeObj*, void*, mqbox_t);
+ *     wiitools_adopt_host_gfx(host_mode, host_backbuffer, 0);
+ *
+ * mode        : GXRModeObj* des Hosts (Host-Global: screenMode)
+ * back_buffer : aktueller Back-Buffer des Hosts, in den gezeichnet wird
+ *               (Host-Global: frame). MUSS != NULL sein.
+ * empty_q     : frame_empty-Queue des Hosts, oder 0 wenn der Host den Flip
+ *               selbst macht (empfohlen -> kein MQ_Receive, kein Konflikt).
+ */
+void wiitools_adopt_host_gfx(GXRModeObj *mode, void *back_buffer, mqbox_t empty_q)
+{
+    screenMode    = mode;
+    current_frame = (mqmsg_t)back_buffer;  /* != NULL -> Check Z.2118 besteht */
+    frame_empty   = empty_q;
+    /* In den Back-Buffer des Hosts zeichnen und (im Flush) direkt anzeigen. */
+    g_draw_target = (mqmsg_t)back_buffer;
+    g_frame_dirty = 0;
+    g_adopt_mode  = 1;
+
+    /* KEIN GX_Init und KEIN eigener FIFO! libpython ist in CavEX gelinkt -> es
+       gibt genau EIN GX und EINEN GP-FIFO (den von CavEX). Ein GX_Init hier
+       wuerde den geteilten GP auf einen fremden FIFO umschalten; das
+       Hin-/Herschalten macht den GP-Finish-Mechanismus kaputt und CavEX'
+       naechstes GX_WaitDrawDone haengt. Wir benutzen CavEX' bereits
+       initialisiertes GX mit und setzen nur den GX-STATE. Kein Video/FB/VI. */
+    GX_SetCopyClear((GXColor) {0, 0, 0, 255}, GX_MAX_Z24);
+    GX_SetViewport(0, 0, screenMode->fbWidth, screenMode->efbHeight, 0, 1);
+    GX_SetDispCopyYScale(
+        GX_GetYScaleFactor(screenMode->efbHeight, screenMode->xfbHeight));
+    GX_SetScissor(0, 0, screenMode->fbWidth, screenMode->efbHeight);
+    GX_SetDispCopySrc(0, 0, screenMode->fbWidth, screenMode->efbHeight);
+    GX_SetDispCopyDst(screenMode->fbWidth, screenMode->xfbHeight);
+    GX_SetCopyFilter(GX_FALSE, NULL, GX_FALSE, NULL);
+    GX_SetFieldMode(screenMode->field_rendering,
+                    ((screenMode->viHeight == 2 * screenMode->xfbHeight) ?
+                         GX_ENABLE : GX_DISABLE));
+
+    GX_SetCullMode(GX_CULL_BACK);
+    GX_SetDispCopyGamma(GX_GM_1_0);
+
+    GX_InvalidateTexAll();
+    GX_ClearVtxDesc();
+    GX_SetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GX_SetVtxDesc(GX_VA_CLR0, GX_INDEX8);
+    GX_SetVtxDesc(GX_VA_TEX0, GX_DIRECT);
+
+    GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_S16, 8);
+    GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGB, GX_RGB8, 0);
+    GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_U8, 8);
+
+    GX_SetVtxAttrFmt(GX_VTXFMT1, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
+    GX_SetVtxAttrFmt(GX_VTXFMT1, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+    GX_SetVtxAttrFmt(GX_VTXFMT1, GX_VA_TEX0, GX_TEX_ST, GX_F32, 0);
+
+    GX_SetVtxAttrFmt(GX_VTXFMT2, GX_VA_POS, GX_POS_XYZ, GX_S16, 0);
+    GX_SetVtxAttrFmt(GX_VTXFMT2, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+    GX_SetVtxAttrFmt(GX_VTXFMT2, GX_VA_TEX0, GX_TEX_ST, GX_U16, 8);
+
+    GX_SetVtxAttrFmt(GX_VTXFMT3, GX_VA_POS, GX_POS_XYZ, GX_S16, 8);
+    GX_SetVtxAttrFmt(GX_VTXFMT3, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+    GX_SetVtxAttrFmt(GX_VTXFMT3, GX_VA_TEX0, GX_TEX_ST, GX_U8, 8);
+
+    GX_SetArray(GX_VA_CLR0, colors, 3 * sizeof(uint8_t));
+    GX_SetNumChans(1);
+    GX_SetNumTexGens(1);
+    GX_SetNumTevStages(1);
+    GX_SetTevOp(GX_TEVSTAGE0, GX_MODULATE);
+    GX_SetAlphaCompare(GX_GEQUAL, 16, GX_AOP_AND, GX_ALWAYS, 0);
+    GX_SetZCompLoc(GX_FALSE);
+
+    GX_SetTexCoordGen(GX_TEXCOORD1, GX_TG_MTX2x4, GX_TG_POS, GX_TEXMTX1);
+    GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+
+    GX_SetLineWidth(12, GX_TO_ZERO);
+    GX_DrawDone();
+}
+
+/* Gleiche Funktion aus Python: rendering_adopt(mode_ptr, fb_ptr[, empty_q])
+ * mit den Zeigern als Integer (Pointer-Werte, die der Host uebergibt). */
+static PyObject* rendering_adopt(PyObject *self, PyObject *args)
+{
+    unsigned long mode_ptr = 0, fb_ptr = 0, empty_ptr = 0;
+    (void)self;
+    if (!PyArg_ParseTuple(args, "kk|k:rendering_adopt",
+                          &mode_ptr, &fb_ptr, &empty_ptr))
+        return NULL;
+    wiitools_adopt_host_gfx((GXRModeObj*)mode_ptr, (void*)fb_ptr,
+                            (mqbox_t)empty_ptr);
+    return py_none();
 }
 
 /* --------------- PNG helpers --------------- */
@@ -1890,7 +2234,7 @@ static int wiitools_begin_shape_draw(void)
 
     guMtxIdentity(model);
     GX_LoadPosMtxImm(model, GX_PNMTX0);
-    guOrtho(proj, 0.0f, (float)screenMode->xfbHeight, 0.0f, (float)screenMode->fbWidth, -1.0f, 1.0f);
+    { float _lw, _lh; get_logical_size(&_lw, &_lh); guOrtho(proj, 0.0f, _lh, 0.0f, _lw, -1.0f, 1.0f); }
     GX_LoadProjectionMtx(proj, GX_ORTHOGRAPHIC);
 
     GX_SetNumChans(1);
@@ -2009,6 +2353,11 @@ static PyObject* draw_rect(PyObject *self, PyObject *args)
         return NULL;
     if (w <= 0 || h <= 0)
         return py_none();
+    if (g_render_target != NULL) {
+        surface_sw_draw_rect(g_render_target, x, y, w, h, r, g, b, a, angle_deg);
+        g_render_target_dirty = 1;
+        return py_none();
+    }
     if (wiitools_begin_shape_draw() != 0) {
         PyErr_SetString(PyExc_RuntimeError, "rendering not initialized");
         return NULL;
@@ -2055,6 +2404,11 @@ static PyObject* draw_circle(PyObject *self, PyObject *args)
         return NULL;
     if (radius <= 0)
         return py_none();
+    if (g_render_target != NULL) {
+        surface_sw_draw_circle(g_render_target, x, y, radius, r, g, b, a);
+        g_render_target_dirty = 1;
+        return py_none();
+    }
     if (wiitools_begin_shape_draw() != 0) {
         PyErr_SetString(PyExc_RuntimeError, "rendering not initialized");
         return NULL;
@@ -2091,6 +2445,11 @@ static PyObject* draw_oval(PyObject *self, PyObject *args)
         return NULL;
     if (w <= 0 || h <= 0)
         return py_none();
+    if (g_render_target != NULL) {
+        surface_sw_draw_oval(g_render_target, x, y, w, h, r, g, b, a, angle_deg);
+        g_render_target_dirty = 1;
+        return py_none();
+    }
     if (wiitools_begin_shape_draw() != 0) {
         PyErr_SetString(PyExc_RuntimeError, "rendering not initialized");
         return NULL;
@@ -2142,6 +2501,11 @@ static PyObject* render_text_py(PyObject *self, PyObject *args)
         return NULL;
     if (wiitools_parse_rgba_tuple(color, &r, &g, &b, &a) != 0)
         return NULL;
+    if (g_render_target != NULL) {
+        surface_sw_render_text(g_render_target, x, y, text, size, shadow, r, g, b, a, angle_deg);
+        g_render_target_dirty = 1;
+        return py_none();
+    }
     if (wiitools_begin_shape_draw() != 0) {
         PyErr_SetString(PyExc_RuntimeError, "rendering not initialized");
         return NULL;
@@ -2221,6 +2585,115 @@ static PyObject* text_length_py(PyObject *self, PyObject *args)
     return PyLong_FromLong((long)wiitools_text_length_px(text, scale));
 }
 
+
+/* --------------- WPADState named-tuple type --------------- */
+
+static PyStructSequence_Field WPADState_fields[] = {
+    {"WPAD_BUTTON_2",              "Wiimote button 2"},
+    {"WPAD_BUTTON_1",              "Wiimote button 1"},
+    {"WPAD_BUTTON_B",              "Wiimote B (trigger)"},
+    {"WPAD_BUTTON_A",              "Wiimote A"},
+    {"WPAD_BUTTON_MINUS",          "Wiimote minus"},
+    {"WPAD_BUTTON_HOME",           "Wiimote home"},
+    {"WPAD_BUTTON_LEFT",           "Wiimote d-pad left"},
+    {"WPAD_BUTTON_RIGHT",          "Wiimote d-pad right"},
+    {"WPAD_BUTTON_DOWN",           "Wiimote d-pad down"},
+    {"WPAD_BUTTON_UP",             "Wiimote d-pad up"},
+    {"WPAD_BUTTON_PLUS",           "Wiimote plus"},
+    {"WPAD_NUNCHUK_BUTTON_Z",      "Nunchuk Z"},
+    {"WPAD_NUNCHUK_BUTTON_C",      "Nunchuk C"},
+    {"WPAD_CLASSIC_BUTTON_UP",     "Classic d-pad up"},
+    {"WPAD_CLASSIC_BUTTON_LEFT",   "Classic d-pad left"},
+    {"WPAD_CLASSIC_BUTTON_ZR",     "Classic ZR"},
+    {"WPAD_CLASSIC_BUTTON_X",      "Classic X"},
+    {"WPAD_CLASSIC_BUTTON_A",      "Classic A"},
+    {"WPAD_CLASSIC_BUTTON_Y",      "Classic Y"},
+    {"WPAD_CLASSIC_BUTTON_B",      "Classic B"},
+    {"WPAD_CLASSIC_BUTTON_ZL",     "Classic ZL"},
+    {"WPAD_CLASSIC_BUTTON_FULL_R", "Classic full R trigger"},
+    {"WPAD_CLASSIC_BUTTON_PLUS",   "Classic plus"},
+    {"WPAD_CLASSIC_BUTTON_HOME",   "Classic home"},
+    {"WPAD_CLASSIC_BUTTON_MINUS",  "Classic minus"},
+    {"WPAD_CLASSIC_BUTTON_FULL_L", "Classic full L trigger"},
+    {"WPAD_CLASSIC_BUTTON_DOWN",   "Classic d-pad down"},
+    {"WPAD_CLASSIC_BUTTON_RIGHT",  "Classic d-pad right"},
+    {"buttons_raw",                "Raw button bitmask (int)"},
+    {NULL, NULL}
+};
+
+static PyStructSequence_Desc WPADState_desc = {
+    "wiitools.WPADState",
+    "Snapshot of all Wiimote/Classic button states. Fields are True/False.",
+    WPADState_fields,
+    29
+};
+
+static PyTypeObject *WPADState_Type = NULL;
+
+static PyObject* wpad_state_from_bits(u32 bits)
+{
+    PyObject *obj;
+    int i = 0;
+    if (WPADState_Type == NULL) {
+        PyErr_SetString(PyExc_RuntimeError, "WPADState not initialized");
+        return NULL;
+    }
+    obj = PyStructSequence_New(WPADState_Type);
+    if (obj == NULL) return NULL;
+#define SETB(mask) PyStructSequence_SET_ITEM(obj, i++, PyBool_FromLong((bits & (u32)(mask)) != 0u))
+    SETB(WPAD_BUTTON_2);   SETB(WPAD_BUTTON_1);
+    SETB(WPAD_BUTTON_B);   SETB(WPAD_BUTTON_A);
+    SETB(WPAD_BUTTON_MINUS); SETB(WPAD_BUTTON_HOME);
+    SETB(WPAD_BUTTON_LEFT);  SETB(WPAD_BUTTON_RIGHT);
+    SETB(WPAD_BUTTON_DOWN);  SETB(WPAD_BUTTON_UP);
+    SETB(WPAD_BUTTON_PLUS);
+    SETB(WPAD_NUNCHUK_BUTTON_Z); SETB(WPAD_NUNCHUK_BUTTON_C);
+    SETB(WPAD_CLASSIC_BUTTON_UP);    SETB(WPAD_CLASSIC_BUTTON_LEFT);
+    SETB(WPAD_CLASSIC_BUTTON_ZR);    SETB(WPAD_CLASSIC_BUTTON_X);
+    SETB(WPAD_CLASSIC_BUTTON_A);     SETB(WPAD_CLASSIC_BUTTON_Y);
+    SETB(WPAD_CLASSIC_BUTTON_B);     SETB(WPAD_CLASSIC_BUTTON_ZL);
+    SETB(WPAD_CLASSIC_BUTTON_FULL_R); SETB(WPAD_CLASSIC_BUTTON_PLUS);
+    SETB(WPAD_CLASSIC_BUTTON_HOME);  SETB(WPAD_CLASSIC_BUTTON_MINUS);
+    SETB(WPAD_CLASSIC_BUTTON_FULL_L); SETB(WPAD_CLASSIC_BUTTON_DOWN);
+    SETB(WPAD_CLASSIC_BUTTON_RIGHT);
+#undef SETB
+    PyStructSequence_SET_ITEM(obj, i++, PyLong_FromUnsignedLong((unsigned long)bits));
+    return obj;
+}
+
+static u32 wpad_collect_bits(int chan, u32 (*fn)(s32))
+{
+    if (chan == WPAD_CHAN_ALL) {
+        u32 r = 0; int k;
+        for (k = 0; k < 4; k++) r |= fn((s32)k);
+        return r;
+    }
+    return fn((s32)chan);
+}
+
+static PyObject* wpad_buttons_down_all(PyObject *self, PyObject *args)
+{
+    int chan;
+    (void)self;
+    if (!PyArg_ParseTuple(args, "i:WPAD_ButtonsDown_all", &chan)) return NULL;
+    return wpad_state_from_bits(wpad_collect_bits(chan, WPAD_ButtonsDown));
+}
+
+static PyObject* wpad_buttons_up_all(PyObject *self, PyObject *args)
+{
+    int chan;
+    (void)self;
+    if (!PyArg_ParseTuple(args, "i:WPAD_ButtonsUp_all", &chan)) return NULL;
+    return wpad_state_from_bits(wpad_collect_bits(chan, WPAD_ButtonsUp));
+}
+
+static PyObject* wpad_buttons_held_all(PyObject *self, PyObject *args)
+{
+    int chan;
+    (void)self;
+    if (!PyArg_ParseTuple(args, "i:WPAD_ButtonsHeld_all", &chan)) return NULL;
+    return wpad_state_from_bits(wpad_collect_bits(chan, WPAD_ButtonsHeld));
+}
 
 /* --------------- WPAD (simplified) --------------- */
 static PyObject* wpad_up(PyObject *self, PyObject *args)
@@ -2893,16 +3366,188 @@ static PyObject* wpad_expansion(PyObject *self, PyObject *args)
     return Py_BuildValue("y#", (const char *)&exp, (int)sizeof(exp));
 }
 
-/* --------------- UPDATE --------------- */
-static PyObject* update(PyObject *self, PyObject *args)
+/* --------------- Surface API --------------- */
+
+static PyObject* py_surface_new(PyObject *self, PyObject *args)
+{
+    const char *name;
+    int w, h;
+    wiitools_png_image *img;
+    (void)self;
+    if (!PyArg_ParseTuple(args, "sii:surface_new", &name, &w, &h))
+        return NULL;
+    if (w <= 0 || h <= 0) {
+        PyErr_SetString(PyExc_ValueError, "width and height must be positive");
+        return NULL;
+    }
+    img = png_get_or_create_image(name);
+    if (img == NULL) { PyErr_NoMemory(); return NULL; }
+    png_unload_image_data(img);
+    img->rgba = (unsigned char *)calloc((size_t)(unsigned)w * (size_t)(unsigned)h * 4u, 1u);
+    if (img->rgba == NULL) { PyErr_NoMemory(); return NULL; }
+    img->w = (unsigned)w;
+    img->h = (unsigned)h;
+    return Py_BuildValue("(ii)", w, h);
+}
+
+static PyObject* py_surface_set_target(PyObject *self, PyObject *args)
+{
+    const char *name;
+    wiitools_png_image *img;
+    (void)self;
+    if (!PyArg_ParseTuple(args, "s:surface_set_target", &name))
+        return NULL;
+    img = png_find_image(name);
+    if (img == NULL || img->rgba == NULL) {
+        PyErr_Format(PyExc_KeyError, "surface not found: '%s'", name);
+        return NULL;
+    }
+    g_render_target = img;
+    g_render_target_dirty = 0;
+    return py_none();
+}
+
+static PyObject* py_surface_clear_target(PyObject *self, PyObject *args)
 {
     (void)self;
-    if (!PyArg_ParseTuple(args, ":update"))
+    if (!PyArg_ParseTuple(args, ":surface_clear_target"))
         return NULL;
-    WPAD_ScanPads();
+    g_render_target = NULL;
+    g_render_target_dirty = 0;
+    return py_none();
+}
 
+static PyObject* py_surface_fill(PyObject *self, PyObject *args)
+{
+    const char *name;
+    PyObject *color;
+    u8 r, g, b, a;
+    wiitools_png_image *img;
+    unsigned i, n;
+    (void)self;
+    if (!PyArg_ParseTuple(args, "sO:surface_fill", &name, &color))
+        return NULL;
+    if (wiitools_parse_rgba_tuple(color, &r, &g, &b, &a) != 0)
+        return NULL;
+    img = png_find_image(name);
+    if (img == NULL || img->rgba == NULL) {
+        PyErr_Format(PyExc_KeyError, "surface not found: '%s'", name);
+        return NULL;
+    }
+    n = img->w * img->h;
+    for (i = 0; i < n; i++) {
+        img->rgba[i*4u+0] = r; img->rgba[i*4u+1] = g;
+        img->rgba[i*4u+2] = b; img->rgba[i*4u+3] = a;
+    }
+    if (g_render_target == img) g_render_target_dirty = 1;
+    return py_none();
+}
+
+static PyObject* py_surface_get_size(PyObject *self, PyObject *args)
+{
+    const char *name;
+    wiitools_png_image *img;
+    (void)self;
+    if (!PyArg_ParseTuple(args, "s:surface_get_size", &name))
+        return NULL;
+    img = png_find_image(name);
+    if (img == NULL || img->rgba == NULL)
+        return py_none();
+    return Py_BuildValue("(ii)", (int)img->w, (int)img->h);
+}
+
+static PyObject* py_blit(PyObject *self, PyObject *args)
+{
+    const char *name;
+    int x, y;
+    int rc;
+    wiitools_png_image *img;
+    wiitools_png_image *saved_target;
+    (void)self;
+    if (!PyArg_ParseTuple(args, "sii:blit", &name, &x, &y))
+        return NULL;
+    img = png_find_image(name);
+    if (img == NULL || img->rgba == NULL) {
+        PyErr_Format(PyExc_KeyError, "surface not found: '%s'", name);
+        return NULL;
+    }
+    /* Always rebuild GX texture so modifications are visible */
+    png_build_gx_texture(img);
+    if (g_render_target == img) g_render_target_dirty = 0;
+    /* blit always goes to the screen, bypass any active render target */
+    saved_target = g_render_target;
+    g_render_target = NULL;
+    rc = png_blit_region_scaled(img, 0, 0, (int)img->w, (int)img->h,
+                                x, y, (int)img->w, (int)img->h);
+    g_render_target = saved_target;
+    if (rc == -1) {
+        PyErr_SetString(PyExc_RuntimeError, "framebuffer not initialized");
+        return NULL;
+    }
+    return py_none();
+}
+
+static PyObject* py_surface_blit(PyObject *self, PyObject *args)
+{
+    const char *src_name;
+    PyObject *dst_obj;
+    int x, y;
+    int sx = 0, sy = 0, sw2 = -1, sh2 = -1;
+    wiitools_png_image *src, *dst;
+    (void)self;
+    /* surface_blit(src_name, dst_name_or_None, x, y[, sx, sy, sw, sh]) */
+    if (!PyArg_ParseTuple(args, "sOii|iiii:surface_blit",
+                          &src_name, &dst_obj, &x, &y, &sx, &sy, &sw2, &sh2))
+        return NULL;
+    src = png_find_image(src_name);
+    if (src == NULL || src->rgba == NULL) {
+        PyErr_Format(PyExc_KeyError, "source surface not found: '%s'", src_name);
+        return NULL;
+    }
+    if (dst_obj == Py_None) {
+        dst = g_render_target;
+        if (dst == NULL) {
+            PyErr_SetString(PyExc_RuntimeError,
+                "no active render target — call surface_set_target() first");
+            return NULL;
+        }
+    } else {
+        const char *dst_name;
+        if (!PyUnicode_Check(dst_obj)) {
+            PyErr_SetString(PyExc_TypeError, "dst must be a surface name (str) or None");
+            return NULL;
+        }
+        dst_name = PyUnicode_AsUTF8(dst_obj);
+        if (dst_name == NULL) return NULL;
+        dst = png_find_image(dst_name);
+        if (dst == NULL || dst->rgba == NULL) {
+            PyErr_Format(PyExc_KeyError, "destination surface not found: '%s'", dst_name);
+            return NULL;
+        }
+    }
+    if (sw2 < 0) sw2 = (int)src->w - sx;
+    if (sh2 < 0) sh2 = (int)src->h - sy;
+    surface_sw_blit_img(src, sx, sy, sw2, sh2, dst, x, y, sw2, sh2);
+    if (g_render_target == dst) g_render_target_dirty = 1;
+    return py_none();
+}
+
+/* --------------- UPDATE --------------- */
+
+static void do_render_flush(void)
+{
     if (g_frame_dirty) {
-        if (screenMode != NULL && current_frame != NULL) {
+        if (g_adopt_mode && g_draw_target != NULL) {
+            /* Uebernommenes Host-Rendering: EFB in den Host-Back-Buffer kopieren
+               und diesen direkt anzeigen. Kein MQ/kein Callback -- den gibt es
+               im Adopt-Modus nicht. g_draw_target bleibt erhalten (wir zeichnen
+               jeden Frame in denselben Host-Puffer). */
+            GX_CopyDisp(g_draw_target, GX_TRUE);
+            GX_DrawDone();
+            GX_WaitDrawDone();
+            VIDEO_SetNextFramebuffer(g_draw_target);
+            VIDEO_Flush();
+        } else if (screenMode != NULL && current_frame != NULL) {
             if (g_draw_target != NULL) {
                 GX_CopyDisp(g_draw_target, GX_TRUE);
                 GX_DrawDone();
@@ -2919,8 +3564,69 @@ static PyObject* update(PyObject *self, PyObject *args)
         }
         g_frame_dirty = 0;
     }
-
     VIDEO_WaitVSync();
+}
+
+static PyObject* wpad_scan_pads(PyObject *self, PyObject *args)
+{
+    (void)self;
+    if (!PyArg_ParseTuple(args, ":WPAD_ScanPads"))
+        return NULL;
+    WPAD_ScanPads();
+    return py_none();
+}
+
+static PyObject* py_set_screen_size(PyObject *self, PyObject *args)
+{
+    int lw, lh;
+    (void)self;
+    if (!PyArg_ParseTuple(args, "ii:set_screen_size", &lw, &lh))
+        return NULL;
+    if (screenMode == NULL) {
+        PyErr_SetString(PyExc_RuntimeError, "graphics not initialized");
+        return NULL;
+    }
+    if (lw <= 0 || lh <= 0) {
+        /* reset to physical */
+        g_logical_w = 0.0f; g_logical_h = 0.0f;
+        GX_SetViewport(0, 0, screenMode->fbWidth, screenMode->efbHeight, 0, 1);
+        GX_SetScissor(0, 0, (u32)screenMode->fbWidth, (u32)screenMode->efbHeight);
+        return py_none();
+    }
+    float phys_w = (float)screenMode->fbWidth;
+    float phys_h = (float)screenMode->xfbHeight;
+    float scale = phys_w / (float)lw < phys_h / (float)lh
+                  ? phys_w / (float)lw : phys_h / (float)lh;
+    float vp_w = (float)lw * scale;
+    float vp_h = (float)lh * scale;
+    float vp_x = (phys_w - vp_w) * 0.5f;
+    float vp_y = (phys_h - vp_h) * 0.5f;
+    g_logical_w = (float)lw;
+    g_logical_h = (float)lh;
+    g_vp_x = vp_x; g_vp_y = vp_y;
+    g_vp_w = vp_w; g_vp_h = vp_h;
+    GX_SetViewport(vp_x, vp_y, vp_w, vp_h, 0, 1);
+    GX_SetScissor((u32)vp_x, (u32)vp_y, (u32)vp_w, (u32)vp_h);
+    return py_none();
+}
+
+static PyObject* render_update(PyObject *self, PyObject *args)
+{
+    (void)self;
+    if (!PyArg_ParseTuple(args, ":render_update"))
+        return NULL;
+    do_render_flush();
+    return py_none();
+}
+
+static PyObject* update(PyObject *self, PyObject *args)
+{
+    (void)self;
+    if (!PyArg_ParseTuple(args, ":update"))
+        return NULL;
+    WPAD_ScanPads();
+    PAD_ScanPads();
+    do_render_flush();
     return py_none();
 }
 
@@ -3027,6 +3733,36 @@ static PyObject* get_local_ip(PyObject *self, PyObject *args)
     return PyUnicode_FromString(ipbuf);
 }
 
+static PyObject* init(PyObject *self, PyObject *args)
+{
+    (void)self;
+    if (!PyArg_ParseTuple(args, ":init"))
+        return NULL;
+    VIDEO_Init();
+
+	rmode3 = VIDEO_GetPreferredMode(NULL);
+    framebuffer3 = MEM_K0_TO_K1(SYS_AllocateFramebuffer(rmode3));
+
+
+	xfb2 = MEM_K0_TO_K1(SYS_AllocateFramebuffer(rmode3));
+
+	console_init(xfb2,20,20,rmode3->fbWidth,rmode3->xfbHeight,rmode3->fbWidth*VI_DISPLAY_PIX_SZ);
+	
+    lwp_t thread;
+    LWP_CreateThread(
+        &thread,
+        net_thread,       
+        &net_ready,       
+        NULL,             
+        0,                
+        50                
+    );
+
+    WPAD_Init();
+    PAD_Init();
+    return py_none();
+}
+
 static PyMethodDef wiitools_methods[] = {
     {"fatInitDefault", fatinit, METH_VARARGS, "Mount SD card and USB"},
     {"VIDEO_WaitVSync", video_waitvsync, METH_VARARGS, "Wait one video frame"},
@@ -3055,6 +3791,13 @@ static PyMethodDef wiitools_methods[] = {
     {"draw_oval", draw_oval, METH_VARARGS, "draw_oval(x, y, w, h, (r,g,b,a), angle_deg)"},
     {"render_text", render_text_py, METH_VARARGS, "render_text(x, y, text, size, shadow, (r,g,b,a), angle_deg)"},
     {"text_length", text_length_py, METH_VARARGS, "text_length(text, size) -> width_px"},
+    {"surface_new", py_surface_new, METH_VARARGS, "surface_new(name, w, h) -> (w, h)  Create a blank off-screen RGBA surface"},
+    {"surface_set_target", py_surface_set_target, METH_VARARGS, "surface_set_target(name)  Redirect draw_*, render_text, png_show into a surface"},
+    {"surface_clear_target", py_surface_clear_target, METH_VARARGS, "surface_clear_target()  Restore rendering to the screen"},
+    {"surface_fill", py_surface_fill, METH_VARARGS, "surface_fill(name, (r,g,b,a))  Fill a surface with a solid colour"},
+    {"surface_get_size", py_surface_get_size, METH_VARARGS, "surface_get_size(name) -> (w, h) or None"},
+    {"blit", py_blit, METH_VARARGS, "blit(name, x, y)  Draw a surface to the screen (always bypasses render target)"},
+    {"surface_blit", py_surface_blit, METH_VARARGS, "surface_blit(src, dst_or_None, x, y[, sx, sy, sw, sh])  Copy one surface into another"},
     {"PAD_Init", pad_init, METH_VARARGS, "PAD_Init()"},
     {"PAD_Sync", pad_sync, METH_VARARGS, "PAD_Sync()"},
     {"PAD_ScanPads", pad_scanpads, METH_VARARGS, "PAD_ScanPads()"},
@@ -3077,6 +3820,9 @@ static PyMethodDef wiitools_methods[] = {
     {"WPAD_ButtonsUp", wpad_up, METH_VARARGS, "Button released? (button, chan) -> 0/1"},
     {"WPAD_ButtonsDown", wpad_down, METH_VARARGS, "Button pressed? (button, chan) -> 0/1"},
     {"WPAD_ButtonsHeld", wpad_held, METH_VARARGS, "Button held? (button, chan) -> 0/1"},
+    {"WPAD_ButtonsDown_all", wpad_buttons_down_all, METH_VARARGS, "WPAD_ButtonsDown_all(chan) -> WPADState with True/False per button"},
+    {"WPAD_ButtonsUp_all",   wpad_buttons_up_all,   METH_VARARGS, "WPAD_ButtonsUp_all(chan) -> WPADState with True/False per button"},
+    {"WPAD_ButtonsHeld_all", wpad_buttons_held_all, METH_VARARGS, "WPAD_ButtonsHeld_all(chan) -> WPADState with True/False per button"},
 
     {"WPAD_ControlSpeaker", wpad_control_speaker, METH_VARARGS, "WPAD_ControlSpeaker(chan, enable)"},
     {"WPAD_ReadEvent", wpad_read_event, METH_VARARGS, "WPAD_ReadEvent(chan) -> (ret, raw_data_bytes)"},
@@ -3111,15 +3857,22 @@ static PyMethodDef wiitools_methods[] = {
 
 	{"terminal_init",  terminal_init,  METH_VARARGS, "Init Debug screen"},
 	{"rendering_init", rendering_init, METH_VARARGS, "Init rendering screen"},
+	{"rendering_adopt", rendering_adopt, METH_VARARGS,
+	 "rendering_adopt(mode_ptr, fb_ptr[, empty_q]) -> uebernimmt das vom Host initialisierte Rendering, ohne neu zu initialisieren"},
     {"curl_request", (PyCFunction)wiitools_curl_request, METH_VARARGS | METH_KEYWORDS,
      "curl_request(method, url, data=None, headers=None, timeout_ms=30000, verify_peer=0, verify_host=0, follow_redirects=1, user_agent=None, ca_file=None) -> dict"},
     {"curl_get", (PyCFunction)wiitools_curl_get, METH_VARARGS | METH_KEYWORDS,
      "curl_get(url, headers=None, timeout_ms=30000, verify_peer=0, verify_host=0, follow_redirects=1, user_agent=None, ca_file=None) -> dict"},
     {"curl_post", (PyCFunction)wiitools_curl_post, METH_VARARGS | METH_KEYWORDS,
      "curl_post(url, data, headers=None, timeout_ms=30000, verify_peer=0, verify_host=0, follow_redirects=1, user_agent=None, ca_file=None) -> dict"},
-    {"update", update, METH_VARARGS, "WPAD_ScanPads wrapper"},
+    {"WPAD_ScanPads", wpad_scan_pads, METH_VARARGS, "WPAD_ScanPads()  Read all Wiimote button states for this frame"},
+    {"set_screen_size", py_set_screen_size, METH_VARARGS,
+     "set_screen_size(w, h)  Set logical resolution with letterboxing; set_screen_size(0,0) resets to physical"},
+    {"render_update", render_update, METH_VARARGS, "render_update()  Flush the framebuffer and wait for VSync, without scanning pads"},
+    {"update", update, METH_VARARGS, "WPAD_ScanPads + render_update combined; call once per frame"},
 	{"IsNetReady", IsNetReady, METH_VARARGS, "is net ready?"},
     {"get_local_ip", get_local_ip, METH_VARARGS, "get_local_ip() -> primary local IPv4 address string or empty string"},
+    {"init", init, METH_VARARGS, "init() -> initialize all (terminal_init() and other ...)"},
     {NULL, NULL, 0, NULL}
 };
 
@@ -3156,6 +3909,13 @@ PyInit_wiitools(void)
     m = PyModule_Create(&wiitools_module);
     if (m == NULL)
         return NULL;
+
+    /* Register WPADState named-tuple type */
+    WPADState_Type = PyStructSequence_NewType(&WPADState_desc);
+    if (WPADState_Type == NULL)
+        return NULL;
+    Py_INCREF(WPADState_Type);
+    PyModule_AddObject(m, "WPADState", (PyObject *)WPADState_Type);
 
     WIITOOLS_ADD_WPAD_CONST(m, WPAD_BUTTON_2);
     WIITOOLS_ADD_WPAD_CONST(m, WPAD_BUTTON_1);
@@ -3212,27 +3972,28 @@ PyInit_wiitools(void)
     wiitools_add_uint_constant(m, "width",  gfx_width );
     wiitools_add_uint_constant(m, "height", gfx_height);
 
-	VIDEO_Init();
-
-	rmode3 = VIDEO_GetPreferredMode(NULL);
-    framebuffer3 = MEM_K0_TO_K1(SYS_AllocateFramebuffer(rmode3));
-
-
-	xfb2 = MEM_K0_TO_K1(SYS_AllocateFramebuffer(rmode3));
-
-	console_init(xfb2,20,20,rmode3->fbWidth,rmode3->xfbHeight,rmode3->fbWidth*VI_DISPLAY_PIX_SZ);
-	
-    lwp_t thread;
-    LWP_CreateThread(
-        &thread,
-        net_thread,       
-        &net_ready,       
-        NULL,             
-        0,                
-        50                
-    );
-
-    WPAD_Init();
+    /* GameCube controller button constants */
+#define ADD_PAD(name) PyModule_AddIntConstant(m, #name, (int)(name))
+    ADD_PAD(PAD_BUTTON_LEFT);
+    ADD_PAD(PAD_BUTTON_RIGHT);
+    ADD_PAD(PAD_BUTTON_DOWN);
+    ADD_PAD(PAD_BUTTON_UP);
+    ADD_PAD(PAD_TRIGGER_Z);
+    ADD_PAD(PAD_TRIGGER_R);
+    ADD_PAD(PAD_TRIGGER_L);
+    ADD_PAD(PAD_BUTTON_A);
+    ADD_PAD(PAD_BUTTON_B);
+    ADD_PAD(PAD_BUTTON_X);
+    ADD_PAD(PAD_BUTTON_Y);
+    ADD_PAD(PAD_BUTTON_MENU);
+    ADD_PAD(PAD_BUTTON_START);
+    ADD_PAD(PAD_CHAN0);
+    ADD_PAD(PAD_CHAN1);
+    ADD_PAD(PAD_CHAN2);
+    ADD_PAD(PAD_CHAN3);
+    ADD_PAD(PAD_CHANMAX);
+    PyModule_AddIntConstant(m, "PAD_CHAN_ALL", -1);
+#undef ADD_PAD
 
     v = PyUnicode_FromString("0.2");
     if (v != NULL) {

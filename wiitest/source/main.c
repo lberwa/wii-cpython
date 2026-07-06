@@ -258,10 +258,10 @@ wait(300); // 5 Sekunden warten
     PRINT("\n\nFertig.\n");
 #endif
 
-    size_t count = 1;
+    size_t count = 3;
 
     //Py_Initalize_Custom(NULL, NULL); 
-    PyStatus status = Py_Init_Custom((const char*[]){ "sd:/", "sd:"}, &count);
+    PyStatus status = Py_Init_Custom((const char*[]){ "sd:/", "sd:", "sd:/python"}, &count);
 
     if (status._type != _PyStatus_TYPE_OK) {
         // Init ist fehlgeschlagen

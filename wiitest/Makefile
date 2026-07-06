@@ -12,18 +12,19 @@ WII_SD_SYNC ?= ~/Dokumente/wii/dolphin/sd-karte/WiiSDSync
 WII_SD_SYNC_PY_GLOB := $(MAKEFILE_DIR)files/*.py
 
 INCLUDE += -I../build-wii
+INCLUDE += -I$(MAKEFILE_DIR)../build-wii
 INCLUDE += -I$(MAKEFILE_DIR)../Include
 INCLUDE += -I$(DEVKITPRO)/libogc/include
 
 
-CFLAGS     += -O0 -g -std=c99 -Wall -Wextra
+CFLAGS     += -Os -g -std=c99 -Wall -Wextra -fdata-sections -ffunction-sections 
 CXXFLAGS   := $(CFLAGS)
-CPPFLAGS   += -O0 -g
+CPPFLAGS   += -Os -g 
 CFLAGS     += $(INCLUDE)
 CPPFLAGS   += $(INCLUDE)
 
 # Includes & Libs
-LDFLAGS += -T$(DEVKITPPC)/powerpc-eabi/lib/rvl.ld
+LDFLAGS += -T$(DEVKITPPC)/powerpc-eabi/lib/rvl.ld -Wl,--gc-sections
 
 LDFLAGS    += -L$(DEVKITPRO)/libogc/lib/wii
 LDFLAGS    += -L$(MAKEFILE_DIR)../libs
@@ -133,7 +134,7 @@ $(OUTPUT).elf: $(OFILES)
 		echo "Missing $(CPYTHON_BUILD)/libpython3.15.a (build CPython for powerpc-eabi first)."; \
 		exit 1; \
 	}
-	$(LD) $(LDFLAGS) $(CRTM) $(OFILES) $(LIBS) -o $@
+	$(LD) -Wl,--allow-multiple-definition $(LDFLAGS) $(CRTM) $(OFILES) $(LIBS) -o $@
 	@true
 
 pydata_%.o: %.py

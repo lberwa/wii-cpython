@@ -11,6 +11,7 @@ extern void* framebuffer;
 
 // Video initialisieren (einmal vor Textzeichnen aufrufen)
 void video_init_custom(void);
+extern int video_init_done;
 
 // Getter für main.c Variablen
 void* get_framebuffer(void);

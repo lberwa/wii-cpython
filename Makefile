@@ -1,4 +1,4 @@
-# Wii-only build (no host build). Uses Python 3.15 configure output to build libpython.a.
+# Wii-only build. Uses Python 3.15 configure output to build libpython.a.
 
 SHELL := /bin/sh
 VERSION=		3.15
@@ -31,7 +31,7 @@ OBJCOPY := $(DEVKITPPC)/bin/powerpc-eabi-objcopy
 OBJDUMP := $(DEVKITPPC)/bin/powerpc-eabi-objdump
 READELF := $(DEVKITPPC)/bin/powerpc-eabi-readelf
 
-OPT=			-mhard-float -g -O2 -Wall -Wstrict-prototypes -fPIC
+OPT=			-mhard-float -g -Os -Wall -Wstrict-prototypes -fPIC -fdata-sections -ffunction-sections
 CFLAGS=			$(OPT)
 WII_DEFINES := \
 	-DWII_BUILD \
@@ -40,7 +40,7 @@ WII_DEFINES := \
 	-D__PPC__ \
 	-D__powerpc__ \
 	-DWII_SINGLE_THREAD=1 \
-	-DTERMINAL_PRINT_DEBUG
+	#-DTERMINAL_PRINT_DEBUG
 WII_INCLUDE_DIRS := \
 	-I. \
 	-I$(MAKEFILE_DIR)bitmap/include \
@@ -221,12 +221,19 @@ $(HOST_BUILD_PYTHON):
 
 configure: $(BUILD_DIR)/Makefile
 
-$(BUILD_DIR)/Makefile: $(BUILD_PYTHON)
+# order-only prerequisite (|): the build-host python only has to *exist* before
+# we configure.  A plain prerequisite would re-run configure whenever build-host
+# was rebuilt (newer mtime), and since configure regenerates config.status but
+# not build-wii/Makefile itself, the target stayed perpetually stale -> configure
+# ran on every `make py`.  We touch the Makefile so a completed configure marks
+# the target up-to-date.
+$(BUILD_DIR)/Makefile: | $(BUILD_PYTHON)
 	@mkdir -p $(TMPDIR)
 	@mkdir -p "$(BUILD_DIR)"
 	cd "$(BUILD_DIR)" && \
 	$(CONFIGURE_ENV) \
 	../configure $(CONFIGURE_FLAGS)
+	@touch "$(BUILD_DIR)/Makefile"
 
 libpython: configure ssl curl $(BUILD_DIR)/Modules/wiitoolsmodule.o
 	@# Ensure build-wii uses our local module setup (e.g. math)
@@ -307,6 +314,9 @@ install: py
 	
 	@cp -r libs/* $(DEVKITPRO)/portlibs/ppc/lib
 	@cp -r Include/* $(DEVKITPRO)/portlibs/ppc/include/Python
+
+	@chmod a+w libs/
+
 	@echo "Installation complete."
 
 wiitest: py
@@ -315,6 +325,26 @@ wiitest: py
 	else \
 		echo "wiitest/ not found, skipping"; \
 	fi
+
+ifdef SD_APP_PATH
+
+run: py
+	@if [ -d "wiitest" ]; then \
+		cd wiitest && $(MAKE) clean && $(MAKE) run SD_APP_PATH=$(SD_APP_PATH) -j$(CPU_CORES); \
+	else \
+		echo "wiitest/ not found, skipping"; \
+	fi
+
+else
+
+run: py
+	@if [ -d "wiitest" ]; then \
+		cd wiitest && $(MAKE) clean && $(MAKE) run -j$(CPU_CORES); \
+	else \
+		echo "wiitest/ not found, skipping"; \
+	fi
+
+endif
 
 wiitest-clean:
 	@$(MAKE) -C $(MAKEFILE_DIR)wiitest clean
