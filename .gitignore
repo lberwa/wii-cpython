@@ -33,6 +33,7 @@ libs/*
 Lib/__pycache__/
 Lib/*/__pycache__/
 Lib/*/*/__pycache__/
+**/__pycache__/
 
 # Docs and developer-only helpers not needed for compiling
 Doc/

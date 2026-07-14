@@ -18,6 +18,11 @@
 static char term_buffer[TERM_MAX_LINES][TERM_MAX_WIDTH + 1];
 static int total_lines = 0;  // Anzahl aktuell gespeicherter Zeilen
 
+// Offene (noch nicht mit '\n' abgeschlossene) aktuelle Zeile für terminal_write().
+static char cur_line[TERM_MAX_WIDTH + 1];
+static int  cur_len = 0;
+static int  term_dirty = 0;  // 1 = seit letztem Render veraendert
+
 
 static char log_buffer[MAX_LINES][MAX_LINE_LENGTH];
 static int line_count = 0;
@@ -132,17 +137,31 @@ void render_bild() {
 }
 
 //terminalfunktionen
+
+// Zeichnet den Terminalinhalt neu. WICHTIG: KEIN VIDEO_WaitVSync() mehr —
+// wir zeichnen direkt in den sichtbaren Framebuffer, der ohnehin jeden Frame
+// ausgegeben wird. Das war der Flaschenhals (2 VSyncs pro Zeile ~ 33 ms).
 void terminal_render(void) {
-    clear_screen("black");
+    if (framebuffer == NULL) return;
+    clear_screen_ohne_bild("black");
 
-    int start = total_lines > TERM_VISIBLE_LINES ? total_lines - TERM_VISIBLE_LINES : 0;
-    for (int i = start; i < total_lines; i++) {
-        render_text_ohne_bild(term_buffer[i], 10, 20 + (i - start) * CHAR_HEIGHT, "white");
-    }
+    int extra = (cur_len > 0) ? 1 : 0;      // offene Teilzeile mitzeichnen
+    int total_shown = total_lines + extra;
+    int start = total_shown > TERM_VISIBLE_LINES ? total_shown - TERM_VISIBLE_LINES : 0;
 
-    VIDEO_Flush();
-    VIDEO_WaitVSync();
-    
+    int row = 0;
+    for (int i = start; i < total_lines; i++, row++)
+        render_text_ohne_bild(term_buffer[i], 10, 20 + row * CHAR_HEIGHT, "white");
+    if (extra)
+        render_text_ohne_bild(cur_line, 10, 20 + row * CHAR_HEIGHT, "white");
+
+    VIDEO_Flush();          // nur Flush, kein WaitVSync
+    term_dirty = 0;
+}
+
+void terminal_flush(void) {
+    if (term_dirty)
+        terminal_render();
 }
 
 static void terminal_add_line(const char *line) {
@@ -157,72 +176,65 @@ static void terminal_add_line(const char *line) {
         strncpy(term_buffer[TERM_MAX_LINES - 1], line, TERM_MAX_WIDTH);
         term_buffer[TERM_MAX_LINES - 1][TERM_MAX_WIDTH] = '\0';
     }
+    term_dirty = 1;
+    // Rendern übernimmt der Aufrufer (terminal_feed) — nicht mehr pro Zeile.
+}
 
+// Commit der offenen Teilzeile als eigene Terminalzeile (auch wenn leer).
+static void terminal_commit_cur(void) {
+    cur_line[cur_len] = '\0';
+    terminal_add_line(cur_line);
+    cur_len = 0;
+    cur_line[0] = '\0';
+}
+
+// Kernroutine: Bytes anhängen, nur bei echtem '\n' umbrechen; bei Überlänge
+// automatisch weiterbrechen. flush_partial=1 committet am Ende einen Rest.
+static void terminal_feed(const char *text, int len, int flush_partial) {
+    for (int i = 0; i < len; i++) {
+        char c = text[i];
+        if (c == '\n') {
+            terminal_commit_cur();
+        } else if (c == '\r') {
+            /* ignorieren */
+        } else {
+            if (c == '\t') c = ' ';
+            if (cur_len >= TERM_MAX_WIDTH)
+                terminal_commit_cur();          // automatischer Zeilenumbruch
+            cur_line[cur_len++] = c;
+        }
+    }
+    if (flush_partial && cur_len > 0)
+        terminal_commit_cur();
+    term_dirty = 1;
     if (autoscroll)
-        terminal_render();
+        terminal_render();                      // einmal pro Aufruf, ohne VSync
+}
+
+void terminal_write(const char *text, int len) {
+    if (text == NULL || len <= 0) return;
+    terminal_feed(text, len, 0);                // Teilzeilen puffern (Stream)
 }
 
 void terminal_clear(void) {
     for (int i = 0; i < TERM_MAX_LINES; i++)
         term_buffer[i][0] = '\0';
     total_lines = 0;
+    cur_len = 0;
+    cur_line[0] = '\0';
+    term_dirty = 1;
     if (framebuffer != NULL)
-        clear_screen("black");
+        terminal_render();
 }
 
 void terminal_set_autoscroll(bool enabled) {
     autoscroll = enabled;
 }
 
-//static bool first = true;
-/*
-void nochmal(const char *line) {
-	terminal_print("hallo akljhklsfhaklfh + AAAAAAAA");
-}
-*/
+// 1 Aufruf = 1 abgeschlossene Ausgabe (committet einen evtl. Rest). Für C-Code,
+// das ganze Meldungen übergibt (z.B. terminal_print("start")).
 void terminal_print(const char *text) {
-    size_t len = strlen(text);
-    size_t pos = 0;
-    
-    //bool first = true;
-    
-    while (pos < len) {
-    
-  //  	if (first) {
-        	
-        	char line[TERM_MAX_WIDTH + 1];
-        	size_t chunk = (len - pos > TERM_MAX_WIDTH) ? TERM_MAX_WIDTH : len - pos;
-		
-	        strncpy(line, &text[pos], chunk);
-	        line[chunk] = '\0';
-	        
-	        
-	        /*
-    		char line[TERM_MAX_WIDTH + 1];
-
-    		// Kopiere nur die ersten TERM_MAX_WIDTH Zeichen
-    		strncpy(line, text, TERM_MAX_WIDTH);
-    		line[TERM_MAX_WIDTH] = '\0';  
-*/
-
-	        terminal_add_line(line);
-		//terminal_print(line);
-		
-	        pos += chunk;
-	        
-	/*        first = false;
-        
-        } else {
-        	char line[TERM_MAX_WIDTH + 1];
-        	size_t chunk = (len - pos > TERM_MAX_WIDTH) ? TERM_MAX_WIDTH : len - pos;
-		
-	        strncpy(line, &text[pos], chunk);
-	        line[chunk] = '\0';
-	        //terminal_add_line(line);
-		terminal_print(line);
-		
-	        pos += chunk;
-	}*/	
-    }
+    if (text == NULL) return;
+    terminal_feed(text, (int)strlen(text), 1);
 }
 

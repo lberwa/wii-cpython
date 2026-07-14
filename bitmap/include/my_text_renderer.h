@@ -31,10 +31,19 @@ void render_bild(void);
 // Initialisiert den Textpuffer (optional, falls du willst)
 void terminal_clear(void);
 
-// Fügt eine neue Zeile hinzu (automatisches Scrollen, wenn nötig)
+// Fügt eine neue Zeile hinzu (automatisches Scrollen, wenn nötig).
+// Committet am Ende eine evtl. offene Teilzeile (1 Aufruf = 1 Zeile für C-Code).
 void terminal_print(const char *text);
 
-// Zeichnet den kompletten Inhalt neu auf den Bildschirm
+// Stream-Ausgabe (z.B. Python stdout): hängt Bytes an die aktuelle Zeile an
+// und bricht NUR bei echtem '\n' um. Teilzeilen bleiben bis zum naechsten
+// Aufruf gepuffert. Rendert am Ende ohne VSync (schnell).
+void terminal_write(const char *text, int len);
+
+// Zeichnet neu, falls seit dem letzten Render etwas geaendert wurde (ohne VSync).
+void terminal_flush(void);
+
+// Zeichnet den kompletten Inhalt neu auf den Bildschirm (ohne VSync)
 void terminal_render(void);
 
 // Aktiviert oder deaktiviert automatisches Scrollen

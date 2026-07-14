@@ -56,7 +56,7 @@ This will make a cpython.a.
 
 
 
-__or if you want test it:__
+__or if you want to test it:__
 
 ```bash
 make -j$(nproc)
@@ -73,7 +73,7 @@ sudo make install DEVKITPRO="/PATH/devkitpro" DEVKITPPC="/PATH/devkitpro/devkitP
 
 ```
 
-This will copy your libarys.a to DEVKITPRO/portlibs/ppc/lib and *.h to include
+This will copy your library .a files to DEVKITPRO/portlibs/ppc/lib and the *.h headers to the include directory.
 
 
 
@@ -83,13 +83,119 @@ __Clean:__
 make clean
 ```
 
-This will cleaning
+This will clean the build.
 
 
 
 ## Tests/Examples:
 
-In __[./wiitest](./wiitest)__ you will find examples how to use it in your main.c and how you make your Makefile.
+### Build/main.c
+
+In __[./wiitest](./wiitest)__ you will find examples of how to use it in your main.c and how to write your Makefile.
+
+-----------
+
+### Python
+
+#### WiiToolsModule
+
+##### Initializing
+
+First, import wiitools:
+
+```python
+import wiitools
+```
+
+Then initialize the Wii system:
+
+```python
+wiitools.init() # init WPAD, PAD, Network, mount sd/usb and Video
+```
+
+If you want to see Python's print() output, initialize it:
+
+```python
+wiitools.terminal_init()
+```
+
+Otherwise, if you want to see what you render (e.g. wiitools.render_text(...)), initialize this:
+
+```python
+wiitools.rendering_init()
+```
+
+--------
+
+If you want to use CPython in a game that is already initialized in C, you can put this C code in your C game:
+
+```c
+set_main_global("mode_pointer",
+					PyLong_FromUnsignedLong((unsigned long)gfx_wii_screenmode()));
+set_main_global("framebuffer_pointer",
+					PyLong_FromUnsignedLong((unsigned long)gfx_wii_backbuffer())); 
+// put pointer into python
+```
+
+and run the script with runpy and these arguments:
+
+```c
+PyRun_SimpleString(
+        "runpy.run_path(_hbc_path,\n"
+		"init_globals={'mode_ptr': mode_pointer, 'fb_ptr': framebuffer_pointer},\n"
+		"run_name='__main__')\n"
+                   );
+```
+
+init in python:
+
+```python
+wiitools.rendering_adopt(mode_ptr, fb_ptr)
+```
+
+----------
+
+
+
+##### Game loop
+
+The Python functions are mostly named like in C:
+
+```python
+import wiitools as wt
+
+wt.init()
+
+game = True
+
+while game: # Game loop
+    if wt.WPAD_ButtonsDown(wt.WPAD_BUTTON_HOME, 0): # key, channel
+        game = False
+       
+    if wt.WPAD_ButtonsHeld(wt.WPAD_BUTTON_A, 0):
+        wt.render_text(10, 10, "Player 1 pressed Button A!", 2,   True,
+                     # x   y              text              size shadow
+                      (255, 255, 255, 255),         0)
+                     #  r    g    b    a   angle: 0°↑
+
+    wt.update() # update WPAD, PAD, rendering and VIDEO_WaitVSync: Next frame
+```
+
+
+
+You can copy [wiitools.pyi](./wiitools.pyi) to your workspace so your IDE knows the wiitools functions.
+
+In wiitools.pyi you can also find all the wiitools functions you can use.
+
+
+
+------
+
+#### Other modules
+
+You can copy the contents of the Lib folder to *sd/usb:/python/*,
+
+and if your main.c has the import path *sd:/python*, you can import these modules.
 
 
 

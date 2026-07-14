@@ -25,6 +25,14 @@ _pass = 0
 _fail = 0
 _errors = []
 
+# Die WPAD-Roh-Event-API (WPAD_SetEventBufs/Flush/ReadPending/ReadEvent) ist
+# jetzt mit Vorbedingungs-Checks abgesichert: ohne initialisiertes WPAD bzw.
+# ohne verbundenen Controller gibt es eine saubere Python-Exception statt DSI.
+# ABER: bei tatsaechlich verbundenem Controller ruft sie den fragilen libogc-
+# Event-Pfad (__wpad_calc_data) auf, der intern crashen kann. Daher hier aus;
+# auf echter Hardware mit Wiimote bewusst aktivierbar.
+_WPAD_RAW_EVENTS = False
+
 
 def ok(name, info=""):
     global _pass
@@ -337,24 +345,25 @@ def test_wpad():
         fail("WPAD_GetBatteryDeadEvent", e)
 
     try:
-        ok("WPAD_SetEventBufs(0, 4)", w.WPAD_SetEventBufs(0, 4))
-    except Exception as e:
-        fail("WPAD_SetEventBufs", e)
-
-    try:
         ok("WPAD_DroppedEvents(0)", w.WPAD_DroppedEvents(0))
     except Exception as e:
         fail("WPAD_DroppedEvents", e)
 
-    try:
-        ok("WPAD_Flush(0)", w.WPAD_Flush(0))
-    except Exception as e:
-        fail("WPAD_Flush", e)
-
-    try:
-        ok("WPAD_ReadPending(0)", w.WPAD_ReadPending(0))
-    except Exception as e:
-        fail("WPAD_ReadPending", e)
+    if _WPAD_RAW_EVENTS:
+        try:
+            ok("WPAD_SetEventBufs(0, 4)", w.WPAD_SetEventBufs(0, 4))
+        except Exception as e:
+            fail("WPAD_SetEventBufs", e)
+        try:
+            ok("WPAD_Flush(0)", w.WPAD_Flush(0))
+        except Exception as e:
+            fail("WPAD_Flush", e)
+        try:
+            ok("WPAD_ReadPending(0)", w.WPAD_ReadPending(0))
+        except Exception as e:
+            fail("WPAD_ReadPending", e)
+    else:
+        print("[--] WPAD Roh-Event-API uebersprungen (_WPAD_RAW_EVENTS=False)")
 
     try:
         ok("WPAD_SetDataFormat(0,0)", w.WPAD_SetDataFormat(0, 0))
@@ -381,11 +390,12 @@ def test_wpad():
     except Exception as e:
         fail("WPAD_ControlSpeaker", e)
 
-    try:
-        ret, raw = w.WPAD_ReadEvent(0)
-        ok("WPAD_ReadEvent(0)", "ret=" + str(ret) + " raw=" + str(len(raw)) + "B")
-    except Exception as e:
-        fail("WPAD_ReadEvent", e)
+    if _WPAD_RAW_EVENTS:
+        try:
+            ret, raw = w.WPAD_ReadEvent(0)
+            ok("WPAD_ReadEvent(0)", "ret=" + str(ret) + " raw=" + str(len(raw)) + "B")
+        except Exception as e:
+            fail("WPAD_ReadEvent", e)
 
     try:
         raw = w.WPAD_IR(0)
@@ -453,6 +463,30 @@ def test_wpad():
     except Exception as e:
         fail("WPAD_EncodeData", e)
 
+    # Init/Scan erneut (idempotent) + *_all-Zustaende
+    try:
+        ok("WPAD_Init", w.WPAD_Init())
+        ok("WPAD_ScanPads", w.WPAD_ScanPads())
+    except Exception as e:
+        fail("WPAD_Init/ScanPads", e)
+    try:
+        st = w.WPAD_ButtonsDown_all(0)
+        ok("WPAD_ButtonsDown_all(0)", "WPADState mit " + str(len(st)) + " Feldern")
+        w.WPAD_ButtonsUp_all(0)
+        w.WPAD_ButtonsHeld_all(0)
+        ok("WPAD_ButtonsUp_all/Held_all(0)")
+    except Exception as e:
+        fail("WPAD_Buttons*_all", e)
+    # SendStreamData nur bei verbundenem Controller (sonst sauberer Fehler)
+    try:
+        r, t = w.WPAD_Probe(0)
+        if r == 0:
+            ok("WPAD_SendStreamData", w.WPAD_SendStreamData(0, bytes(20)))
+        else:
+            print("[--] WPAD_SendStreamData uebersprungen (kein Controller)")
+    except Exception as e:
+        fail("WPAD_SendStreamData", e)
+
 
 def test_pad():
     section("PAD (GameCube-Controller)")
@@ -514,6 +548,479 @@ def test_pad():
         ok("PAD_ControlMotor(0,0)")
     except Exception as e:
         fail("PAD_ControlMotor", e)
+
+
+def test_sys_power_reset():
+    section("SYS Power / Reset (Ereignis-Abfrage)")
+
+    # Direkte Zustandsabfrage - kein Callback noetig
+    try:
+        ok("SYS_ResetButtonDown", w.SYS_ResetButtonDown())
+    except Exception as e:
+        fail("SYS_ResetButtonDown", e)
+
+    try:
+        ok("SYS_Time", w.SYS_Time())
+    except Exception as e:
+        fail("SYS_Time", e)
+
+    # Callback-Trampoline aktivieren
+    try:
+        w.SYS_SetPowerCallback(True)
+        ok("SYS_SetPowerCallback(True)")
+    except Exception as e:
+        fail("SYS_SetPowerCallback", e)
+    try:
+        w.SYS_SetResetCallback(True)
+        ok("SYS_SetResetCallback(True)")
+    except Exception as e:
+        fail("SYS_SetResetCallback", e)
+
+    # Zaehler frisch abholen (sollten 0 sein)
+    try:
+        ok("SYS_GetPowerEvent (init)", w.SYS_GetPowerEvent())
+        ok("SYS_GetResetEvent (init)", w.SYS_GetResetEvent())
+    except Exception as e:
+        fail("SYS_Get*Event", e)
+
+    # Interaktiv: ~8s auf POWER/RESET lauschen.
+    # Es wird NICHT ausgeschaltet/resettet - nur erkannt und gemeldet.
+    print("")
+    print("Druecke am Wii: POWER oder RESET")
+    print("(Test schaltet NICHT ab)   A = beenden")
+    seen_power = 0
+    seen_reset = 0
+    for _ in range(480):          # ~8 s bei 60 fps
+        w.update()
+        p = w.SYS_GetPowerEvent()
+        r = w.SYS_GetResetEvent()
+        if p:
+            seen_power += p
+            print("  -> POWER erkannt (" + str(seen_power) + ")")
+        if r:
+            seen_reset += r
+            print("  -> RESET erkannt (" + str(seen_reset) + ")")
+        if w.SYS_ResetButtonDown():
+            print("  -> RESET-Knopf wird gehalten")
+        if w.WPAD_ButtonsDown(w.WPAD_BUTTON_A, 0):
+            break
+
+    ok("Power-Ereignisse gesamt", seen_power)
+    ok("Reset-Ereignisse gesamt", seen_reset)
+
+    # Callbacks wieder deaktivieren
+    try:
+        w.SYS_SetPowerCallback(False)
+        w.SYS_SetResetCallback(False)
+        ok("Callbacks deaktiviert")
+    except Exception as e:
+        fail("SYS_Set*Callback(False)", e)
+
+
+def test_conf():
+    section("CONF (Wii-Systemeinstellungen, nur lesend)")
+    try:
+        ok("CONF_Init", w.CONF_Init())
+    except Exception as e:
+        fail("CONF_Init", e)
+    getters = [
+        ("CONF_GetShutdownMode",     w.CONF_GetShutdownMode),
+        ("CONF_GetIdleLedMode",      w.CONF_GetIdleLedMode),
+        ("CONF_GetProgressiveScan",  w.CONF_GetProgressiveScan),
+        ("CONF_GetEuRGB60",          w.CONF_GetEuRGB60),
+        ("CONF_GetIRSensitivity",    w.CONF_GetIRSensitivity),
+        ("CONF_GetSensorBarPosition",w.CONF_GetSensorBarPosition),
+        ("CONF_GetPadSpeakerVolume", w.CONF_GetPadSpeakerVolume),
+        ("CONF_GetPadMotorMode",     w.CONF_GetPadMotorMode),
+        ("CONF_GetSoundMode",        w.CONF_GetSoundMode),
+        ("CONF_GetLanguage",         w.CONF_GetLanguage),
+        ("CONF_GetScreenSaverMode",  w.CONF_GetScreenSaverMode),
+        ("CONF_GetAspectRatio",      w.CONF_GetAspectRatio),
+        ("CONF_GetEULA",             w.CONF_GetEULA),
+        ("CONF_GetWiiConnect24",     w.CONF_GetWiiConnect24),
+        ("CONF_GetRegion",           w.CONF_GetRegion),
+        ("CONF_GetArea",             w.CONF_GetArea),
+        ("CONF_GetVideo",            w.CONF_GetVideo),
+        ("CONF_GetCounterBias",      w.CONF_GetCounterBias),
+        ("CONF_GetDisplayOffsetH",   w.CONF_GetDisplayOffsetH),
+        ("CONF_GetPadDevices",       w.CONF_GetPadDevices),
+    ]
+    for name, fn in getters:
+        try:
+            ok(name, fn())
+        except Exception as e:
+            fail(name, e)
+    try:
+        ok("CONF_GetNickName", repr(w.CONF_GetNickName()))
+    except Exception as e:
+        fail("CONF_GetNickName", e)
+    try:
+        ok("CONF_GetParentalPassword", repr(w.CONF_GetParentalPassword()))
+    except Exception as e:
+        fail("CONF_GetParentalPassword", e)
+    try:
+        ok("CONF_GetParentalAnswer", repr(w.CONF_GetParentalAnswer()))
+    except Exception as e:
+        fail("CONF_GetParentalAnswer", e)
+    # generischer Zugriff auf einen SYSCONF-Eintrag
+    try:
+        ok("CONF_GetLength(IPL.LNG)", w.CONF_GetLength("IPL.LNG"))
+        ok("CONF_GetType(IPL.LNG)",   w.CONF_GetType("IPL.LNG"))
+        ok("CONF_Get(IPL.LNG)",       str(len(w.CONF_Get("IPL.LNG"))) + "B")
+    except Exception as e:
+        fail("CONF_Get*", e)
+
+
+def test_sys():
+    section("SYS (Info + Einstellungen, ohne Reset/Poweroff)")
+    # --- reine Getter ---
+    for name, fn in [
+        ("SYS_Time",                 w.SYS_Time),
+        ("SYS_ResetButtonDown",      w.SYS_ResetButtonDown),
+        ("SYS_GetHollywoodRevision", w.SYS_GetHollywoodRevision),
+        ("SYS_GetCounterBias",       w.SYS_GetCounterBias),
+        ("SYS_GetDisplayOffsetH",    w.SYS_GetDisplayOffsetH),
+        ("SYS_GetEuRGB60",           w.SYS_GetEuRGB60),
+        ("SYS_GetLanguage",          w.SYS_GetLanguage),
+        ("SYS_GetProgressiveScan",   w.SYS_GetProgressiveScan),
+        ("SYS_GetSoundMode",         w.SYS_GetSoundMode),
+        ("SYS_GetVideoMode",         w.SYS_GetVideoMode),
+        ("SYS_GetGBSMode",           w.SYS_GetGBSMode),
+        ("SYS_GetFontEncoding",      w.SYS_GetFontEncoding),
+        ("SYS_GetArena1Size",        w.SYS_GetArena1Size),
+        ("SYS_GetArena2Size",        w.SYS_GetArena2Size),
+        ("SYS_GetWirelessID(0)",     lambda: w.SYS_GetWirelessID(0)),
+    ]:
+        try:
+            ok(name, fn())
+        except Exception as e:
+            fail(name, e)
+
+    # --- Setter NUR als Identitaet: liest Wert und schreibt ihn zurueck ---
+    #     -> aendert nichts an der Konsole
+    print("  (Setter schreiben nur den gelesenen Wert zurueck)")
+    try:
+        w.SYS_SetCounterBias(w.SYS_GetCounterBias())
+        w.SYS_SetDisplayOffsetH(w.SYS_GetDisplayOffsetH())
+        w.SYS_SetEuRGB60(w.SYS_GetEuRGB60())
+        w.SYS_SetLanguage(w.SYS_GetLanguage())
+        w.SYS_SetProgressiveScan(w.SYS_GetProgressiveScan())
+        w.SYS_SetSoundMode(w.SYS_GetSoundMode())
+        w.SYS_SetVideoMode(w.SYS_GetVideoMode())
+        w.SYS_SetGBSMode(w.SYS_GetGBSMode())
+        w.SYS_SetWirelessID(0, w.SYS_GetWirelessID(0))
+        ok("SYS_Set* (identity, keine Aenderung)")
+    except Exception as e:
+        fail("SYS_Set* (identity)", e)
+
+    try:
+        w.SYS_Report("wiitools test_sys: SYS_Report ok")
+        ok("SYS_Report")
+    except Exception as e:
+        fail("SYS_Report", e)
+
+    # --- Alarm: 0.2s einmalig, auf Ausloesung warten ---
+    try:
+        h = w.SYS_CreateAlarm()
+        ok("SYS_CreateAlarm", h)
+        w.SYS_GetAlarmEvent()          # Zaehler leeren
+        w.SYS_SetAlarm(h, 0.2)
+        fired = 0
+        for _ in range(180):           # ~3 s
+            w.update()
+            fired += w.SYS_GetAlarmEvent()
+            if fired:
+                break
+        ok("SYS_SetAlarm ausgeloest", fired)
+        ok("SYS_RemoveAlarm", w.SYS_RemoveAlarm(h))
+    except Exception as e:
+        fail("SYS_Alarm", e)
+
+    # periodischer Alarm: kurz laufen lassen, dann abbrechen + entfernen
+    try:
+        h2 = w.SYS_CreateAlarm()
+        w.SYS_GetAlarmEvent()
+        w.SYS_SetPeriodicAlarm(h2, 0.1, 0.1)
+        pfired = 0
+        for _ in range(120):        # ~2 s
+            w.update()
+            pfired += w.SYS_GetAlarmEvent()
+            if pfired >= 2:
+                break
+        ok("SYS_SetPeriodicAlarm", pfired)
+        ok("SYS_CancelAlarm", w.SYS_CancelAlarm(h2))
+        ok("SYS_RemoveAlarm(2)", w.SYS_RemoveAlarm(h2))
+    except Exception as e:
+        fail("SYS_PeriodicAlarm", e)
+
+    try:
+        w.SYS_STDIO_Report(False)
+        ok("SYS_STDIO_Report(False)")
+    except Exception as e:
+        fail("SYS_STDIO_Report", e)
+
+
+def test_audio():
+    section("AUDIO (DMA/DSP - kein Ton, nur Smoke-Test)")
+    # StartDMA/InitDMA werden bewusst NICHT ausgefuehrt:
+    # das wuerde den Speicherinhalt als Rauschen ausgeben.
+    try:
+        w.AUDIO_Init()
+        ok("AUDIO_Init")
+    except Exception as e:
+        fail("AUDIO_Init", e)
+        return
+    for name, fn in [
+        ("AUDIO_GetDSPSampleRate", w.AUDIO_GetDSPSampleRate),
+        ("AUDIO_GetDMAEnableFlag", w.AUDIO_GetDMAEnableFlag),
+        ("AUDIO_GetDMABytesLeft",  w.AUDIO_GetDMABytesLeft),
+        ("AUDIO_GetDMALength",     w.AUDIO_GetDMALength),
+        ("AUDIO_GetDMAStartAddr",  w.AUDIO_GetDMAStartAddr),
+    ]:
+        try:
+            ok(name, fn())
+        except Exception as e:
+            fail(name, e)
+    try:
+        w.AUDIO_SetDSPSampleRate(w.AUDIO_GetDSPSampleRate())  # identity
+        ok("AUDIO_SetDSPSampleRate (identity)")
+    except Exception as e:
+        fail("AUDIO_SetDSPSampleRate", e)
+    try:
+        w.AUDIO_RegisterDMACallback(True)
+        w.AUDIO_GetDMAEvent()
+        ok("AUDIO_RegisterDMACallback(True)")
+        w.AUDIO_RegisterDMACallback(False)
+        ok("AUDIO_GetDMAEvent", w.AUDIO_GetDMAEvent())
+    except Exception as e:
+        fail("AUDIO DMA-Callback", e)
+    # StopDMA/StartDMA (leerer/gestoppter DMA -> kein Ton). InitDMA-Guard pruefen.
+    try:
+        w.AUDIO_StopDMA()
+        w.AUDIO_StartDMA()
+        w.AUDIO_StopDMA()
+        ok("AUDIO_Start/StopDMA")
+    except Exception as e:
+        fail("AUDIO_Start/StopDMA", e)
+    try:
+        # ungueltige Adresse -> muss ValueError werfen (Guard), kein DSI
+        raised = False
+        try:
+            w.AUDIO_InitDMA(0, 32)
+        except ValueError:
+            raised = True
+        ok("AUDIO_InitDMA lehnt ungueltige Adresse ab", raised)
+    except Exception as e:
+        fail("AUDIO_InitDMA-Guard", e)
+
+
+def test_audio_play():
+    section("AUDIO abspielen (Sinuston ueber DMA)")
+    print("Achtung: gibt echten Ton aus (Lautstaerke pruefen)")
+    # kurze Tonleiter A4 - E5 - A5
+    for freq in (440, 659, 880):
+        try:
+            print("  Ton " + str(freq) + " Hz ...")
+            w.audio_play_tone(freq, 300, 8000)   # blockierend ~0,3 s
+            ok("audio_play_tone(" + str(freq) + " Hz)")
+        except Exception as e:
+            fail("audio_play_tone(" + str(freq) + ")", e)
+            break
+    # kurzer leiserer Doppel-Piep
+    try:
+        w.audio_play_tone(1000, 120, 4000)
+        w.audio_play_tone(1500, 120, 4000)
+        ok("Doppel-Piep")
+    except Exception as e:
+        fail("audio_play_tone piep", e)
+
+
+def test_graphics():
+    section("Grafik: surface / draw / png_show / render_text (CPU)")
+    WHITE = (255, 255, 255, 255)
+    RED   = (255, 0, 0, 255)
+    GRN   = (0, 255, 0, 255)
+    BLU   = (0, 0, 64, 255)
+
+    # --- Surface-API (CPU-RGBA-Puffer) ---
+    try:
+        w.surface_new("t_surf", 64, 48)
+        ok("surface_new")
+        ok("surface_get_size", w.surface_get_size("t_surf"))
+        w.surface_fill("t_surf", BLU);        ok("surface_fill")
+        w.surface_set_target("t_surf");       ok("surface_set_target")
+        w.draw_rect(2, 2, 20, 10, RED, 0.0);  ok("draw_rect")
+        w.draw_circle(40, 24, 8, GRN);        ok("draw_circle")
+        w.draw_oval(10, 30, 30, 12, WHITE, 0.0); ok("draw_oval")
+        try:
+            w.render_text(2, 2, "hi", 1, 0, WHITE, 0.0); ok("render_text")
+        except Exception as e:
+            fail("render_text", e)
+        w.surface_clear_target();             ok("surface_clear_target")
+        w.surface_blit("t_surf", None, 20, 20); ok("surface_blit")
+        w.blit("t_surf", 110, 20);            ok("blit")
+    except Exception as e:
+        fail("surface/draw", e)
+
+    # --- PNG auf den Bildschirm (CPU-Blit) ---
+    try:
+        w.png_load_embedded()
+        w.png_show(0, 0);                              ok("png_show")
+        w.png_show_scaled(0, 0, 100, 60);              ok("png_show_scaled")
+        w.png_show_region(0, 0, 32, 32, 10, 10);       ok("png_show_region")
+        w.png_show_region_scaled(0, 0, 32, 32, 10, 10, 64, 64); ok("png_show_region_scaled")
+        w.png(0, 0, 0, 0, 32, 32, 64, 64);             ok("png (png_draw)")
+        w.png_show_fullscreen();                       ok("png_show_fullscreen")
+    except Exception as e:
+        fail("png_show*", e)
+    try:
+        w.png_load_embedded_named("test_png"); ok("png_load_embedded_named")
+    except Exception as e:
+        fail("png_load_embedded_named (optional)", e)
+    # png_quad ist GX-Pfad: ohne rendering_init sauber abgelehnt (kein DSI)
+    try:
+        w.png_quad(0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0, 0, 64, 64)
+        ok("png_quad")
+    except RuntimeError:
+        ok("png_quad (ohne GX korrekt abgelehnt)")
+    except Exception as e:
+        fail("png_quad", e)
+
+    # --- set_screen_size (mit Reset) + render_update ---
+    try:
+        w.set_screen_size(640, 480)
+        w.set_screen_size(0, 0)              # zuruecksetzen auf physisch
+        ok("set_screen_size (+reset)")
+    except Exception as e:
+        fail("set_screen_size", e)
+    try:
+        w.render_update(); ok("render_update")
+    except Exception as e:
+        fail("render_update", e)
+
+
+def test_con():
+    section("CON (Textkonsole)")
+    try:
+        cols, rows = w.CON_GetMetrics()
+        ok("CON_GetMetrics", str(cols) + "x" + str(rows))
+    except Exception as e:
+        fail("CON_GetMetrics", e)
+    try:
+        col, row = w.CON_GetPosition()
+        ok("CON_GetPosition", "(" + str(col) + "," + str(row) + ")")
+    except Exception as e:
+        fail("CON_GetPosition", e)
+    # CON_EnableGecko NICHT aufrufen: wuerde die Ausgabe auf USB-Gecko umleiten
+    # (Bildschirm bliebe leer). Nur Vorhandensein pruefen.
+    ok("CON_EnableGecko vorhanden", hasattr(w, "CON_EnableGecko"))
+
+
+def test_pad_sampling():
+    section("PAD Sampling-Callback")
+    try:
+        w.PAD_Init()
+    except Exception:
+        pass
+    try:
+        w.PAD_SetSamplingCallback(True)
+        w.PAD_GetSamplingEvent()       # Zaehler leeren
+        n = 0
+        for _ in range(60):            # ~1 s
+            w.update()
+            n += w.PAD_GetSamplingEvent()
+        w.PAD_SetSamplingCallback(False)
+        ok("PAD_SetSamplingCallback/GetSamplingEvent", n)
+    except Exception as e:
+        fail("PAD_Sampling", e)
+
+
+def test_netapi():
+    section("Netzwerk-API (Sockets, MAC, inet_*)")
+    # --- reine Umwandlungen, kein Netz noetig ---
+    try:
+        a = w.inet_addr("192.168.1.10")
+        ok("inet_addr", a)
+        b = w.inet_aton("192.168.1.10")
+        ok("inet_aton", b)
+        ok("inet_ntoa", w.inet_ntoa(b if b is not None else a))
+    except Exception as e:
+        fail("inet_*", e)
+
+    if not w.IsNetReady():
+        print("(Netz nicht bereit - Socket-Teil uebersprungen)")
+        return
+
+    try:
+        ok("net_get_status",      w.net_get_status())
+        ok("net_gethostip",       repr(w.net_gethostip()))
+        ok("net_get_mac_address", w.net_get_mac_address())
+    except Exception as e:
+        fail("net_get*", e)
+
+    # --- Socket erstellen / binden / lauschen / schliessen ---
+    s = -1
+    try:
+        s = w.net_socket(w.AF_INET, w.SOCK_STREAM, 0)
+        ok("net_socket", s)
+        if s >= 0:
+            ok("net_setsockopt SO_REUSEADDR",
+               w.net_setsockopt(s, w.SOL_SOCKET, w.SO_REUSEADDR, 1))
+            ok("net_bind :8099",    w.net_bind(s, "", 8099))
+            ok("net_listen",        w.net_listen(s, 1))
+            ok("net_getsockname",   w.net_getsockname(s))
+            ok("net_fcntl(F_GETFL)", w.net_fcntl(s, 3, 0))
+            ok("net_poll",          w.net_poll([(s, w.POLLIN)], 0))
+    except Exception as e:
+        fail("net socket", e)
+    finally:
+        if s >= 0:
+            try:
+                ok("net_close", w.net_close(s))
+            except Exception as e:
+                fail("net_close", e)
+
+    # --- Non-Blocking-Socket: sonst blockierende Ops sicher testen ---
+    # FIONBIO=1 macht accept/connect/recv/read/recvfrom sofort zurueckkehren.
+    s2 = -1
+    try:
+        s2 = w.net_socket(w.AF_INET, w.SOCK_STREAM, 0)
+        if s2 >= 0:
+            ok("net_ioctl FIONBIO", w.net_ioctl(s2, w.FIONBIO, 1))
+            ok("net_bind :8098",   w.net_bind(s2, "", 8098))
+            ok("net_listen",       w.net_listen(s2, 1))
+            ok("net_accept (nb)",  w.net_accept(s2)[0])            # sofort < 0
+            ok("net_connect (nb)", w.net_connect(s2, "127.0.0.1", 9))
+            ok("net_send",         w.net_send(s2, b"x"))
+            ok("net_write",        w.net_write(s2, b"y"))
+            ok("net_recv (nb)",    w.net_recv(s2, 8))
+            ok("net_read (nb)",    w.net_read(s2, 8))
+            ok("net_shutdown",     w.net_shutdown(s2, 2))
+    except Exception as e:
+        fail("net non-blocking", e)
+    finally:
+        if s2 >= 0:
+            w.net_close(s2)
+
+    # UDP: sendto / recvfrom (non-blocking)
+    s3 = -1
+    try:
+        s3 = w.net_socket(w.AF_INET, w.SOCK_DGRAM, 0)
+        if s3 >= 0:
+            w.net_ioctl(s3, w.FIONBIO, 1)
+            ok("net_sendto",       w.net_sendto(s3, b"z", "127.0.0.1", 9))
+            ok("net_recvfrom (nb)", w.net_recvfrom(s3, 8))
+    except Exception as e:
+        fail("net udp", e)
+    finally:
+        if s3 >= 0:
+            w.net_close(s3)
+
+    # --- DNS (kann offline fehlschlagen) ---
+    try:
+        ok("net_gethostbyname", repr(w.net_gethostbyname("example.com")))
+    except Exception as e:
+        fail("net_gethostbyname", e)
 
 
 def test_png():
@@ -828,6 +1335,10 @@ def run_all_tests():
     test_filesystem()
     test_wpad()
     test_pad()
+    test_conf()
+    test_sys()
+    test_audio()
+    test_con()
     test_png()
     test_network()
     test_curl()
@@ -1263,7 +1774,7 @@ def run_all_module_tests():
     _print_results()
 
 
-def show_narrow_menu(items, sel):
+def show_narrow_menu(items, sel, hint="A=run  HOME=zurueck"):
     """Zeigt nur die Zeile darueber, die aktuelle (->), und die darunter."""
     n = len(items)
     above = ("    " + items[sel - 1][0]) if sel > 0     else ""
@@ -1273,7 +1784,7 @@ def show_narrow_menu(items, sel):
     if above: print(above)
     print(curr)
     if below: print(below)
-    print("  [" + str(sel + 1) + "/" + str(n) + "]  UP/DOWN  A=run  HOME=zurueck")
+    print("  [" + str(sel + 1) + "/" + str(n) + "]  UP/DOWN  " + hint)
 
 
 def module_test_menu():
@@ -1335,6 +1846,15 @@ MENU = [
     ("filesystem",    lambda: _run_single(test_filesystem)),
     ("wpad",          lambda: _run_single(test_wpad)),
     ("pad",           lambda: _run_single(test_pad)),
+    ("pad sampling",  lambda: _run_single(test_pad_sampling)),
+    ("sys power/reset", lambda: _run_single(test_sys_power_reset)),
+    ("conf",          lambda: _run_single(test_conf)),
+    ("sys info",      lambda: _run_single(test_sys)),
+    ("audio (dma)",   lambda: _run_single(test_audio)),
+    ("audio play",    lambda: _run_single(test_audio_play)),
+    ("graphics",      lambda: _run_single(test_graphics)),
+    ("con",           lambda: _run_single(test_con)),
+    ("net api",       lambda: _run_single(test_netapi)),
     ("png",           lambda: _run_single(test_png)),
     ("network",       lambda: _run_single(test_network)),
     ("curl (https)",  lambda: _run_single(test_curl)),
@@ -1351,20 +1871,11 @@ MENU = [
 
 
 def show_menu(sel):
-    print("")
-    print("========= TEST MENU =========")
-    for i, (label, _) in enumerate(MENU):
-        prefix = " -> " if i == sel else "    "
-        print(prefix + label)
-    print("")
-    print("  UP/DOWN  navigieren")
-    print("  A        ausfuehren")
-    print("  HOME     beenden")
-    print("=============================")
+    show_narrow_menu(MENU, sel, "A=run  HOME=beenden")
 
 
 def menu_loop():
-    sel = 14
+    sel = 0
     show_menu(sel)
     while True:
         w.update()

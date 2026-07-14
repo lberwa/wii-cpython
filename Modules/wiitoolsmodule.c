@@ -18,6 +18,11 @@
 #include <gx.h>
 #include <assert.h>
 #include <ogc/conf.h>
+#include <ogc/system.h>
+#include <ogc/audio.h>
+#include <ogc/cache.h>
+#include <ogc/consol.h>
+#include <sys/time.h>
 
 #include <malloc.h>
 #include <stdlib.h>
@@ -37,8 +42,72 @@
 #include <time.h>
 #include <sys/types.h>
 //#include <sys/socket.h>
-
 extern char font8x8_basic[128][8];
+
+/* ====================================================================== *
+ *  Sicherheit: deterministische Vorbedingungs-Checks                     *
+ *                                                                        *
+ *  Aus Python darf kein harter DSI/ISI-Halt entstehen. Statt einen       *
+ *  CPU-Fault abzufangen (fragil), prüfen die Wrapper VOR dem libogc-      *
+ *  Aufruf, ob die Voraussetzung erfüllt ist (Subsystem initialisiert,    *
+ *  Controller verbunden, gültiger Kanal/Adresse) und werfen sonst eine   *
+ *  normale, in Python abfangbare Exception.                              *
+ * ====================================================================== */
+
+/* Init-Status der Subsysteme (aus Python-Sicht). */
+static int g_wpad_inited  = 0;
+static int g_pad_inited   = 0;
+static int g_audio_inited = 0;
+
+/* Prüft, ob [addr, addr+len) vollständig in gültigem Wii-RAM liegt
+   (MEM1/MEM2, cached + uncached). 0 = ungültig. */
+static int wt_addr_range_ok(u32 a, u32 len)
+{
+    u32 end;
+    if (len == 0) len = 1;
+    end = a + len;
+    if (end < a) return 0;                                  /* Overflow */
+    if (a >= 0x80000000u && end <= 0x81800000u) return 1;   /* MEM1 cached  (24 MB) */
+    if (a >= 0xC0000000u && end <= 0xC1800000u) return 1;   /* MEM1 uncached */
+    if (a >= 0x90000000u && end <= 0x94000000u) return 1;   /* MEM2 cached  (64 MB) */
+    if (a >= 0xD0000000u && end <= 0xD4000000u) return 1;   /* MEM2 uncached */
+    return 0;
+}
+
+/* Subsystem muss initialisiert sein, sonst RuntimeError. Rückgabe -1 = Fehler. */
+static int wt_require(int inited, const char *what)
+{
+    if (!inited) {
+        PyErr_Format(PyExc_RuntimeError,
+            "%s ist nicht initialisiert — zuerst die passende *_Init-Funktion aufrufen", what);
+        return -1;
+    }
+    return 0;
+}
+
+/* WPAD initialisiert + gültiger Kanal + Controller verbunden (Probe ok).
+   Verhindert, dass libogc mit uninitialisiertem/leerem Zustand deref't (DSI).
+   Rückgabe -1 = Fehler (Python-Exception gesetzt). */
+static int wt_wpad_channel_ready(int chan)
+{
+    u32 type = 0;
+    s32 pr;
+    if (wt_require(g_wpad_inited, "WPAD") != 0)
+        return -1;
+    if (chan < 0 || chan >= WPAD_MAX_WIIMOTES) {
+        PyErr_SetString(PyExc_ValueError, "chan must be 0..3");
+        return -1;
+    }
+    /* WPAD_Probe ist selbst gefahrlos (prüft intern __wpads_inited) und meldet,
+       ob auf dem Kanal ein Controller verbunden und der Handshake fertig ist. */
+    pr = WPAD_Probe((s32)chan, &type);
+    if (pr != WPAD_ERR_NONE) {
+        PyErr_Format(PyExc_RuntimeError,
+            "kein Controller auf Kanal %d (WPAD_Probe=%d)", chan, (int)pr);
+        return -1;
+    }
+    return 0;
+}
 
 static int net_ready = 0;
 static void *xfb2 = NULL;
@@ -1647,6 +1716,13 @@ static PyObject* rendering_adopt(PyObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "kk|k:rendering_adopt",
                           &mode_ptr, &fb_ptr, &empty_ptr))
         return NULL;
+    /* rohe Zeiger von Python: zuerst Bereich prüfen */
+    if (!wt_addr_range_ok((u32)mode_ptr, sizeof(GXRModeObj)) ||
+        !wt_addr_range_ok((u32)fb_ptr, 4)) {
+        PyErr_SetString(PyExc_ValueError,
+            "rendering_adopt: mode_ptr/fb_ptr outside valid RAM");
+        return NULL;
+    }
     wiitools_adopt_host_gfx((GXRModeObj*)mode_ptr, (void*)fb_ptr,
                             (mqbox_t)empty_ptr);
     return py_none();
@@ -2253,6 +2329,70 @@ static int wiitools_begin_shape_draw(void)
     return 0;
 }
 
+/*
+ * gutil_prepare()
+ *
+ * Setzt den GX-Zustand exakt so, wie CavEX' gutil_*-Funktionen (gfx_draw_quads,
+ * GX_VTXFMT2) ihn erwarten, und MUSS vor jedem gutil_text/gutil_texquad-Aufruf
+ * (via c_run) laufen. Hintergrund: draw_rect/render_text nutzen
+ * wiitools_begin_shape_draw(), das GX_VA_TEX0 auf GX_NONE laesst und
+ * NumTexGens=0 setzt. gfx_draw_quads schreibt aber Position(S16)+Farbe(RGBA8)+
+ * Texcoord(U16) fuer VTXFMT2. Ohne den passenden Vertex-Deskriptor liest der
+ * Grafikprozessor die falsche Byte-Zahl pro Vertex -> FIFO-Desync -> der
+ * naechste GX_DrawDone (in update()) haengt fuer immer.
+ *
+ * Setzt daher: vollen Deskriptor (POS/CLR0/TEX0 = DIRECT), VTXFMT2-Format wie
+ * CavEX (S16 / RGBA8 / U16 mit frac 8), TEV MODULATE + TexCoordGen fuer die in
+ * gutil gebundene Textur, Ortho-Projektion mit CavEX' z-Bereich (-256..256, da
+ * gutil-Schatten z=-2 nutzen), Blending an, Tiefentest aus.
+ */
+static PyObject* gutil_prepare(PyObject *self, PyObject *args)
+{
+    Mtx model;
+    Mtx44 proj;
+    float lw, lh;
+    (void)self;
+
+    if (!PyArg_ParseTuple(args, ":gutil_prepare"))
+        return NULL;
+
+    if (screenMode == NULL || current_frame == NULL)
+        return py_none();
+
+    if (g_draw_target == NULL && frame_empty != 0) {
+        mqmsg_t next = NULL;
+        MQ_Receive(frame_empty, &next, MQ_MSG_BLOCK);
+        g_draw_target = next;
+    }
+
+    guMtxIdentity(model);
+    GX_LoadPosMtxImm(model, GX_PNMTX0);
+    get_logical_size(&lw, &lh);
+    guOrtho(proj, 0.0f, lh, 0.0f, lw, -256.0f, 256.0f);
+    GX_LoadProjectionMtx(proj, GX_ORTHOGRAPHIC);
+
+    GX_SetNumChans(1);
+    GX_SetNumTexGens(1);
+    GX_SetNumTevStages(1);
+    GX_SetTevOp(GX_TEVSTAGE0, GX_MODULATE);
+    GX_SetTexCoordGen(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, GX_IDENTITY);
+    GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+    GX_SetZMode(GX_FALSE, GX_LEQUAL, GX_FALSE);
+    GX_SetColorUpdate(GX_TRUE);
+    GX_SetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_NOOP);
+
+    GX_ClearVtxDesc();
+    GX_SetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GX_SetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+    GX_SetVtxDesc(GX_VA_TEX0, GX_DIRECT);
+    GX_SetVtxAttrFmt(GX_VTXFMT2, GX_VA_POS, GX_POS_XYZ, GX_S16, 0);
+    GX_SetVtxAttrFmt(GX_VTXFMT2, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+    GX_SetVtxAttrFmt(GX_VTXFMT2, GX_VA_TEX0, GX_TEX_ST, GX_U16, 8);
+
+    g_frame_dirty = 1;
+    return py_none();
+}
+
 static u8 wiitools_u8(int v)
 {
     if (v < 0) return 0;
@@ -2729,16 +2869,23 @@ static PyObject* wpad_init(PyObject *self, PyObject *args)
     (void)self;
     if (!PyArg_ParseTuple(args, ":WPAD_Init"))
         return NULL;
-    return PyLong_FromLong((long)WPAD_Init());
+    s32 r = WPAD_Init();
+    g_wpad_inited = 1;
+    WPAD_SetDataFormat(WPAD_CHAN_ALL, WPAD_FMT_BTNS_ACC_IR);
+    WPAD_SetVRes(WPAD_CHAN_ALL, gfx_width, gfx_height);
+    return PyLong_FromLong((long)r);
 }
 
 /* PAD (GameCube controller) wrappers */
 static PyObject* pad_init(PyObject *self, PyObject *args)
 {
+    s32 r;
     (void)self;
     if (!PyArg_ParseTuple(args, ":PAD_Init"))
         return NULL;
-    return PyLong_FromLong((long)PAD_Init());
+    r = PAD_Init();
+    g_pad_inited = 1;
+    return PyLong_FromLong((long)r);
 }
 
 static PyObject* pad_sync(PyObject *self, PyObject *args)
@@ -3007,6 +3154,10 @@ static PyObject* wpad_read_event(PyObject *self, PyObject *args)
     (void)self;
     if (!PyArg_ParseTuple(args, "i:WPAD_ReadEvent", &chan))
         return NULL;
+    /* Nur in den libogc-Event-Pfad (__wpad_calc_data) gehen, wenn WPAD
+       initialisiert und auf dem Kanal ein Controller verbunden ist. */
+    if (wt_wpad_channel_ready(chan) != 0)
+        return NULL;
     memset(&data, 0, sizeof(data));
     r = WPAD_ReadEvent((s32)chan, &data);
     return Py_BuildValue("(iy#)", (int)r, (const char *)&data, (int)sizeof(data));
@@ -3030,6 +3181,10 @@ static PyObject* wpad_flush(PyObject *self, PyObject *args)
     (void)self;
     if (!PyArg_ParseTuple(args, "i:WPAD_Flush", &chan))
         return NULL;
+    if (wt_require(g_wpad_inited, "WPAD") != 0)
+        return NULL;
+    if (chan != WPAD_CHAN_ALL && wt_wpad_channel_ready(chan) != 0)
+        return NULL;
     r = WPAD_Flush((s32)chan);
     return PyLong_FromLong((long)r);
 }
@@ -3042,6 +3197,10 @@ static PyObject* wpad_read_pending(PyObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "i:WPAD_ReadPending", &chan))
         return NULL;
     /* Simplified: no Python callback support; pass NULL. */
+    if (wt_require(g_wpad_inited, "WPAD") != 0)
+        return NULL;
+    if (chan != WPAD_CHAN_ALL && wt_wpad_channel_ready(chan) != 0)
+        return NULL;
     r = WPAD_ReadPending((s32)chan, NULL);
     return PyLong_FromLong((long)r);
 }
@@ -3117,6 +3276,8 @@ static PyObject* wpad_set_event_bufs(PyObject *self, PyObject *args)
         PyErr_SetString(PyExc_ValueError, "cnt must be 1..8");
         return NULL;
     }
+    if (wt_require(g_wpad_inited, "WPAD") != 0)
+        return NULL;
     memset(g_event_bufs[chan], 0, sizeof(g_event_bufs[chan]));
     r = WPAD_SetEventBufs((s32)chan, g_event_bufs[chan], (u32)cnt);
     return PyLong_FromLong((long)r);
@@ -3289,6 +3450,8 @@ static PyObject* wpad_data(PyObject *self, PyObject *args)
     (void)self;
     if (!PyArg_ParseTuple(args, "i:WPAD_Data", &chan))
         return NULL;
+    if (wt_wpad_channel_ready(chan) != 0)
+        return NULL;
     data = WPAD_Data(chan);
     if (data == NULL)
         return py_none();
@@ -3313,6 +3476,8 @@ static PyObject* wpad_ir(PyObject *self, PyObject *args)
     (void)self;
     if (!PyArg_ParseTuple(args, "i:WPAD_IR", &chan))
         return NULL;
+    if (wt_wpad_channel_ready(chan) != 0)
+        return NULL;
     memset(&ir, 0, sizeof(ir));
     WPAD_IR(chan, &ir);
     return Py_BuildValue("y#", (const char *)&ir, (int)sizeof(ir));
@@ -3324,6 +3489,8 @@ static PyObject* wpad_orientation(PyObject *self, PyObject *args)
     struct orient_t orient;
     (void)self;
     if (!PyArg_ParseTuple(args, "i:WPAD_Orientation", &chan))
+        return NULL;
+    if (wt_wpad_channel_ready(chan) != 0)
         return NULL;
     memset(&orient, 0, sizeof(orient));
     WPAD_Orientation(chan, &orient);
@@ -3337,6 +3504,8 @@ static PyObject* wpad_gforce(PyObject *self, PyObject *args)
     (void)self;
     if (!PyArg_ParseTuple(args, "i:WPAD_GForce", &chan))
         return NULL;
+    if (wt_wpad_channel_ready(chan) != 0)
+        return NULL;
     memset(&gforce, 0, sizeof(gforce));
     WPAD_GForce(chan, &gforce);
     return Py_BuildValue("y#", (const char *)&gforce, (int)sizeof(gforce));
@@ -3349,6 +3518,8 @@ static PyObject* wpad_accel(PyObject *self, PyObject *args)
     (void)self;
     if (!PyArg_ParseTuple(args, "i:WPAD_Accel", &chan))
         return NULL;
+    if (wt_wpad_channel_ready(chan) != 0)
+        return NULL;
     memset(&accel, 0, sizeof(accel));
     WPAD_Accel(chan, &accel);
     return Py_BuildValue("y#", (const char *)&accel, (int)sizeof(accel));
@@ -3360,6 +3531,8 @@ static PyObject* wpad_expansion(PyObject *self, PyObject *args)
     struct expansion_t exp;
     (void)self;
     if (!PyArg_ParseTuple(args, "i:WPAD_Expansion", &chan))
+        return NULL;
+    if (wt_wpad_channel_ready(chan) != 0)
         return NULL;
     memset(&exp, 0, sizeof(exp));
     WPAD_Expansion(chan, &exp);
@@ -3746,6 +3919,8 @@ static PyObject* init(PyObject *self, PyObject *args)
 
 	xfb2 = MEM_K0_TO_K1(SYS_AllocateFramebuffer(rmode3));
 
+    fatInitDefault();
+
 	console_init(xfb2,20,20,rmode3->fbWidth,rmode3->xfbHeight,rmode3->fbWidth*VI_DISPLAY_PIX_SZ);
 	
     lwp_t thread;
@@ -3759,11 +3934,722 @@ static PyObject* init(PyObject *self, PyObject *args)
     );
 
     WPAD_Init();
+    g_wpad_inited = 1;
+    WPAD_SetDataFormat(WPAD_CHAN_ALL, WPAD_FMT_BTNS_ACC_IR);
+    WPAD_SetVRes(WPAD_CHAN_ALL, gfx_width, gfx_height);
     PAD_Init();
+    g_pad_inited = 1;
     return py_none();
 }
 
+static PyObject* init_network(PyObject *self, PyObject *args)
+{
+    (void)self;
+    if (!PyArg_ParseTuple(args, ":net_init"))
+        return NULL;
+    
+    lwp_t thread;
+    LWP_CreateThread(
+        &thread,
+        net_thread,       
+        &net_ready,       
+        NULL,             
+        0,                
+        50                
+    );
+
+    return py_none();
+}
+/* Fixed 8-word prototype used by c_run().  On the PowerPC EABI the first eight
+ * integer/pointer arguments are passed in GPRs r3..r10, so calling a real
+ * function that takes fewer parameters through this prototype is safe: the
+ * callee simply ignores the extra registers and there is no stack cleanup to
+ * mismatch (register arguments need none, and we never spill past r10). */
+typedef u32 (*wii_cfn8)(u32, u32, u32, u32, u32, u32, u32, u32);
+
+/* c_run(func_addr, *args) -> int
+ *
+ * Call an arbitrary C function located at address `func_addr` with up to eight
+ * arguments and return its result (the value in r3) as an int.
+ *
+ * Each argument may be:
+ *   - an int  -> passed verbatim as a 32-bit word (value or address), or
+ *   - a bytes / bytearray object -> a pointer to its buffer is passed (the
+ *     buffer stays valid for the duration of the call).
+ *
+ * LIMITATIONS (no libffi): float/double arguments (which the EABI passes in
+ * f1..f8), struct-by-value arguments, more than 8 arguments, and 64-bit or
+ * floating-point return values are NOT handled correctly.  For those a
+ * dedicated wrapper is required. */
+static PyObject* c_run(PyObject *self, PyObject *args)
+{
+    (void)self;
+    Py_ssize_t n = PyTuple_GET_SIZE(args);
+    if (n < 1) {
+        PyErr_SetString(PyExc_TypeError,
+            "c_run(func_addr, *args): missing function address");
+        return NULL;
+    }
+    if (n - 1 > 8) {
+        PyErr_SetString(PyExc_TypeError,
+            "c_run supports at most 8 arguments");
+        return NULL;
+    }
+
+    unsigned long addr = PyLong_AsUnsignedLong(PyTuple_GET_ITEM(args, 0));
+    if (PyErr_Occurred())
+        return NULL;
+    if (addr == 0) {
+        PyErr_SetString(PyExc_ValueError, "c_run: NULL function address");
+        return NULL;
+    }
+    /* Erste Verteidigung: Adresse muss in gültigem Code-RAM (MEM1/MEM2) liegen. */
+    if (!wt_addr_range_ok((u32)addr, 4)) {
+        PyErr_Format(PyExc_ValueError,
+            "c_run: function address 0x%08lx outside valid RAM", addr);
+        return NULL;
+    }
+
+    u32 a[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+    for (Py_ssize_t i = 1; i < n; ++i) {
+        PyObject *o = PyTuple_GET_ITEM(args, i);
+        if (PyLong_Check(o)) {
+            a[i - 1] = (u32)PyLong_AsUnsignedLong(o);
+            if (PyErr_Occurred())
+                return NULL;
+        } else if (PyBytes_Check(o)) {
+            a[i - 1] = (u32)(uintptr_t)PyBytes_AS_STRING(o);
+        } else if (PyByteArray_Check(o)) {
+            a[i - 1] = (u32)(uintptr_t)PyByteArray_AS_STRING(o);
+        } else {
+            PyErr_Format(PyExc_TypeError,
+                "c_run: argument %zd must be int or bytes-like", i);
+            return NULL;
+        }
+    }
+
+    wii_cfn8 fn = (wii_cfn8)(uintptr_t)addr;
+    /* Achtung: c_run ruft eine beliebige Adresse auf. Der Adressbereich wurde
+       geprüft, aber ob dort gültiger Code steht, kann nicht garantiert werden —
+       c_run ist prinzipbedingt "unsafe by design". */
+    u32 r = fn(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7]);
+    return PyLong_FromUnsignedLong((unsigned long)r);
+}
+
+/* ====================================================================== *
+ *  Zusätzliche libogc-Wrapper: CONF (read-only), SYS, AUDIO, CON, net    *
+ *                                                                        *
+ *  Callbacks (PAD/SYS/AUDIO/net) feuern im Interrupt-Kontext; dort darf  *
+ *  kein Python laufen. Daher: ein C-Trampolin zählt nur ein Ereignis,    *
+ *  Python fragt den Zähler per *_GetEvent() ab (wie WPAD-Power/Battery). *
+ * ====================================================================== */
+
+/* --- Makros für einfache Getter/Setter ------------------------------- */
+#define WT_GET_L0(cfn) \
+static PyObject* wt_##cfn(PyObject *self, PyObject *args) { \
+    (void)self; if (!PyArg_ParseTuple(args, ":" #cfn)) return NULL; \
+    return PyLong_FromLong((long)cfn()); }
+
+#define WT_GET_UL0(cfn) \
+static PyObject* wt_##cfn(PyObject *self, PyObject *args) { \
+    (void)self; if (!PyArg_ParseTuple(args, ":" #cfn)) return NULL; \
+    return PyLong_FromUnsignedLong((unsigned long)cfn()); }
+
+#define WT_SET_1(cfn, ctype) \
+static PyObject* wt_##cfn(PyObject *self, PyObject *args) { \
+    (void)self; long v; if (!PyArg_ParseTuple(args, "l:" #cfn, &v)) return NULL; \
+    cfn((ctype)v); return py_none(); }
+
+#define WT_VOID0(cfn) \
+static PyObject* wt_##cfn(PyObject *self, PyObject *args) { \
+    (void)self; if (!PyArg_ParseTuple(args, ":" #cfn)) return NULL; \
+    cfn(); return py_none(); }
+
+/* ---------------------------- CONF (nur lesend) ---------------------- */
+WT_GET_L0(CONF_Init)
+WT_GET_L0(CONF_GetShutdownMode)
+WT_GET_L0(CONF_GetIdleLedMode)
+WT_GET_L0(CONF_GetProgressiveScan)
+WT_GET_L0(CONF_GetEuRGB60)
+WT_GET_L0(CONF_GetIRSensitivity)
+WT_GET_L0(CONF_GetSensorBarPosition)
+WT_GET_L0(CONF_GetPadSpeakerVolume)
+WT_GET_L0(CONF_GetPadMotorMode)
+WT_GET_L0(CONF_GetSoundMode)
+WT_GET_L0(CONF_GetLanguage)
+WT_GET_L0(CONF_GetScreenSaverMode)
+WT_GET_L0(CONF_GetAspectRatio)
+WT_GET_L0(CONF_GetEULA)
+WT_GET_L0(CONF_GetWiiConnect24)
+WT_GET_L0(CONF_GetRegion)
+WT_GET_L0(CONF_GetArea)
+WT_GET_L0(CONF_GetVideo)
+
+static PyObject* wt_CONF_GetLength(PyObject *self, PyObject *args) {
+    (void)self; const char *name;
+    if (!PyArg_ParseTuple(args, "s:CONF_GetLength", &name)) return NULL;
+    return PyLong_FromLong((long)CONF_GetLength(name));
+}
+static PyObject* wt_CONF_GetType(PyObject *self, PyObject *args) {
+    (void)self; const char *name;
+    if (!PyArg_ParseTuple(args, "s:CONF_GetType", &name)) return NULL;
+    return PyLong_FromLong((long)CONF_GetType(name));
+}
+static PyObject* wt_CONF_Get(PyObject *self, PyObject *args) {
+    (void)self; const char *name;
+    if (!PyArg_ParseTuple(args, "s:CONF_Get", &name)) return NULL;
+    s32 len = CONF_GetLength(name);
+    if (len < 0) { PyErr_SetString(PyExc_KeyError, "CONF entry not found"); return NULL; }
+    char *buf = (char *)malloc((size_t)len > 0 ? (size_t)len : 1);
+    if (!buf) return PyErr_NoMemory();
+    s32 r = CONF_Get(name, buf, (u32)len);
+    if (r < 0) { free(buf); PyErr_SetString(PyExc_RuntimeError, "CONF_Get failed"); return NULL; }
+    PyObject *b = PyBytes_FromStringAndSize(buf, r);
+    free(buf);
+    return b;
+}
+static PyObject* wt_CONF_GetCounterBias(PyObject *self, PyObject *args) {
+    (void)self; u32 bias = 0;
+    if (!PyArg_ParseTuple(args, ":CONF_GetCounterBias")) return NULL;
+    if (CONF_GetCounterBias(&bias) < 0) { PyErr_SetString(PyExc_RuntimeError, "CONF_GetCounterBias failed"); return NULL; }
+    return PyLong_FromUnsignedLong((unsigned long)bias);
+}
+static PyObject* wt_CONF_GetDisplayOffsetH(PyObject *self, PyObject *args) {
+    (void)self; s8 off = 0;
+    if (!PyArg_ParseTuple(args, ":CONF_GetDisplayOffsetH")) return NULL;
+    if (CONF_GetDisplayOffsetH(&off) < 0) { PyErr_SetString(PyExc_RuntimeError, "CONF_GetDisplayOffsetH failed"); return NULL; }
+    return PyLong_FromLong((long)off);
+}
+static PyObject* wt_CONF_GetNickName(PyObject *self, PyObject *args) {
+    (void)self; u8 raw[64]; int byteorder = 1; /* UTF-16 big-endian */
+    if (!PyArg_ParseTuple(args, ":CONF_GetNickName")) return NULL;
+    memset(raw, 0, sizeof(raw));
+    if (CONF_GetNickName(raw) < 0) { PyErr_SetString(PyExc_RuntimeError, "CONF_GetNickName failed"); return NULL; }
+    /* Länge bis zum ersten 0x0000-Codepoint (max. 10 Zeichen) bestimmen */
+    Py_ssize_t nbytes = 0;
+    while (nbytes < 20 && !(raw[nbytes] == 0 && raw[nbytes + 1] == 0)) nbytes += 2;
+    return PyUnicode_DecodeUTF16((const char *)raw, nbytes, "replace", &byteorder);
+}
+static PyObject* wt_CONF_GetParentalPassword(PyObject *self, PyObject *args) {
+    (void)self; s8 buf[64];
+    if (!PyArg_ParseTuple(args, ":CONF_GetParentalPassword")) return NULL;
+    memset(buf, 0, sizeof(buf));
+    if (CONF_GetParentalPassword(buf) < 0) { PyErr_SetString(PyExc_RuntimeError, "CONF_GetParentalPassword failed"); return NULL; }
+    return PyUnicode_FromString((const char *)buf);
+}
+static PyObject* wt_CONF_GetParentalAnswer(PyObject *self, PyObject *args) {
+    (void)self; s8 buf[64];
+    if (!PyArg_ParseTuple(args, ":CONF_GetParentalAnswer")) return NULL;
+    memset(buf, 0, sizeof(buf));
+    if (CONF_GetParentalAnswer(buf) < 0) { PyErr_SetString(PyExc_RuntimeError, "CONF_GetParentalAnswer failed"); return NULL; }
+    return PyUnicode_FromString((const char *)buf);
+}
+static PyObject* wt_CONF_GetPadDevices(PyObject *self, PyObject *args) {
+    (void)self; conf_pads pads;
+    if (!PyArg_ParseTuple(args, ":CONF_GetPadDevices")) return NULL;
+    memset(&pads, 0, sizeof(pads));
+    if (CONF_GetPadDevices(&pads) < 0) { PyErr_SetString(PyExc_RuntimeError, "CONF_GetPadDevices failed"); return NULL; }
+    return PyLong_FromLong((long)pads.num_registered);
+}
+
+/* ---------------------------- SYS ------------------------------------ */
+WT_GET_L0(SYS_GetHollywoodRevision)
+WT_GET_L0(SYS_ResetButtonDown)
+WT_GET_L0(SYS_GetCounterBias)
+WT_GET_L0(SYS_GetDisplayOffsetH)
+WT_GET_L0(SYS_GetEuRGB60)
+WT_GET_L0(SYS_GetLanguage)
+WT_GET_L0(SYS_GetProgressiveScan)
+WT_GET_L0(SYS_GetSoundMode)
+WT_GET_L0(SYS_GetVideoMode)
+WT_GET_L0(SYS_GetGBSMode)
+WT_GET_UL0(SYS_GetFontEncoding)
+WT_GET_UL0(SYS_GetArena1Size)
+WT_GET_UL0(SYS_GetArena2Size)
+WT_SET_1(SYS_SetCounterBias, u32)
+WT_SET_1(SYS_SetDisplayOffsetH, s8)
+WT_SET_1(SYS_SetEuRGB60, u8)
+WT_SET_1(SYS_SetLanguage, u8)
+WT_SET_1(SYS_SetProgressiveScan, u8)
+WT_SET_1(SYS_SetSoundMode, u8)
+WT_SET_1(SYS_SetVideoMode, u8)
+WT_SET_1(SYS_SetGBSMode, u16)
+
+static PyObject* wt_SYS_Time(PyObject *self, PyObject *args) {
+    (void)self; if (!PyArg_ParseTuple(args, ":SYS_Time")) return NULL;
+    return PyLong_FromUnsignedLongLong((unsigned long long)SYS_Time());
+}
+static PyObject* wt_SYS_GetWirelessID(PyObject *self, PyObject *args) {
+    (void)self; long chan;
+    if (!PyArg_ParseTuple(args, "l:SYS_GetWirelessID", &chan)) return NULL;
+    return PyLong_FromUnsignedLong((unsigned long)SYS_GetWirelessID((u32)chan));
+}
+static PyObject* wt_SYS_SetWirelessID(PyObject *self, PyObject *args) {
+    (void)self; long chan, id;
+    if (!PyArg_ParseTuple(args, "ll:SYS_SetWirelessID", &chan, &id)) return NULL;
+    SYS_SetWirelessID((u32)chan, (u16)id); return py_none();
+}
+static PyObject* wt_SYS_STDIO_Report(PyObject *self, PyObject *args) {
+    (void)self; int enable;
+    if (!PyArg_ParseTuple(args, "p:SYS_STDIO_Report", &enable)) return NULL;
+    SYS_STDIO_Report(enable ? true : false); return py_none();
+}
+static PyObject* wt_SYS_Report(PyObject *self, PyObject *args) {
+    (void)self; const char *msg;
+    if (!PyArg_ParseTuple(args, "s:SYS_Report", &msg)) return NULL;
+    SYS_Report("%s", msg); return py_none();
+}
+static PyObject* wt_SYS_ResetSystem(PyObject *self, PyObject *args) {
+    (void)self; long reset; unsigned long code = 0; int force_menu = 0;
+    if (!PyArg_ParseTuple(args, "l|kp:SYS_ResetSystem", &reset, &code, &force_menu)) return NULL;
+    SYS_ResetSystem((s32)reset, (u32)code, (s32)force_menu);
+    return py_none();
+}
+
+/* SYS Power/Reset-Callbacks: nur Zählen im Trampolin, Python pollt */
+static volatile u32 g_sys_power_events = 0;
+static volatile u32 g_sys_reset_events = 0;
+static volatile u32 g_sys_alarm_events = 0;
+static void wt_sys_power_cb(void) { g_sys_power_events++; }
+static void wt_sys_reset_cb(u32 irq, void *ctx) { (void)irq; (void)ctx; g_sys_reset_events++; }
+static void wt_sys_alarm_cb(syswd_t alarm, void *cbarg) { (void)alarm; (void)cbarg; g_sys_alarm_events++; }
+
+static PyObject* wt_SYS_SetPowerCallback(PyObject *self, PyObject *args) {
+    (void)self; int enable;
+    if (!PyArg_ParseTuple(args, "p:SYS_SetPowerCallback", &enable)) return NULL;
+    SYS_SetPowerCallback(enable ? wt_sys_power_cb : NULL);
+    return py_none();
+}
+static PyObject* wt_SYS_GetPowerEvent(PyObject *self, PyObject *args) {
+    (void)self; if (!PyArg_ParseTuple(args, ":SYS_GetPowerEvent")) return NULL;
+    u32 n = g_sys_power_events; g_sys_power_events = 0;
+    return PyLong_FromUnsignedLong((unsigned long)n);
+}
+static PyObject* wt_SYS_SetResetCallback(PyObject *self, PyObject *args) {
+    (void)self; int enable;
+    if (!PyArg_ParseTuple(args, "p:SYS_SetResetCallback", &enable)) return NULL;
+    SYS_SetResetCallback(enable ? wt_sys_reset_cb : NULL);
+    return py_none();
+}
+static PyObject* wt_SYS_GetResetEvent(PyObject *self, PyObject *args) {
+    (void)self; if (!PyArg_ParseTuple(args, ":SYS_GetResetEvent")) return NULL;
+    u32 n = g_sys_reset_events; g_sys_reset_events = 0;
+    return PyLong_FromUnsignedLong((unsigned long)n);
+}
+
+/* SYS Alarme */
+static PyObject* wt_SYS_CreateAlarm(PyObject *self, PyObject *args) {
+    (void)self; syswd_t h = 0;
+    if (!PyArg_ParseTuple(args, ":SYS_CreateAlarm")) return NULL;
+    if (SYS_CreateAlarm(&h) < 0) { PyErr_SetString(PyExc_RuntimeError, "SYS_CreateAlarm failed"); return NULL; }
+    return PyLong_FromUnsignedLong((unsigned long)h);
+}
+static PyObject* wt_SYS_SetAlarm(PyObject *self, PyObject *args) {
+    (void)self; unsigned long h; double secs;
+    if (!PyArg_ParseTuple(args, "kd:SYS_SetAlarm", &h, &secs)) return NULL;
+    struct timespec tp;
+    tp.tv_sec = (time_t)secs;
+    tp.tv_nsec = (long)((secs - (double)tp.tv_sec) * 1e9);
+    s32 r = SYS_SetAlarm((syswd_t)h, &tp, wt_sys_alarm_cb, NULL);
+    return PyLong_FromLong((long)r);
+}
+static PyObject* wt_SYS_SetPeriodicAlarm(PyObject *self, PyObject *args) {
+    (void)self; unsigned long h; double start_s, period_s;
+    if (!PyArg_ParseTuple(args, "kdd:SYS_SetPeriodicAlarm", &h, &start_s, &period_s)) return NULL;
+    struct timespec ts, tp;
+    ts.tv_sec = (time_t)start_s;  ts.tv_nsec = (long)((start_s  - (double)ts.tv_sec) * 1e9);
+    tp.tv_sec = (time_t)period_s; tp.tv_nsec = (long)((period_s - (double)tp.tv_sec) * 1e9);
+    s32 r = SYS_SetPeriodicAlarm((syswd_t)h, &ts, &tp, wt_sys_alarm_cb, NULL);
+    return PyLong_FromLong((long)r);
+}
+static PyObject* wt_SYS_RemoveAlarm(PyObject *self, PyObject *args) {
+    (void)self; unsigned long h;
+    if (!PyArg_ParseTuple(args, "k:SYS_RemoveAlarm", &h)) return NULL;
+    return PyLong_FromLong((long)SYS_RemoveAlarm((syswd_t)h));
+}
+static PyObject* wt_SYS_CancelAlarm(PyObject *self, PyObject *args) {
+    (void)self; unsigned long h;
+    if (!PyArg_ParseTuple(args, "k:SYS_CancelAlarm", &h)) return NULL;
+    return PyLong_FromLong((long)SYS_CancelAlarm((syswd_t)h));
+}
+static PyObject* wt_SYS_GetAlarmEvent(PyObject *self, PyObject *args) {
+    (void)self; if (!PyArg_ParseTuple(args, ":SYS_GetAlarmEvent")) return NULL;
+    u32 n = g_sys_alarm_events; g_sys_alarm_events = 0;
+    return PyLong_FromUnsignedLong((unsigned long)n);
+}
+
+/* ---------------------------- AUDIO ---------------------------------- */
+/* Hinweis: Die AUDIO-*Stream*-API (SetStreamVol*, SetStreamSampleRate,
+   SetStreamPlayState, RegisterStreamCallback, SetStreamTrigger,
+   ResetStreamSampleCnt) sowie net_getsockopt existieren in libogc nur im
+   GameCube-Build, nicht für Wii. Daher hier nur die vorhandene DMA/DSP-API. */
+WT_VOID0(AUDIO_StartDMA)
+WT_VOID0(AUDIO_StopDMA)
+WT_SET_1(AUDIO_SetDSPSampleRate, u8)
+WT_GET_UL0(AUDIO_GetDMAEnableFlag)
+WT_GET_UL0(AUDIO_GetDMABytesLeft)
+WT_GET_UL0(AUDIO_GetDMALength)
+WT_GET_UL0(AUDIO_GetDMAStartAddr)
+WT_GET_UL0(AUDIO_GetDSPSampleRate)
+
+static PyObject* wt_AUDIO_Init(PyObject *self, PyObject *args) {
+    (void)self; if (!PyArg_ParseTuple(args, ":AUDIO_Init")) return NULL;
+    AUDIO_Init(NULL); g_audio_inited = 1; return py_none();
+}
+static PyObject* wt_AUDIO_InitDMA(PyObject *self, PyObject *args) {
+    (void)self; unsigned long addr, len;
+    if (!PyArg_ParseTuple(args, "kk:AUDIO_InitDMA", &addr, &len)) return NULL;
+    if (wt_require(g_audio_inited, "AUDIO") != 0)
+        return NULL;
+    /* DMA-Quelle muss in gültigem RAM liegen (sonst spielt die Hardware Müll
+       oder greift ungültig zu). 32-Byte-aligned wird von der AI-DMA erwartet. */
+    if (!wt_addr_range_ok((u32)addr, (u32)len)) {
+        PyErr_SetString(PyExc_ValueError, "AUDIO_InitDMA: startaddr/len outside valid RAM");
+        return NULL;
+    }
+    if ((addr & 31u) != 0u || (len & 31u) != 0u) {
+        PyErr_SetString(PyExc_ValueError, "AUDIO_InitDMA: startaddr and len must be 32-byte aligned");
+        return NULL;
+    }
+    AUDIO_InitDMA((u32)addr, (u32)len); return py_none();
+}
+
+/* AUDIO-DMA-Callback: Trampolin zählt nur, Python pollt */
+static volatile u32 g_audio_dma_events = 0;
+static void wt_audio_dma_cb(void) { g_audio_dma_events++; }
+
+static PyObject* wt_AUDIO_RegisterDMACallback(PyObject *self, PyObject *args) {
+    (void)self; int enable;
+    if (!PyArg_ParseTuple(args, "p:AUDIO_RegisterDMACallback", &enable)) return NULL;
+    AUDIO_RegisterDMACallback(enable ? wt_audio_dma_cb : NULL); return py_none();
+}
+static PyObject* wt_AUDIO_GetDMAEvent(PyObject *self, PyObject *args) {
+    (void)self; if (!PyArg_ParseTuple(args, ":AUDIO_GetDMAEvent")) return NULL;
+    u32 n = g_audio_dma_events; g_audio_dma_events = 0;
+    return PyLong_FromUnsignedLong((unsigned long)n);
+}
+
+/* Höhere Ebene: einen Sinuston per AI-DMA ausgeben (48 kHz, 16-bit Stereo).
+   Blockierend: erzeugt den Puffer, startet DMA, wartet die Dauer ab, stoppt
+   und gibt den Puffer wieder frei. */
+static PyObject* wt_audio_play_tone(PyObject *self, PyObject *args)
+{
+    (void)self;
+    double freq = 440.0;
+    int    ms   = 500;
+    long   vol  = 8000;
+    if (!PyArg_ParseTuple(args, "|dil:audio_play_tone", &freq, &ms, &vol))
+        return NULL;
+    if (ms  < 1)     ms  = 1;
+    if (ms  > 3000)  ms  = 3000;    /* Puffer-/Blockier-Obergrenze */
+    if (vol < 0)     vol = 0;
+    if (vol > 32767) vol = 32767;
+    if (freq < 1.0)  freq = 1.0;
+
+    const int rate = 48000;
+    long frames = (long)(((long long)rate * ms) / 1000);
+    long nbytes = frames * 4;               /* 2 Kanäle * 2 Byte */
+    nbytes &= ~31L;                          /* auf 32 Byte abrunden (AI-DMA) */
+    if (nbytes < 32)      nbytes = 32;
+    if (nbytes > 1048544) nbytes = 1048544;  /* AI-DMA-Längenlimit (~1 MB) */
+    frames = nbytes / 4;
+
+    s16 *buf = (s16*)memalign(32, (size_t)nbytes);
+    if (buf == NULL)
+        return PyErr_NoMemory();
+
+    double w = 2.0 * M_PI * freq / (double)rate;
+    for (long i = 0; i < frames; i++) {
+        s16 v = (s16)((double)vol * sin(w * (double)i));
+        buf[2*i]     = v;   /* links  */
+        buf[2*i + 1] = v;   /* rechts */
+    }
+    DCFlushRange(buf, (u32)nbytes);
+
+    if (!g_audio_inited) { AUDIO_Init(NULL); g_audio_inited = 1; }
+    AUDIO_StopDMA();
+    AUDIO_SetDSPSampleRate(AI_SAMPLERATE_48KHZ);
+    AUDIO_InitDMA((u32)buf, (u32)nbytes);
+    AUDIO_StartDMA();
+
+    usleep((useconds_t)ms * 1000u + 20000u);   /* Wiedergabe abwarten */
+
+    AUDIO_StopDMA();
+    free(buf);
+    return py_none();
+}
+
+/* ---------------------------- CON ------------------------------------ */
+static PyObject* wt_CON_GetMetrics(PyObject *self, PyObject *args) {
+    (void)self; int cols = 0, rows = 0;
+    if (!PyArg_ParseTuple(args, ":CON_GetMetrics")) return NULL;
+    CON_GetMetrics(&cols, &rows);
+    return Py_BuildValue("(ii)", cols, rows);
+}
+static PyObject* wt_CON_GetPosition(PyObject *self, PyObject *args) {
+    (void)self; int col = 0, row = 0;
+    if (!PyArg_ParseTuple(args, ":CON_GetPosition")) return NULL;
+    CON_GetPosition(&col, &row);
+    return Py_BuildValue("(ii)", col, row);
+}
+static PyObject* wt_CON_EnableGecko(PyObject *self, PyObject *args) {
+    (void)self; int channel, safe = 0;
+    if (!PyArg_ParseTuple(args, "i|p:CON_EnableGecko", &channel, &safe)) return NULL;
+    CON_EnableGecko(channel, safe);
+    return py_none();
+}
+
+/* ---------------------------- PAD Sampling-Callback ------------------ */
+static volatile u32 g_pad_sampling_events = 0;
+static void wt_pad_sampling_cb(void) { g_pad_sampling_events++; }
+static PyObject* wt_PAD_SetSamplingCallback(PyObject *self, PyObject *args) {
+    (void)self; int enable;
+    if (!PyArg_ParseTuple(args, "p:PAD_SetSamplingCallback", &enable)) return NULL;
+    PAD_SetSamplingCallback(enable ? wt_pad_sampling_cb : NULL);
+    return py_none();
+}
+static PyObject* wt_PAD_GetSamplingEvent(PyObject *self, PyObject *args) {
+    (void)self; if (!PyArg_ParseTuple(args, ":PAD_GetSamplingEvent")) return NULL;
+    u32 n = g_pad_sampling_events; g_pad_sampling_events = 0;
+    return PyLong_FromUnsignedLong((unsigned long)n);
+}
+
+/* ---------------------------- Netzwerk / Sockets --------------------- */
+/* Hilfsfunktionen: IP-String <-> sockaddr_in */
+static PyObject* wt_ip_to_str(struct in_addr a) {
+    char *s = inet_ntoa(a);
+    return PyUnicode_FromString(s ? s : "");
+}
+static int wt_fill_sin(struct sockaddr_in *sin, const char *ip, int port) {
+    memset(sin, 0, sizeof(*sin));
+    sin->sin_len = sizeof(struct sockaddr_in);
+    sin->sin_family = AF_INET;
+    sin->sin_port = htons((u16)port);
+    if (ip && ip[0]) {
+        if (inet_aton(ip, &sin->sin_addr) == 0) return -1;
+    } else {
+        sin->sin_addr.s_addr = 0; /* INADDR_ANY */
+    }
+    return 0;
+}
+
+WT_GET_L0(net_get_status)
+WT_VOID0(net_deinit)
+WT_VOID0(net_wc24cleanup)
+
+static PyObject* wt_net_gethostip(PyObject *self, PyObject *args) {
+    (void)self; if (!PyArg_ParseTuple(args, ":net_gethostip")) return NULL;
+    struct in_addr a; a.s_addr = (in_addr_t)net_gethostip();
+    return wt_ip_to_str(a);
+}
+static PyObject* wt_net_get_mac_address(PyObject *self, PyObject *args) {
+    (void)self; u8 mac[6] = {0};
+    if (!PyArg_ParseTuple(args, ":net_get_mac_address")) return NULL;
+    if (net_get_mac_address(mac) < 0) { PyErr_SetString(PyExc_RuntimeError, "net_get_mac_address failed"); return NULL; }
+    return PyUnicode_FromFormat("%02x:%02x:%02x:%02x:%02x:%02x",
+                                mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+}
+static PyObject* wt_net_gethostbyname(PyObject *self, PyObject *args) {
+    (void)self; const char *name;
+    if (!PyArg_ParseTuple(args, "s:net_gethostbyname", &name)) return NULL;
+    struct hostent *h = net_gethostbyname(name);
+    if (!h || !h->h_addr_list || !h->h_addr_list[0]) return py_none();
+    struct in_addr a; memcpy(&a, h->h_addr_list[0], sizeof(a));
+    return wt_ip_to_str(a);
+}
+static PyObject* wt_inet_addr(PyObject *self, PyObject *args) {
+    (void)self; const char *cp;
+    if (!PyArg_ParseTuple(args, "s:inet_addr", &cp)) return NULL;
+    return PyLong_FromUnsignedLong((unsigned long)inet_addr(cp));
+}
+static PyObject* wt_inet_aton(PyObject *self, PyObject *args) {
+    (void)self; const char *cp; struct in_addr a;
+    if (!PyArg_ParseTuple(args, "s:inet_aton", &cp)) return NULL;
+    if (inet_aton(cp, &a) == 0) return py_none();
+    return PyLong_FromUnsignedLong((unsigned long)a.s_addr);
+}
+static PyObject* wt_inet_ntoa(PyObject *self, PyObject *args) {
+    (void)self; unsigned long v; struct in_addr a;
+    if (!PyArg_ParseTuple(args, "k:inet_ntoa", &v)) return NULL;
+    a.s_addr = (in_addr_t)v;
+    return wt_ip_to_str(a);
+}
+static PyObject* wt_if_config(PyObject *self, PyObject *args) {
+    (void)self; int use_dhcp = 1, retries = 20;
+    char ip[16] = "", nm[16] = "", gw[16] = "";
+    if (!PyArg_ParseTuple(args, "|pi:if_config", &use_dhcp, &retries)) return NULL;
+    s32 r = if_config(ip, nm, gw, use_dhcp ? true : false, retries);
+    if (r < 0) return PyLong_FromLong((long)r);
+    return Py_BuildValue("{s:s,s:s,s:s}", "ip", ip, "netmask", nm, "gateway", gw);
+}
+
+static PyObject* wt_net_socket(PyObject *self, PyObject *args) {
+    (void)self; long domain = AF_INET, type = SOCK_STREAM, proto = 0;
+    if (!PyArg_ParseTuple(args, "|lll:net_socket", &domain, &type, &proto)) return NULL;
+    return PyLong_FromLong((long)net_socket((u32)domain, (u32)type, (u32)proto));
+}
+static PyObject* wt_net_bind(PyObject *self, PyObject *args) {
+    (void)self; long s; const char *ip = ""; int port;
+    if (!PyArg_ParseTuple(args, "lsi:net_bind", &s, &ip, &port)) return NULL;
+    struct sockaddr_in sin;
+    if (wt_fill_sin(&sin, ip, port) < 0) { PyErr_SetString(PyExc_ValueError, "invalid IP"); return NULL; }
+    return PyLong_FromLong((long)net_bind((s32)s, (struct sockaddr *)&sin, sizeof(sin)));
+}
+static PyObject* wt_net_connect(PyObject *self, PyObject *args) {
+    (void)self; long s; const char *ip; int port;
+    if (!PyArg_ParseTuple(args, "lsi:net_connect", &s, &ip, &port)) return NULL;
+    struct sockaddr_in sin;
+    if (wt_fill_sin(&sin, ip, port) < 0) { PyErr_SetString(PyExc_ValueError, "invalid IP"); return NULL; }
+    return PyLong_FromLong((long)net_connect((s32)s, (struct sockaddr *)&sin, sizeof(sin)));
+}
+static PyObject* wt_net_listen(PyObject *self, PyObject *args) {
+    (void)self; long s, backlog = 5;
+    if (!PyArg_ParseTuple(args, "l|l:net_listen", &s, &backlog)) return NULL;
+    return PyLong_FromLong((long)net_listen((s32)s, (u32)backlog));
+}
+static PyObject* wt_net_accept(PyObject *self, PyObject *args) {
+    (void)self; long s;
+    if (!PyArg_ParseTuple(args, "l:net_accept", &s)) return NULL;
+    struct sockaddr_in sin; socklen_t l = sizeof(sin);
+    memset(&sin, 0, sizeof(sin));
+    s32 fd = net_accept((s32)s, (struct sockaddr *)&sin, &l);
+    if (fd < 0) return Py_BuildValue("(iOi)", (int)fd, Py_None, 0);
+    PyObject *ipo = wt_ip_to_str(sin.sin_addr);
+    PyObject *res = Py_BuildValue("(iOi)", (int)fd, ipo, (int)ntohs(sin.sin_port));
+    Py_XDECREF(ipo);
+    return res;
+}
+static PyObject* wt_net_close(PyObject *self, PyObject *args) {
+    (void)self; long s;
+    if (!PyArg_ParseTuple(args, "l:net_close", &s)) return NULL;
+    return PyLong_FromLong((long)net_close((s32)s));
+}
+static PyObject* wt_net_shutdown(PyObject *self, PyObject *args) {
+    (void)self; long s, how;
+    if (!PyArg_ParseTuple(args, "ll:net_shutdown", &s, &how)) return NULL;
+    return PyLong_FromLong((long)net_shutdown((s32)s, (u32)how));
+}
+static PyObject* wt_net_send(PyObject *self, PyObject *args) {
+    (void)self; long s; Py_buffer buf; long flags = 0;
+    if (!PyArg_ParseTuple(args, "ly*|l:net_send", &s, &buf, &flags)) return NULL;
+    s32 r = net_send((s32)s, buf.buf, (s32)buf.len, (u32)flags);
+    PyBuffer_Release(&buf);
+    return PyLong_FromLong((long)r);
+}
+static PyObject* wt_net_write(PyObject *self, PyObject *args) {
+    (void)self; long s; Py_buffer buf;
+    if (!PyArg_ParseTuple(args, "ly*:net_write", &s, &buf)) return NULL;
+    s32 r = net_write((s32)s, buf.buf, (s32)buf.len);
+    PyBuffer_Release(&buf);
+    return PyLong_FromLong((long)r);
+}
+static PyObject* wt_net_sendto(PyObject *self, PyObject *args) {
+    (void)self; long s; Py_buffer buf; const char *ip; int port; long flags = 0;
+    if (!PyArg_ParseTuple(args, "ly*si|l:net_sendto", &s, &buf, &ip, &port, &flags)) return NULL;
+    struct sockaddr_in sin;
+    if (wt_fill_sin(&sin, ip, port) < 0) { PyBuffer_Release(&buf); PyErr_SetString(PyExc_ValueError, "invalid IP"); return NULL; }
+    s32 r = net_sendto((s32)s, buf.buf, (s32)buf.len, (u32)flags, (struct sockaddr *)&sin, sizeof(sin));
+    PyBuffer_Release(&buf);
+    return PyLong_FromLong((long)r);
+}
+static PyObject* wt_net_recv(PyObject *self, PyObject *args) {
+    (void)self; long s, maxlen; long flags = 0;
+    if (!PyArg_ParseTuple(args, "ll|l:net_recv", &s, &maxlen, &flags)) return NULL;
+    if (maxlen < 0) maxlen = 0;
+    char *b = (char *)malloc((size_t)maxlen > 0 ? (size_t)maxlen : 1);
+    if (!b) return PyErr_NoMemory();
+    s32 r = net_recv((s32)s, b, (s32)maxlen, (u32)flags);
+    if (r < 0) { free(b); return PyLong_FromLong((long)r); }
+    PyObject *o = PyBytes_FromStringAndSize(b, r);
+    free(b);
+    return o;
+}
+static PyObject* wt_net_read(PyObject *self, PyObject *args) {
+    (void)self; long s, maxlen;
+    if (!PyArg_ParseTuple(args, "ll:net_read", &s, &maxlen)) return NULL;
+    if (maxlen < 0) maxlen = 0;
+    char *b = (char *)malloc((size_t)maxlen > 0 ? (size_t)maxlen : 1);
+    if (!b) return PyErr_NoMemory();
+    s32 r = net_read((s32)s, b, (s32)maxlen);
+    if (r < 0) { free(b); return PyLong_FromLong((long)r); }
+    PyObject *o = PyBytes_FromStringAndSize(b, r);
+    free(b);
+    return o;
+}
+static PyObject* wt_net_recvfrom(PyObject *self, PyObject *args) {
+    (void)self; long s, maxlen; long flags = 0;
+    if (!PyArg_ParseTuple(args, "ll|l:net_recvfrom", &s, &maxlen, &flags)) return NULL;
+    if (maxlen < 0) maxlen = 0;
+    char *b = (char *)malloc((size_t)maxlen > 0 ? (size_t)maxlen : 1);
+    if (!b) return PyErr_NoMemory();
+    struct sockaddr_in sin; socklen_t l = sizeof(sin); memset(&sin, 0, sizeof(sin));
+    s32 r = net_recvfrom((s32)s, b, (s32)maxlen, (u32)flags, (struct sockaddr *)&sin, &l);
+    if (r < 0) { free(b); return Py_BuildValue("(OOi)", Py_None, Py_None, (int)r); }
+    PyObject *data = PyBytes_FromStringAndSize(b, r);
+    free(b);
+    PyObject *ipo = wt_ip_to_str(sin.sin_addr);
+    PyObject *res = Py_BuildValue("(OOi)", data, ipo, (int)ntohs(sin.sin_port));
+    Py_XDECREF(data); Py_XDECREF(ipo);
+    return res;
+}
+static PyObject* wt_net_getsockname(PyObject *self, PyObject *args) {
+    (void)self; long s;
+    if (!PyArg_ParseTuple(args, "l:net_getsockname", &s)) return NULL;
+    struct sockaddr_in sin; socklen_t l = sizeof(sin); memset(&sin, 0, sizeof(sin));
+    if (net_getsockname((s32)s, (struct sockaddr *)&sin, &l) < 0) return py_none();
+    PyObject *ipo = wt_ip_to_str(sin.sin_addr);
+    PyObject *res = Py_BuildValue("(Oi)", ipo, (int)ntohs(sin.sin_port));
+    Py_XDECREF(ipo);
+    return res;
+}
+static PyObject* wt_net_setsockopt(PyObject *self, PyObject *args) {
+    (void)self; long s, level, opt, val;
+    if (!PyArg_ParseTuple(args, "llll:net_setsockopt", &s, &level, &opt, &val)) return NULL;
+    int v = (int)val;
+    return PyLong_FromLong((long)net_setsockopt((s32)s, (u32)level, (u32)opt, &v, sizeof(v)));
+}
+/* net_getsockopt fehlt im Wii-libogc (nur net_setsockopt vorhanden) -> nicht gewrappt */
+static PyObject* wt_net_fcntl(PyObject *self, PyObject *args) {
+    (void)self; long s, cmd, flags;
+    if (!PyArg_ParseTuple(args, "lll:net_fcntl", &s, &cmd, &flags)) return NULL;
+    return PyLong_FromLong((long)net_fcntl((s32)s, (u32)cmd, (u32)flags));
+}
+static PyObject* wt_net_ioctl(PyObject *self, PyObject *args) {
+    (void)self; long s, cmd; unsigned long arg = 0;
+    if (!PyArg_ParseTuple(args, "ll|k:net_ioctl", &s, &cmd, &arg)) return NULL;
+    u32 a = (u32)arg;
+    return PyLong_FromLong((long)net_ioctl((s32)s, (u32)cmd, &a));
+}
+static PyObject* wt_net_poll(PyObject *self, PyObject *args) {
+    (void)self; PyObject *lst; long timeout;
+    if (!PyArg_ParseTuple(args, "Ol:net_poll", &lst, &timeout)) return NULL;
+    PyObject *seq = PySequence_Fast(lst, "net_poll expects a list of (fd, events)");
+    if (!seq) return NULL;
+    Py_ssize_t n = PySequence_Fast_GET_SIZE(seq);
+    struct pollsd *sds = (struct pollsd *)calloc((size_t)(n > 0 ? n : 1), sizeof(struct pollsd));
+    if (!sds) { Py_DECREF(seq); return PyErr_NoMemory(); }
+    for (Py_ssize_t i = 0; i < n; i++) {
+        PyObject *it = PySequence_Fast_GET_ITEM(seq, i);
+        long fd = 0, ev = 0;
+        if (!PyArg_ParseTuple(it, "ll", &fd, &ev)) { free(sds); Py_DECREF(seq); return NULL; }
+        sds[i].socket = (s32)fd; sds[i].events = (u32)ev; sds[i].revents = 0;
+    }
+    s32 r = net_poll(sds, (s32)n, (s32)timeout);
+    (void)r;
+    PyObject *out = PyList_New(n);
+    if (!out) { free(sds); Py_DECREF(seq); return NULL; }
+    for (Py_ssize_t i = 0; i < n; i++)
+        PyList_SET_ITEM(out, i, Py_BuildValue("(ik)", (int)sds[i].socket, (unsigned long)sds[i].revents));
+    free(sds); Py_DECREF(seq);
+    return out;
+}
+
+/* --- Modul-Init (net-Thread + Netzwerk) exponiert bereits: net_init --- */
+
 static PyMethodDef wiitools_methods[] = {
+    {"c_run", c_run, METH_VARARGS,
+     "c_run(func_addr, *args) -> int : call C function at func_addr with up to "
+     "8 int/pointer args (PPC EABI r3..r10); float/struct args unsupported"},
     {"fatInitDefault", fatinit, METH_VARARGS, "Mount SD card and USB"},
     {"VIDEO_WaitVSync", video_waitvsync, METH_VARARGS, "Wait one video frame"},
 	{ "usleep", usleep2, METH_VARARGS, "usleep"},
@@ -3787,6 +4673,7 @@ static PyMethodDef wiitools_methods[] = {
     {"png_unload", png_unload, METH_VARARGS, "png_unload() unload active PNG"},
     {"png_unload_all", png_unload_all, METH_VARARGS, "png_unload_all()"},
     {"draw_rect", draw_rect, METH_VARARGS, "draw_rect(x, y, w, h, (r,g,b,a), angle_deg)"},
+    {"gutil_prepare", gutil_prepare, METH_VARARGS, "gutil_prepare()  set GX state (VTXFMT2, TEX0 DIRECT, TEV MODULATE) required before CavEX gutil_* calls via c_run"},
     {"draw_circle", draw_circle, METH_VARARGS, "draw_circle(x, y, radius, (r,g,b,a))"},
     {"draw_oval", draw_oval, METH_VARARGS, "draw_oval(x, y, w, h, (r,g,b,a), angle_deg)"},
     {"render_text", render_text_py, METH_VARARGS, "render_text(x, y, text, size, shadow, (r,g,b,a), angle_deg)"},
@@ -3873,6 +4760,130 @@ static PyMethodDef wiitools_methods[] = {
 	{"IsNetReady", IsNetReady, METH_VARARGS, "is net ready?"},
     {"get_local_ip", get_local_ip, METH_VARARGS, "get_local_ip() -> primary local IPv4 address string or empty string"},
     {"init", init, METH_VARARGS, "init() -> initialize all (terminal_init() and other ...)"},
+    {"net_init", init_network, METH_VARARGS, "net_init() -> initialize network thread"},
+
+    /* ---- CONF (nur lesend) ---- */
+    {"CONF_Init", wt_CONF_Init, METH_VARARGS, "CONF_Init() -> int"},
+    {"CONF_GetLength", wt_CONF_GetLength, METH_VARARGS, "CONF_GetLength(name) -> int"},
+    {"CONF_GetType", wt_CONF_GetType, METH_VARARGS, "CONF_GetType(name) -> int"},
+    {"CONF_Get", wt_CONF_Get, METH_VARARGS, "CONF_Get(name) -> bytes"},
+    {"CONF_GetShutdownMode", wt_CONF_GetShutdownMode, METH_VARARGS, "CONF_GetShutdownMode() -> int"},
+    {"CONF_GetIdleLedMode", wt_CONF_GetIdleLedMode, METH_VARARGS, "CONF_GetIdleLedMode() -> int"},
+    {"CONF_GetProgressiveScan", wt_CONF_GetProgressiveScan, METH_VARARGS, "CONF_GetProgressiveScan() -> int"},
+    {"CONF_GetEuRGB60", wt_CONF_GetEuRGB60, METH_VARARGS, "CONF_GetEuRGB60() -> int"},
+    {"CONF_GetIRSensitivity", wt_CONF_GetIRSensitivity, METH_VARARGS, "CONF_GetIRSensitivity() -> int"},
+    {"CONF_GetSensorBarPosition", wt_CONF_GetSensorBarPosition, METH_VARARGS, "CONF_GetSensorBarPosition() -> int"},
+    {"CONF_GetPadSpeakerVolume", wt_CONF_GetPadSpeakerVolume, METH_VARARGS, "CONF_GetPadSpeakerVolume() -> int"},
+    {"CONF_GetPadMotorMode", wt_CONF_GetPadMotorMode, METH_VARARGS, "CONF_GetPadMotorMode() -> int"},
+    {"CONF_GetSoundMode", wt_CONF_GetSoundMode, METH_VARARGS, "CONF_GetSoundMode() -> int (0=Mono,1=Stereo,2=Surround)"},
+    {"CONF_GetLanguage", wt_CONF_GetLanguage, METH_VARARGS, "CONF_GetLanguage() -> int"},
+    {"CONF_GetScreenSaverMode", wt_CONF_GetScreenSaverMode, METH_VARARGS, "CONF_GetScreenSaverMode() -> int"},
+    {"CONF_GetAspectRatio", wt_CONF_GetAspectRatio, METH_VARARGS, "CONF_GetAspectRatio() -> int (0=4:3,1=16:9)"},
+    {"CONF_GetEULA", wt_CONF_GetEULA, METH_VARARGS, "CONF_GetEULA() -> int"},
+    {"CONF_GetWiiConnect24", wt_CONF_GetWiiConnect24, METH_VARARGS, "CONF_GetWiiConnect24() -> int"},
+    {"CONF_GetRegion", wt_CONF_GetRegion, METH_VARARGS, "CONF_GetRegion() -> int"},
+    {"CONF_GetArea", wt_CONF_GetArea, METH_VARARGS, "CONF_GetArea() -> int"},
+    {"CONF_GetVideo", wt_CONF_GetVideo, METH_VARARGS, "CONF_GetVideo() -> int"},
+    {"CONF_GetCounterBias", wt_CONF_GetCounterBias, METH_VARARGS, "CONF_GetCounterBias() -> int"},
+    {"CONF_GetDisplayOffsetH", wt_CONF_GetDisplayOffsetH, METH_VARARGS, "CONF_GetDisplayOffsetH() -> int"},
+    {"CONF_GetNickName", wt_CONF_GetNickName, METH_VARARGS, "CONF_GetNickName() -> str (Konsolen-Spitzname)"},
+    {"CONF_GetParentalPassword", wt_CONF_GetParentalPassword, METH_VARARGS, "CONF_GetParentalPassword() -> str"},
+    {"CONF_GetParentalAnswer", wt_CONF_GetParentalAnswer, METH_VARARGS, "CONF_GetParentalAnswer() -> str"},
+    {"CONF_GetPadDevices", wt_CONF_GetPadDevices, METH_VARARGS, "CONF_GetPadDevices() -> int (Anzahl registrierter Geräte)"},
+
+    /* ---- SYS ---- */
+    {"SYS_Time", wt_SYS_Time, METH_VARARGS, "SYS_Time() -> int (Wii-Timebase-Ticks)"},
+    {"SYS_ResetButtonDown", wt_SYS_ResetButtonDown, METH_VARARGS, "SYS_ResetButtonDown() -> int"},
+    {"SYS_GetHollywoodRevision", wt_SYS_GetHollywoodRevision, METH_VARARGS, "SYS_GetHollywoodRevision() -> int"},
+    {"SYS_GetCounterBias", wt_SYS_GetCounterBias, METH_VARARGS, "SYS_GetCounterBias() -> int"},
+    {"SYS_SetCounterBias", wt_SYS_SetCounterBias, METH_VARARGS, "SYS_SetCounterBias(bias)"},
+    {"SYS_GetDisplayOffsetH", wt_SYS_GetDisplayOffsetH, METH_VARARGS, "SYS_GetDisplayOffsetH() -> int"},
+    {"SYS_SetDisplayOffsetH", wt_SYS_SetDisplayOffsetH, METH_VARARGS, "SYS_SetDisplayOffsetH(offset)"},
+    {"SYS_GetEuRGB60", wt_SYS_GetEuRGB60, METH_VARARGS, "SYS_GetEuRGB60() -> int"},
+    {"SYS_SetEuRGB60", wt_SYS_SetEuRGB60, METH_VARARGS, "SYS_SetEuRGB60(enable)"},
+    {"SYS_GetLanguage", wt_SYS_GetLanguage, METH_VARARGS, "SYS_GetLanguage() -> int"},
+    {"SYS_SetLanguage", wt_SYS_SetLanguage, METH_VARARGS, "SYS_SetLanguage(lang)"},
+    {"SYS_GetProgressiveScan", wt_SYS_GetProgressiveScan, METH_VARARGS, "SYS_GetProgressiveScan() -> int"},
+    {"SYS_SetProgressiveScan", wt_SYS_SetProgressiveScan, METH_VARARGS, "SYS_SetProgressiveScan(enable)"},
+    {"SYS_GetSoundMode", wt_SYS_GetSoundMode, METH_VARARGS, "SYS_GetSoundMode() -> int"},
+    {"SYS_SetSoundMode", wt_SYS_SetSoundMode, METH_VARARGS, "SYS_SetSoundMode(mode)"},
+    {"SYS_GetVideoMode", wt_SYS_GetVideoMode, METH_VARARGS, "SYS_GetVideoMode() -> int"},
+    {"SYS_SetVideoMode", wt_SYS_SetVideoMode, METH_VARARGS, "SYS_SetVideoMode(mode)"},
+    {"SYS_GetWirelessID", wt_SYS_GetWirelessID, METH_VARARGS, "SYS_GetWirelessID(chan) -> int"},
+    {"SYS_SetWirelessID", wt_SYS_SetWirelessID, METH_VARARGS, "SYS_SetWirelessID(chan, id)"},
+    {"SYS_GetGBSMode", wt_SYS_GetGBSMode, METH_VARARGS, "SYS_GetGBSMode() -> int"},
+    {"SYS_SetGBSMode", wt_SYS_SetGBSMode, METH_VARARGS, "SYS_SetGBSMode(mode)"},
+    {"SYS_GetFontEncoding", wt_SYS_GetFontEncoding, METH_VARARGS, "SYS_GetFontEncoding() -> int"},
+    {"SYS_GetArena1Size", wt_SYS_GetArena1Size, METH_VARARGS, "SYS_GetArena1Size() -> int (freier MEM1-Arena in Bytes)"},
+    {"SYS_GetArena2Size", wt_SYS_GetArena2Size, METH_VARARGS, "SYS_GetArena2Size() -> int (freier MEM2-Arena in Bytes)"},
+    {"SYS_STDIO_Report", wt_SYS_STDIO_Report, METH_VARARGS, "SYS_STDIO_Report(enable)"},
+    {"SYS_Report", wt_SYS_Report, METH_VARARGS, "SYS_Report(msg)  Nachricht ins Systemlog"},
+    {"SYS_ResetSystem", wt_SYS_ResetSystem, METH_VARARGS, "SYS_ResetSystem(reset[, code=0, force_menu=0])"},
+    {"SYS_SetPowerCallback", wt_SYS_SetPowerCallback, METH_VARARGS, "SYS_SetPowerCallback(enable)  danach mit SYS_GetPowerEvent() pollen"},
+    {"SYS_GetPowerEvent", wt_SYS_GetPowerEvent, METH_VARARGS, "SYS_GetPowerEvent() -> Anzahl seit letztem Abruf"},
+    {"SYS_SetResetCallback", wt_SYS_SetResetCallback, METH_VARARGS, "SYS_SetResetCallback(enable)  danach mit SYS_GetResetEvent() pollen"},
+    {"SYS_GetResetEvent", wt_SYS_GetResetEvent, METH_VARARGS, "SYS_GetResetEvent() -> Anzahl seit letztem Abruf"},
+    {"SYS_CreateAlarm", wt_SYS_CreateAlarm, METH_VARARGS, "SYS_CreateAlarm() -> handle"},
+    {"SYS_SetAlarm", wt_SYS_SetAlarm, METH_VARARGS, "SYS_SetAlarm(handle, seconds)  Einzel-Alarm; mit SYS_GetAlarmEvent() pollen"},
+    {"SYS_SetPeriodicAlarm", wt_SYS_SetPeriodicAlarm, METH_VARARGS, "SYS_SetPeriodicAlarm(handle, start_s, period_s)"},
+    {"SYS_RemoveAlarm", wt_SYS_RemoveAlarm, METH_VARARGS, "SYS_RemoveAlarm(handle)"},
+    {"SYS_CancelAlarm", wt_SYS_CancelAlarm, METH_VARARGS, "SYS_CancelAlarm(handle)"},
+    {"SYS_GetAlarmEvent", wt_SYS_GetAlarmEvent, METH_VARARGS, "SYS_GetAlarmEvent() -> Anzahl ausgelöster Alarme seit letztem Abruf"},
+
+    /* ---- AUDIO ---- */
+    {"AUDIO_Init", wt_AUDIO_Init, METH_VARARGS, "AUDIO_Init()"},
+    {"AUDIO_InitDMA", wt_AUDIO_InitDMA, METH_VARARGS, "AUDIO_InitDMA(startaddr, len)"},
+    {"AUDIO_StartDMA", wt_AUDIO_StartDMA, METH_VARARGS, "AUDIO_StartDMA()"},
+    {"AUDIO_StopDMA", wt_AUDIO_StopDMA, METH_VARARGS, "AUDIO_StopDMA()"},
+    {"AUDIO_GetDMAEnableFlag", wt_AUDIO_GetDMAEnableFlag, METH_VARARGS, "AUDIO_GetDMAEnableFlag() -> int"},
+    {"AUDIO_GetDMABytesLeft", wt_AUDIO_GetDMABytesLeft, METH_VARARGS, "AUDIO_GetDMABytesLeft() -> int"},
+    {"AUDIO_GetDMALength", wt_AUDIO_GetDMALength, METH_VARARGS, "AUDIO_GetDMALength() -> int"},
+    {"AUDIO_GetDMAStartAddr", wt_AUDIO_GetDMAStartAddr, METH_VARARGS, "AUDIO_GetDMAStartAddr() -> int"},
+    {"AUDIO_SetDSPSampleRate", wt_AUDIO_SetDSPSampleRate, METH_VARARGS, "AUDIO_SetDSPSampleRate(rate)"},
+    {"AUDIO_GetDSPSampleRate", wt_AUDIO_GetDSPSampleRate, METH_VARARGS, "AUDIO_GetDSPSampleRate() -> int"},
+    {"AUDIO_RegisterDMACallback", wt_AUDIO_RegisterDMACallback, METH_VARARGS, "AUDIO_RegisterDMACallback(enable)  mit AUDIO_GetDMAEvent() pollen"},
+    {"AUDIO_GetDMAEvent", wt_AUDIO_GetDMAEvent, METH_VARARGS, "AUDIO_GetDMAEvent() -> Anzahl seit letztem Abruf"},
+    {"audio_play_tone", wt_audio_play_tone, METH_VARARGS, "audio_play_tone(freq=440.0, ms=500, volume=8000)  Sinuston ausgeben (48kHz Stereo, blockierend)"},
+
+    /* ---- CON (Konsole) ---- */
+    {"CON_GetMetrics", wt_CON_GetMetrics, METH_VARARGS, "CON_GetMetrics() -> (cols, rows)"},
+    {"CON_GetPosition", wt_CON_GetPosition, METH_VARARGS, "CON_GetPosition() -> (col, row)"},
+    {"CON_EnableGecko", wt_CON_EnableGecko, METH_VARARGS, "CON_EnableGecko(channel[, safe=0])"},
+
+    /* ---- PAD Sampling-Callback ---- */
+    {"PAD_SetSamplingCallback", wt_PAD_SetSamplingCallback, METH_VARARGS, "PAD_SetSamplingCallback(enable)  mit PAD_GetSamplingEvent() pollen"},
+    {"PAD_GetSamplingEvent", wt_PAD_GetSamplingEvent, METH_VARARGS, "PAD_GetSamplingEvent() -> Anzahl seit letztem Abruf"},
+
+    /* ---- Netzwerk / Sockets ---- */
+    {"net_get_status", wt_net_get_status, METH_VARARGS, "net_get_status() -> int"},
+    {"net_deinit", wt_net_deinit, METH_VARARGS, "net_deinit()"},
+    {"net_wc24cleanup", wt_net_wc24cleanup, METH_VARARGS, "net_wc24cleanup()"},
+    {"net_gethostip", wt_net_gethostip, METH_VARARGS, "net_gethostip() -> str (eigene IPv4)"},
+    {"net_get_mac_address", wt_net_get_mac_address, METH_VARARGS, "net_get_mac_address() -> 'aa:bb:cc:dd:ee:ff'"},
+    {"net_gethostbyname", wt_net_gethostbyname, METH_VARARGS, "net_gethostbyname(name) -> ip_str oder None"},
+    {"inet_addr", wt_inet_addr, METH_VARARGS, "inet_addr(ip_str) -> int"},
+    {"inet_aton", wt_inet_aton, METH_VARARGS, "inet_aton(ip_str) -> int oder None"},
+    {"inet_ntoa", wt_inet_ntoa, METH_VARARGS, "inet_ntoa(addr_int) -> ip_str"},
+    {"if_config", wt_if_config, METH_VARARGS, "if_config(use_dhcp=True, retries=20) -> dict{ip,netmask,gateway} oder int<0"},
+    {"net_socket", wt_net_socket, METH_VARARGS, "net_socket(domain=AF_INET, type=SOCK_STREAM, proto=0) -> fd"},
+    {"net_bind", wt_net_bind, METH_VARARGS, "net_bind(fd, ip, port) -> int"},
+    {"net_connect", wt_net_connect, METH_VARARGS, "net_connect(fd, ip, port) -> int"},
+    {"net_listen", wt_net_listen, METH_VARARGS, "net_listen(fd, backlog=5) -> int"},
+    {"net_accept", wt_net_accept, METH_VARARGS, "net_accept(fd) -> (fd, ip, port)"},
+    {"net_close", wt_net_close, METH_VARARGS, "net_close(fd) -> int"},
+    {"net_shutdown", wt_net_shutdown, METH_VARARGS, "net_shutdown(fd, how) -> int"},
+    {"net_send", wt_net_send, METH_VARARGS, "net_send(fd, data, flags=0) -> int"},
+    {"net_write", wt_net_write, METH_VARARGS, "net_write(fd, data) -> int"},
+    {"net_sendto", wt_net_sendto, METH_VARARGS, "net_sendto(fd, data, ip, port, flags=0) -> int"},
+    {"net_recv", wt_net_recv, METH_VARARGS, "net_recv(fd, maxlen, flags=0) -> bytes (oder int<0)"},
+    {"net_read", wt_net_read, METH_VARARGS, "net_read(fd, maxlen) -> bytes (oder int<0)"},
+    {"net_recvfrom", wt_net_recvfrom, METH_VARARGS, "net_recvfrom(fd, maxlen, flags=0) -> (bytes, ip, port)"},
+    {"net_getsockname", wt_net_getsockname, METH_VARARGS, "net_getsockname(fd) -> (ip, port) oder None"},
+    {"net_setsockopt", wt_net_setsockopt, METH_VARARGS, "net_setsockopt(fd, level, optname, int_value) -> int"},
+    {"net_fcntl", wt_net_fcntl, METH_VARARGS, "net_fcntl(fd, cmd, flags) -> int"},
+    {"net_ioctl", wt_net_ioctl, METH_VARARGS, "net_ioctl(fd, cmd, arg=0) -> int"},
+    {"net_poll", wt_net_poll, METH_VARARGS, "net_poll([(fd, events), ...], timeout_ms) -> [(fd, revents), ...]"},
+
     {NULL, NULL, 0, NULL}
 };
 
@@ -3994,6 +5005,33 @@ PyInit_wiitools(void)
     ADD_PAD(PAD_CHANMAX);
     PyModule_AddIntConstant(m, "PAD_CHAN_ALL", -1);
 #undef ADD_PAD
+
+    /* Socket-Konstanten (network.h) */
+#define ADD_INT(name) PyModule_AddIntConstant(m, #name, (int)(name))
+    ADD_INT(AF_INET);
+    ADD_INT(PF_INET);
+    ADD_INT(SOCK_STREAM);
+    ADD_INT(SOCK_DGRAM);
+    ADD_INT(IPPROTO_IP);
+    ADD_INT(IPPROTO_TCP);
+    ADD_INT(IPPROTO_UDP);
+    ADD_INT(SOL_SOCKET);
+    ADD_INT(SO_REUSEADDR);
+    ADD_INT(TCP_NODELAY);
+    ADD_INT(POLLIN);
+    ADD_INT(POLLOUT);
+    ADD_INT(FIONBIO);
+    ADD_INT(O_NONBLOCK);
+
+    /* SYS_ResetSystem-Modi (system.h) */
+    ADD_INT(SYS_RESTART);
+    ADD_INT(SYS_HOTRESET);
+    ADD_INT(SYS_SHUTDOWN);
+    ADD_INT(SYS_RETURNTOMENU);
+    ADD_INT(SYS_POWEROFF);
+    ADD_INT(SYS_POWEROFF_STANDBY);
+    ADD_INT(SYS_POWEROFF_IDLE);
+#undef ADD_INT
 
     v = PyUnicode_FromString("0.2");
     if (v != NULL) {

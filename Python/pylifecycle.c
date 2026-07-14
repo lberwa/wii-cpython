@@ -1590,18 +1590,12 @@ static PyObject *wiiio_write(PyObject *self, PyObject *args) {
 #ifdef OS_REPORT_PYTHON_PRINT
         wiiio_write_stdout_raw(data, len);
 #else
-        char *buf = (char *)PyMem_Malloc((size_t)len + 1);
-        if (!buf) {
-            Py_XDECREF(tmp);
-            return PyErr_NoMemory();
-        }
-        memcpy(buf, data, (size_t)len);
-        buf[len] = '\0';
-        
         #ifdef __WII__
-        terminal_print(buf);
+        /* Stream-Semantik: Bytes anhängen, nur bei echtem '\n' umbrechen.
+           So landet print("a", b) in EINER Zeile statt in mehreren, und es
+           wird ohne VSync gezeichnet (schnell). */
+        terminal_write(data, (int)len);
         #endif
-        PyMem_Free(buf);
 #endif
     }
 
