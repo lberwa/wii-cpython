@@ -22,6 +22,8 @@
 #  include <pthread.h>
 #endif
 
+#include <signal.h>
+
 #ifdef __wasi__
 // WASI's bits/alltypes.h provides type definitions when __NEED_ is set.
 // The header file can be included multiple times.
@@ -81,7 +83,9 @@ PyAPI_FUNC(int) pthread_cond_timedwait(pthread_cond_t *restrict cond,
                                        pthread_mutex_t *restrict mutex,
                                        const struct timespec *restrict abstime);
 PyAPI_FUNC(int) pthread_cond_signal(pthread_cond_t *cond);
+PyAPI_FUNC(int) pthread_cond_broadcast(pthread_cond_t *cond);
 PyAPI_FUNC(int) pthread_condattr_init(pthread_condattr_t *attr);
+PyAPI_FUNC(int) pthread_condattr_destroy(pthread_condattr_t *attr);
 PyAPI_FUNC(int) pthread_condattr_setclock(
     pthread_condattr_t *attr, clockid_t clock_id);
 
@@ -93,10 +97,13 @@ PyAPI_FUNC(int) pthread_create(pthread_t *restrict thread,
 PyAPI_FUNC(int) pthread_detach(pthread_t thread);
 PyAPI_FUNC(int) pthread_join(pthread_t thread, void** value_ptr);
 PyAPI_FUNC(pthread_t) pthread_self(void);
+PyAPI_FUNC(int) pthread_equal(pthread_t t1, pthread_t t2);
 PyAPI_FUNC(void) pthread_exit(void *retval) __attribute__ ((__noreturn__));
 PyAPI_FUNC(int) pthread_attr_init(pthread_attr_t *attr);
 PyAPI_FUNC(int) pthread_attr_setstacksize(pthread_attr_t *attr, size_t stacksize);
 PyAPI_FUNC(int) pthread_attr_destroy(pthread_attr_t *attr);
+PyAPI_FUNC(int) pthread_sigmask(int how, const sigset_t *set, sigset_t *oldset);
+PyAPI_FUNC(int) pthread_kill(pthread_t thread, int sig);
 
 
 // pthread_key

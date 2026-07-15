@@ -43,12 +43,46 @@ def ok(name, info=""):
         print("[OK ] " + name)
 
 
-def fail(name, err):
+def _error_hint(name, msg):
+    text = (name + " " + msg).lower()
+
+    if "cannot release un-acquired lock" in text:
+        return ("Lock-Freigabe ohne Besitz. Das passiert typischerweise in "
+                "threading.Condition/Event/RLock und deutet auf einen Fehler "
+                "im Wii-Threading-Pfad hin.")
+    if "cannot wait on un-acquired lock" in text:
+        return ("Condition.wait() glaubt, dass der aktuelle Thread das Lock "
+                "nicht mehr besitzt. Das ist meist ein Besitz-/RLock-Problem.")
+    if "timeout waiting for workers" in text:
+        return ("Die Worker sind nicht sauber bis zum done-Event gekommen. "
+                "Bitte auf die letzten [OK]-Zeilen vor dem Fehler achten.")
+    if "tls mismatch" in text:
+        return ("threading.local() hat pro Thread keinen stabilen eigenen "
+                "Speicher geliefert.")
+    if "worker ident == main ident" in text or "nicht eindeutig" in text:
+        return ("Die Thread-IDs sehen nicht nach echten, getrennten Threads aus.")
+    if "threading import" in text:
+        return ("Ein Basis-Modul fuer threading fehlt noch oder wurde nicht "
+                "korrekt frozen eingebaut.")
+    return ""
+
+
+def fail(name, err, detail=""):
     global _fail
     _fail += 1
     msg = repr(err)
     print("[ERR] " + name + ": " + msg)
-    _errors.append((name, msg))
+    hint = _error_hint(name, msg)
+    if detail:
+        print("      " + detail)
+    if hint:
+        print("      Hinweis: " + hint)
+    _errors.append({
+        "name": name,
+        "msg": msg,
+        "detail": detail,
+        "hint": hint,
+    })
 
 
 def section(title):
@@ -1288,6 +1322,218 @@ def test_write_sd():
 def test_write_usb():
     _test_write("usb")
 
+import threading
+import time
+
+THREADS = 4
+WORK_TIME = 2.0
+
+barrier = threading.Barrier(THREADS)
+
+start_times = [0] * THREADS
+end_times = [0] * THREADS
+
+
+def worker2(i):
+    print(f"Thread {i} bereit")
+
+    # Alle Threads warten hier.
+    barrier.wait()
+
+    start_times[i] = time.perf_counter()
+    print(f"Thread {i} gestartet")
+
+    # "Arbeit"
+    time.sleep(WORK_TIME)
+
+    end_times[i] = time.perf_counter()
+    print(f"Thread {i} beendet")
+
+
+def test_threading2():
+    threads = []
+
+    t0 = time.perf_counter()
+
+    for i in range(THREADS):
+        t = threading.Thread(target=worker2, args=(i,))
+        threads.append(t)
+        t.start()
+
+    for t in threads:
+        t.join()
+
+    total = time.perf_counter() - t0
+
+    print()
+    print(f"Gesamtzeit: {total:.3f} s")
+
+    for i in range(THREADS):
+        print(
+            f"Thread {i}: "
+            f"Start={start_times[i]-t0:.3f}s  "
+            f"Ende={end_times[i]-t0:.3f}s"
+        )
+
+    if total < WORK_TIME * 1.5:
+        print("\n✓ Threads liefen parallel.")
+    else:
+        print("\n✗ Threads liefen vermutlich nacheinander.")
+    wait_a()
+
+
+def test_threading():
+    print("test 1")
+    test_threading2()
+    section("threading")
+    phase = "import"
+
+    try:
+        import _thread
+        import threading
+        ok("import threading", threading.__name__)
+        ok("import _thread", _thread.__name__)
+    except Exception as e:
+        fail("threading import", e)
+        return
+
+    try:
+        main_ident = threading.get_ident()
+        ok("main thread ident", main_ident)
+    except Exception as e:
+        fail("threading.get_ident", e)
+        return
+
+    try:
+        rlock = threading.RLock()
+        ok("RLock implementation", rlock.__class__.__name__ + " aus " + rlock.__class__.__module__)
+    except Exception as e:
+        fail("threading.RLock", e)
+        return
+
+    ready = threading.Event()
+    done = threading.Event()
+    gate = threading.Lock()
+    local = threading.local()
+    errors = []
+    results = []
+    workers_done = [0]
+    worker_count = 3
+    phase = "thread setup"
+
+    def worker(idx):
+        try:
+            local.worker_idx = idx
+            ident_before = threading.get_ident()
+            ready.wait(2.0)
+            ident_after_wait = threading.get_ident()
+
+            subtotal = 0
+            for value in range(2000):
+                subtotal += idx + value
+
+            with gate:
+                if getattr(local, "worker_idx", None) != idx:
+                    errors.append("TLS mismatch in worker " + str(idx))
+                ident_final = threading.get_ident()
+                if ident_before != ident_after_wait or ident_before != ident_final:
+                    errors.append(
+                        "worker " + str(idx) + " ident instabil: "
+                        + str((ident_before, ident_after_wait, ident_final))
+                    )
+                results.append((idx, ident_final, subtotal))
+                workers_done[0] += 1
+                if workers_done[0] == worker_count:
+                    done.set()
+        except Exception as e:
+            with gate:
+                errors.append("worker " + str(idx) + ": " + repr(e))
+                done.set()
+    print("[DBG] threading: vor thread start")
+    #wait_a()
+    print("[DBG] threading: nach wait, starte threads")
+
+    threads = []
+    try:
+        for idx in range(worker_count):
+            print("[DBG] threading: baue thread " + str(idx))
+            t = threading.Thread(target=worker, args=(idx,), name="wii-worker-" + str(idx))
+            threads.append(t)
+            print("[DBG] threading: start thread " + str(idx))
+            t.start()
+            print("[DBG] threading: thread " + str(idx) + " gestartet")
+        ok("threads started", len(threads))
+    except Exception as e:
+        fail("thread start", e, "Phase=" + phase + " gestartet=" + str(len(threads)))
+        return
+    
+    print("[DBG] threading: alle start() fertig")
+    #wait_a()
+    print("[DBG] threading: setze ready event")
+
+    phase = "worker run"
+    ready.set()
+    if not done.wait(5.0):
+        fail("thread completion",
+             "timeout waiting for workers",
+             "Phase=" + phase + " fertig=" + str(workers_done[0]) + "/" + str(worker_count))
+    else:
+        ok("thread completion", workers_done[0])
+    
+    print("[DBG] threading: wait(done) vorbei")
+    #wait_a()
+    print("[DBG] threading: beginne join")
+
+    phase = "join"
+    for t in threads:
+        t.join(1.0)
+    #wait_a()
+
+    alive = [t.name for t in threads if t.is_alive()]
+    if alive:
+        fail("thread join", ", ".join(alive), "Noch aktiv: " + ", ".join(alive))
+    else:
+        ok("thread join")
+
+    #wait_a()
+
+    if errors:
+        fail("thread worker errors",
+             "; ".join(errors),
+             "Phase=" + phase + " Ergebnisse=" + str(len(results)) + "/" + str(worker_count))
+        return
+    
+    #wait_a()
+
+    phase = "verification"
+    try:
+        idents = [ident for _, ident, _ in results]
+        if len(results) != worker_count:
+            fail("thread results",
+                 "nur " + str(len(results)) + "/" + str(worker_count),
+                 "Worker fertig=" + str(workers_done[0]) + " Resultate=" + str(results))
+        elif any(ident == main_ident for ident in idents):
+            fail("thread idents",
+                 "worker ident == main ident",
+                 "main=" + str(main_ident) + " worker=" + str(idents))
+        elif len(set(idents)) != worker_count:
+            fail("thread idents", "nicht eindeutig", "worker=" + str(idents))
+        else:
+            ok("thread idents", str(idents))
+        #wait_a()
+
+        expected = [sum(idx + value for value in range(2000)) for idx in range(worker_count)]
+        got = sorted(subtotal for _, _, subtotal in results)
+        if got != sorted(expected):
+            fail("thread workload",
+                 "unerwartete Summen",
+                 "erwartet=" + str(sorted(expected)) + " bekommen=" + str(got))
+        else:
+            ok("thread workload", str(got))
+        #wait_a()
+    except Exception as e:
+        fail("thread verification", e, "Phase=" + phase + " results=" + str(results))
+
 
 # --------------------------------------------------------- Ergebnis-Zusammenfassung --
 
@@ -1300,9 +1546,13 @@ def _print_results():
     if _errors:
         print("")
         print("  Fehler:")
-        for name, msg in _errors:
-            print("  [ERR] " + name + ":")
-            print("        " + msg)
+        for item in _errors:
+            print("  [ERR] " + item["name"] + ":")
+            print("        " + item["msg"])
+            if item["detail"]:
+                print("        Detail: " + item["detail"])
+            if item["hint"]:
+                print("        Hinweis: " + item["hint"])
     print("================================")
     print("(A druecken um zurueck zum Menu)")
     wait_a()
@@ -1343,6 +1593,7 @@ def run_all_tests():
     test_network()
     test_curl()
     test_curl_http()
+    test_threading()
     _print_results()
     test_frozen_modules()
     test_builtin_modules()
@@ -1859,6 +2110,7 @@ MENU = [
     ("network",       lambda: _run_single(test_network)),
     ("curl (https)",  lambda: _run_single(test_curl)),
     ("curl (http)",   lambda: _run_single(test_curl_http)),
+    ("threading",     lambda: _run_single(test_threading)),
     ("write sd",      lambda: _run_single(test_write_sd)),
     ("write usb",     lambda: _run_single(test_write_usb)),
     ("frozen modules", lambda: _run_single(test_frozen_modules)),

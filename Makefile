@@ -39,7 +39,6 @@ WII_DEFINES := \
 	-D__wii__ \
 	-D__PPC__ \
 	-D__powerpc__ \
-	-DWII_SINGLE_THREAD=1 \
 	#-DTERMINAL_PRINT_DEBUG
 WII_INCLUDE_DIRS := \
 	-I. \
@@ -88,8 +87,10 @@ CONFIGURE_FLAGS= \
 	--with-build-python="$(BUILD_PYTHON)" \
 	--without-ensurepip --disable-shared --disable-ipv6 --with-mimalloc=no
 
+FROZEN_HEADERS := $(shell sed -n 's/^#include "frozen_modules\/\(.*\)"/Python\/frozen_modules\/\1/p' Python/frozen.c)
+
 .PHONY: all clean configure libpython build-host python curl ssl wiitest	\
- 		regen-importlib bitmap bitmap-clean fat fat-clean wiitest-clean py \
+ 		regen-importlib frozen-modules bitmap bitmap-clean fat fat-clean wiitest-clean py \
  		gdbm gdbm-clean xz xz-clean uuid uuid-clean
 
 all: wiitest
@@ -235,10 +236,26 @@ $(BUILD_DIR)/Makefile: | $(BUILD_PYTHON)
 	../configure $(CONFIGURE_FLAGS)
 	@touch "$(BUILD_DIR)/Makefile"
 
-libpython: configure ssl curl $(BUILD_DIR)/Modules/wiitoolsmodule.o
+frozen-modules:
+	@missing=0; \
+	for file in $(FROZEN_HEADERS); do \
+		if [ ! -f "$$file" ]; then \
+			echo "missing frozen header: $$file"; \
+			missing=1; \
+			break; \
+		fi; \
+	done; \
+	if [ "$$missing" -ne 0 ]; then \
+		$(MAKE) regen-importlib; \
+	fi
+
+libpython: configure frozen-modules ssl curl $(BUILD_DIR)/Modules/wiitoolsmodule.o
 	@# Ensure build-wii uses our local module setup (e.g. math)
 	@cmp -s "$(srcdir)/Modules/Setup.local" "$(BUILD_DIR)/Modules/Setup.local" 2>/dev/null || \
 		cp "$(srcdir)/Modules/Setup.local" "$(BUILD_DIR)/Modules/Setup.local"
+	@# Interrupted builds can leave behind empty object files that make treats as
+	@# up-to-date. Drop them so they are rebuilt before archiving/linking.
+	@find "$(BUILD_DIR)" -name '*.o' -size 0 -print -delete 2>/dev/null || true
 	@# frozen.o has no header dependency in the generated Makefile; invalidate it
 	@# whenever frozen.c or any frozen_modules/*.h changed, so re-frozen stdlib
 	@# modules actually make it into libpython.

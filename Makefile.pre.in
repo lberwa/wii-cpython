@@ -1975,6 +1975,30 @@ FROZEN_FILES_IN = \
 		Lib/site.py \
 		Lib/stat.py \
 		Lib/runpy.py \
+		Lib/pkgutil.py \
+		Lib/enum.py \
+		Lib/keyword.py \
+		Lib/operator.py \
+		Lib/copyreg.py \
+		Lib/reprlib.py \
+		Lib/warnings.py \
+		Lib/_py_warnings.py \
+		Lib/threading.py \
+		Lib/weakref.py \
+		Lib/_weakrefset.py \
+		Lib/copy.py \
+		Lib/_compat_pickle.py \
+		Lib/xml/__init__.py \
+		Lib/xml/dom/__init__.py \
+		Lib/xml/etree/__init__.py \
+		Lib/xml/parsers/__init__.py \
+		Lib/xml/sax/__init__.py \
+		Lib/xml/etree/ElementPath.py \
+		Lib/struct.py \
+		Lib/zoneinfo/__init__.py \
+		Lib/zoneinfo/_common.py \
+		Lib/zoneinfo/_tzpath.py \
+		Lib/zoneinfo/_zoneinfo.py \
 		Lib/__hello__.py \
 		Lib/__phello__/__init__.py \
 		Lib/__phello__/ham/__init__.py \
@@ -2141,6 +2165,30 @@ FROZEN_FILES_OUT = \
 		Python/frozen_modules/site.h \
 		Python/frozen_modules/stat.h \
 		Python/frozen_modules/runpy.h \
+		Python/frozen_modules/pkgutil.h \
+		Python/frozen_modules/enum.h \
+		Python/frozen_modules/keyword.h \
+		Python/frozen_modules/operator.h \
+		Python/frozen_modules/copyreg.h \
+		Python/frozen_modules/reprlib.h \
+		Python/frozen_modules/warnings.h \
+		Python/frozen_modules/_py_warnings.h \
+		Python/frozen_modules/threading.h \
+		Python/frozen_modules/weakref.h \
+		Python/frozen_modules/_weakrefset.h \
+		Python/frozen_modules/copy.h \
+		Python/frozen_modules/_compat_pickle.h \
+		Python/frozen_modules/xml.h \
+		Python/frozen_modules/xml.dom.h \
+		Python/frozen_modules/xml.etree.h \
+		Python/frozen_modules/xml.parsers.h \
+		Python/frozen_modules/xml.sax.h \
+		Python/frozen_modules/xml.etree.ElementPath.h \
+		Python/frozen_modules/struct.h \
+		Python/frozen_modules/zoneinfo.h \
+		Python/frozen_modules/zoneinfo._common.h \
+		Python/frozen_modules/zoneinfo._tzpath.h \
+		Python/frozen_modules/zoneinfo._zoneinfo.h \
 		Python/frozen_modules/__hello__.h \
 		Python/frozen_modules/__phello__.h \
 		Python/frozen_modules/__phello__.ham.h \
@@ -2635,6 +2683,78 @@ Python/frozen_modules/stat.h: Lib/stat.py $(FREEZE_MODULE_DEPS)
 
 Python/frozen_modules/runpy.h: Lib/runpy.py $(FREEZE_MODULE_DEPS)
 	$(FREEZE_MODULE) runpy $(srcdir)/Lib/runpy.py Python/frozen_modules/runpy.h
+
+Python/frozen_modules/pkgutil.h: Lib/pkgutil.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) pkgutil $(srcdir)/Lib/pkgutil.py Python/frozen_modules/pkgutil.h
+
+Python/frozen_modules/enum.h: Lib/enum.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) enum $(srcdir)/Lib/enum.py Python/frozen_modules/enum.h
+
+Python/frozen_modules/keyword.h: Lib/keyword.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) keyword $(srcdir)/Lib/keyword.py Python/frozen_modules/keyword.h
+
+Python/frozen_modules/operator.h: Lib/operator.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) operator $(srcdir)/Lib/operator.py Python/frozen_modules/operator.h
+
+Python/frozen_modules/copyreg.h: Lib/copyreg.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) copyreg $(srcdir)/Lib/copyreg.py Python/frozen_modules/copyreg.h
+
+Python/frozen_modules/reprlib.h: Lib/reprlib.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) reprlib $(srcdir)/Lib/reprlib.py Python/frozen_modules/reprlib.h
+
+Python/frozen_modules/warnings.h: Lib/warnings.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) warnings $(srcdir)/Lib/warnings.py Python/frozen_modules/warnings.h
+
+Python/frozen_modules/_py_warnings.h: Lib/_py_warnings.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) _py_warnings $(srcdir)/Lib/_py_warnings.py Python/frozen_modules/_py_warnings.h
+
+Python/frozen_modules/threading.h: Lib/threading.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) threading $(srcdir)/Lib/threading.py Python/frozen_modules/threading.h
+
+Python/frozen_modules/weakref.h: Lib/weakref.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) weakref $(srcdir)/Lib/weakref.py Python/frozen_modules/weakref.h
+
+Python/frozen_modules/_weakrefset.h: Lib/_weakrefset.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) _weakrefset $(srcdir)/Lib/_weakrefset.py Python/frozen_modules/_weakrefset.h
+
+Python/frozen_modules/copy.h: Lib/copy.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) copy $(srcdir)/Lib/copy.py Python/frozen_modules/copy.h
+
+Python/frozen_modules/_compat_pickle.h: Lib/_compat_pickle.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) _compat_pickle $(srcdir)/Lib/_compat_pickle.py Python/frozen_modules/_compat_pickle.h
+
+Python/frozen_modules/xml.h: Lib/xml/__init__.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) xml $(srcdir)/Lib/xml/__init__.py Python/frozen_modules/xml.h
+
+Python/frozen_modules/xml.dom.h: Lib/xml/dom/__init__.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) xml.dom $(srcdir)/Lib/xml/dom/__init__.py Python/frozen_modules/xml.dom.h
+
+Python/frozen_modules/xml.etree.h: Lib/xml/etree/__init__.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) xml.etree $(srcdir)/Lib/xml/etree/__init__.py Python/frozen_modules/xml.etree.h
+
+Python/frozen_modules/xml.parsers.h: Lib/xml/parsers/__init__.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) xml.parsers $(srcdir)/Lib/xml/parsers/__init__.py Python/frozen_modules/xml.parsers.h
+
+Python/frozen_modules/xml.sax.h: Lib/xml/sax/__init__.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) xml.sax $(srcdir)/Lib/xml/sax/__init__.py Python/frozen_modules/xml.sax.h
+
+Python/frozen_modules/xml.etree.ElementPath.h: Lib/xml/etree/ElementPath.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) xml.etree.ElementPath $(srcdir)/Lib/xml/etree/ElementPath.py Python/frozen_modules/xml.etree.ElementPath.h
+
+Python/frozen_modules/struct.h: Lib/struct.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) struct $(srcdir)/Lib/struct.py Python/frozen_modules/struct.h
+
+Python/frozen_modules/zoneinfo.h: Lib/zoneinfo/__init__.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) zoneinfo $(srcdir)/Lib/zoneinfo/__init__.py Python/frozen_modules/zoneinfo.h
+
+Python/frozen_modules/zoneinfo._common.h: Lib/zoneinfo/_common.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) zoneinfo._common $(srcdir)/Lib/zoneinfo/_common.py Python/frozen_modules/zoneinfo._common.h
+
+Python/frozen_modules/zoneinfo._tzpath.h: Lib/zoneinfo/_tzpath.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) zoneinfo._tzpath $(srcdir)/Lib/zoneinfo/_tzpath.py Python/frozen_modules/zoneinfo._tzpath.h
+
+Python/frozen_modules/zoneinfo._zoneinfo.h: Lib/zoneinfo/_zoneinfo.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) zoneinfo._zoneinfo $(srcdir)/Lib/zoneinfo/_zoneinfo.py Python/frozen_modules/zoneinfo._zoneinfo.h
 
 Python/frozen_modules/__hello__.h: Lib/__hello__.py $(FREEZE_MODULE_DEPS)
 	$(FREEZE_MODULE) __hello__ $(srcdir)/Lib/__hello__.py Python/frozen_modules/__hello__.h

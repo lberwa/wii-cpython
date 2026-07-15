@@ -57,8 +57,21 @@ try:
     _CRLock = _thread.RLock
 except AttributeError:
     _CRLock = None
+
+_WII_FORCE_PY_RLOCK = False
+
+# The Wii port has a working basic _thread layer, but the C RLock ownership
+# checks still misfire under some condition-variable paths. Force the Python
+# fallback there so Event/Condition/threading can make progress reliably.
+try:
+    import wiitools as _wii_threading_probe
+except ImportError:
+    _wii_threading_probe = None
+else:
+    _CRLock = None
+    _WII_FORCE_PY_RLOCK = True
+del _wii_threading_probe
 TIMEOUT_MAX = _thread.TIMEOUT_MAX
-del _thread
 
 # get thread-local implementation, either from the thread
 # module, or from the python fallback
@@ -226,8 +239,10 @@ class _RLock:
 
         """
         if self._owner != get_ident():
-            # Wii quick-test: ignore stale release
-            return
+            raise RuntimeError(
+                "cannot release un-acquired lock "
+                f"(py owner={self._owner}, current={get_ident()}, count={self._count})"
+            )
         self._count = count = self._count - 1
         if not count:
             self._owner = None
@@ -248,8 +263,10 @@ class _RLock:
 
     def _release_save(self):
         if self._count == 0:
-            # Wii quick-test: ignore stale release
-            return
+            raise RuntimeError(
+                "cannot release un-acquired lock "
+                f"(py owner={self._owner}, current={get_ident()}, count={self._count})"
+            )
         count = self._count
         self._count = 0
         owner = self._owner
@@ -268,6 +285,19 @@ class _RLock:
         return self._count
 
 _PyRLock = _RLock
+
+if _WII_FORCE_PY_RLOCK:
+    _thread.RLock = _PyRLock
+
+    warnings_mod = _sys.modules.get("_py_warnings")
+    if warnings_mod is not None and hasattr(warnings_mod, "_lock"):
+        warnings_mod._lock = _PyRLock()
+
+    functools_mod = _sys.modules.get("functools")
+    if functools_mod is not None and getattr(functools_mod, "RLock", None) is not None:
+        functools_mod.RLock = _PyRLock
+
+del _thread
 
 
 class Condition:
