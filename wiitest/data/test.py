@@ -2090,8 +2090,63 @@ def snake():
 
 
 # Hier neue Eintraege einfuegen: (Label, Funktion)
+def _exists(p):
+    try:
+        f = open(p, "rb"); f.close(); return True
+    except Exception:
+        return False
+
+
+def test_dlopen_so():
+    """Laedt zur Laufzeit eine C-Extension (sd:/spam.so) via `import spam`.
+    Voraussetzung: sd:/spam.so und sd:/symbols.map liegen auf sd:/."""
+    import sys, _imp
+    # kompakte Diagnose (kurze Zeilen, kein Umbruch auf schmalem Schirm)
+    print("so-suffix: " + ("ja" if ".so" in _imp.extension_suffixes() else "NEIN"))
+    # sind die externen Importer ueberhaupt installiert?
+    print("meta_path: " + str(len(sys.meta_path)) +
+          " hooks: " + str(len(sys.path_hooks)))
+    print("spam.so: " + ("da" if _exists("sd:/spam.so") else "FEHLT"))
+    # Findet der FileFinder sd:/ per listdir? (open() allein reicht ihm nicht)
+    try:
+        import os
+        names = os.listdir("sd:/")
+        print("ls sd:/: " + str(len(names)) + " eintr, spam.so " +
+              ("DA" if "spam.so" in names else "NICHT"))
+    except Exception as e:
+        print("listdir ERR: " + repr(e)[:40])
+    # Was liefert der Import-Finder direkt?
+    try:
+        import importlib.util as _iu
+        sp = _iu.find_spec("spam")
+        print("find_spec: " + (repr(sp)[:55] if sp else "None"))
+    except Exception as e:
+        print("find_spec ERR: " + repr(e)[:45])
+    try:
+        import spam
+    except Exception as e:
+        fail("import spam", e)
+        return
+    ok("import")
+    try:
+        ok("add(2,3)", spam.add(2, 3))
+    except Exception as e:
+        fail("add", e)
+    try:
+        ok("greet", spam.greet())
+    except Exception as e:
+        fail("greet", e)
+
+
+def menu_dlopen_so():
+    _run_single(test_dlopen_so)
+    print("A = zurueck")
+    wait_a()
+
+
 MENU = [
     ("Alle Tests",    run_all_tests),
+    ("dlopen .so",    menu_dlopen_so),
     ("constants",     lambda: _run_single(test_constants)),
     ("video",         lambda: _run_single(test_video)),
     ("filesystem",    lambda: _run_single(test_filesystem)),

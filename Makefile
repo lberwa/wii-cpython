@@ -40,13 +40,16 @@ WII_DEFINES := \
 	-D__PPC__ \
 	-D__powerpc__ \
 	#-DTERMINAL_PRINT_DEBUG
+LIBOGC_INC ?= $(DEVKITPRO)/libogc2/wii/include
+LIBOGC_LIB ?= $(DEVKITPRO)/libogc2/wii/lib
+export LIBOGC_INC
+export LIBOGC_LIB
+
 WII_INCLUDE_DIRS := \
 	-I. \
 	-I$(MAKEFILE_DIR)bitmap/include \
 	-I$(MAKEFILE_DIR)fat/include \
-	-I$(DEVKITPRO)/libogc/include \
-	-I$(DEVKITPRO)/libogc/gc \
-	-I$(DEVKITPRO)/libogc/gc/ogc
+	-I$(LIBOGC_INC)
 CFLAGS_WII := -Os -Wall $(WII_DEFINES) $(WII_INCLUDE_DIRS)
 CPPFLAGS_WII := $(WII_DEFINES) $(WII_INCLUDE_DIRS)
 MACHDEP=		wii
@@ -80,7 +83,8 @@ CONFIGURE_ENV= \
 	ax_cv_c_float_words_bigendian=yes \
 	ac_cv_file__dev_ptmx=no ac_cv_file__dev_ptc=no \
 	ac_cv_header_sys_resource_h=no ac_cv_func_getrlimit=no ac_cv_func_setrlimit=no \
-	ac_cv_header_sys_statvfs_h=no ac_cv_func_statvfs=no
+	ac_cv_header_sys_statvfs_h=no ac_cv_func_statvfs=no \
+	DYNLOADFILE="dynload_wii.o"
 
 CONFIGURE_FLAGS= \
 	--host=powerpc-eabi --build=$$(../config.guess) \
@@ -91,7 +95,7 @@ FROZEN_HEADERS := $(shell sed -n 's/^#include "frozen_modules\/\(.*\)"/Python\/f
 
 .PHONY: all clean configure libpython build-host python curl ssl wiitest	\
  		regen-importlib frozen-modules bitmap bitmap-clean fat fat-clean wiitest-clean py \
- 		gdbm gdbm-clean xz xz-clean uuid uuid-clean
+ 		gdbm gdbm-clean xz xz-clean uuid uuid-clean glibc glibc-clean
 
 all: wiitest
 
@@ -199,12 +203,32 @@ $(UUID_INSTALL)/lib/libuuid.a:
 uuid-clean:
 	@-rm -rf "$(UUID_BUILD)" "$(UUID_INSTALL)"
 
-cp-libs: python curl bitmap fat gdbm xz uuid
+# --- Wii dlopen loader (Ersatz fuer glibc-dlfcn/ld.so) ---
+# Baut den PPC-ELF-Runtime-Loader (dlfcn/wii_dlfcn.c) zu libwiidl.a.
+# Der Ordner glibc/ enthaelt nur den Upstream-Quellbaum als Referenz
+# (PPC-Relocation-Mathematik) und wird NICHT als Ganzes gebaut.
+GLIBC_DIR := $(MAKEFILE_DIR)dlfcn
+GLIBC_LIB := $(GLIBC_DIR)/libwiidl.a
+GLIBC_OBJ := $(GLIBC_DIR)/wii_dlfcn.o
+
+glibc: $(GLIBC_LIB)
+
+$(GLIBC_LIB): $(GLIBC_DIR)/wii_dlfcn.c $(GLIBC_DIR)/wii_dlfcn.h
+	$(CC) $(CFLAGS) $(CFLAGS_WII) -c "$(GLIBC_DIR)/wii_dlfcn.c" -o "$(GLIBC_OBJ)"
+	$(AR) rcs "$(GLIBC_LIB)" "$(GLIBC_OBJ)"
+
+glibc-clean:
+	@-rm -f "$(GLIBC_OBJ)" "$(GLIBC_LIB)"
+
+cp-libs: python curl bitmap fat gdbm xz uuid glibc
 	@rm -rf "$(LIB_DIR)"
 	@mkdir -p "$(LIB_DIR)"
+	@# Der Upstream-glibc-Quellbaum (glibc/) enthaelt ASCII-Linkerskripte
+	@# (glibc/htl/libpthread*.a), die keine echten Wii-Archive sind -> ausschliessen.
 	@find "$(MAKEFILE_DIR)" \
     -path "$(BUILD_HOST_DIR_ABS)" -prune -o \
     -path "$(LIB_DIR_ABS)" -prune -o \
+    -path "$(MAKEFILE_DIR)glibc" -prune -o \
     -name "*.a" -exec cp {} "$(LIB_DIR_ABS)" \;
 	@# Ensure we use the Wii build of libpython (avoid host overwrite).
 	@cp "$(BUILD_DIR_ABS)/libpython$(VERSION).a" "$(LIB_DIR_ABS)/"
@@ -372,7 +396,7 @@ fat-clean:
 fat:
 	$(MAKE) -j$(CPU_CORES) -C $(MAKEFILE_DIR)fat wii-release
 
-clean: fat-clean wiitest-clean bitmap-clean
+clean: fat-clean wiitest-clean bitmap-clean glibc-clean
 	@-rm -rf "$(BUILD_DIR)"
 	@-rm -rf $(MAKEFILE_DIR)bitmap/build
 	@-rm -rf $(LIB_DIR)

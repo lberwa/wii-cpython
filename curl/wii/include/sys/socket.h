@@ -6,4 +6,10 @@
 #endif
 #include <network.h>
 
+/* IPv6 address family — not in libogc2/network.h */
+#ifndef AF_INET6
+#define AF_INET6  28
+#define PF_INET6  AF_INET6
+#endif
+
 #endif

@@ -14,14 +14,17 @@ General Information
 __This is a port of Python for the Nintendo Wii.__
 
 
+__Version:__
+
+  Python 3.15.0a7
+
 
 __Included components:__
 
 - wiitoolsmodule: Provides Python bindings for many libogc functions.
 - libcurl: Available through wiitoolsmodule for network and HTTP/HTTPS operations.
 - LodePNG: Available through wiitoolsmodule for PNG image loading and saving.
-
-
+- compatible with *.so files which were generated as shown in the [example](#build-so-files)
 
 __Python:__
 
@@ -37,6 +40,10 @@ Build Instructions
 -----------------------
 
 __PC-build-tool:__
+```bash
+dkp-pacman -S libogc2
+```
+if libogc2 is not avaiable: see [here](#install-libogc2)
 
 ```bash
 make build-host -j$(nproc)
@@ -91,9 +98,70 @@ This will clean the build.
 
 ### Build/main.c
 
-In __[./wiitest](./wiitest)__ you will find examples of how to use it in your main.c and how to write your Makefile.
+In __[wiitest/](./wiitest)__ you will find examples of how to use it in your __main.c__ and how to write your __Makefile__.
+
+
+
+__Example:__
+
+```c
+#include <Python.h>
+// #include ...
+// ...
+
+void init_wii_system() {
+	VIDEO_Init();
+	//...
+	//...
+}
+
+int main() {
+    //################
+    //INIT SYSTEHM
+    //################
+	init_wii_system();
+	
+    //################
+    //INIT PYTHON
+    //################
+	size_t count = 2;
+	
+	// if you don't want import paths
+	//Py_Initialize_Custom(NULL, NULL); 
+	
+    // you can now import from "sd:" and sd:/python
+    PyStatus status = Py_Init_Custom((const char*[]){ "sd:/", "sd:/python"}, &count);
+    
+    // return if failed to initialize Python
+    if (status._type != _PyStatus_TYPE_OK) { 
+        return status.exitcode;  
+    }
+    
+    
+    //################
+    //RUN PYTHON
+    //################
+    
+    // run your file
+    int rc = PyRun_SimpleString("import runpy\n" // runpy runs your file
+                                "runpy.run('sd:/test.py')"); // path=sd:/test.py
+    
+    //################
+    //FINALIZE AND RETURN
+    //################
+    
+    Py_Finalize();
+    
+    if (rc == 0) {/* script ran successfully */}
+    else {/* script returned an error */}
+    
+    return rc;
+}
+```
 
 -----------
+
+
 
 ### Python
 
@@ -187,16 +255,54 @@ You can copy [wiitools.pyi](./wiitools.pyi) to your workspace so your IDE knows 
 
 In wiitools.pyi you can also find all the wiitools functions you can use.
 
+------------
 
 
-------
 
 #### Other modules
 
-You can copy the contents of the Lib folder to *sd/usb:/python/*,
+You can copy the contents of the Lib folder to `sd/usb:/python/*`
 
-and if your main.c has the import path *sd:/python*, you can import these modules.
+and if your `main.c` has the import path `sd:/python`, you can import these modules.
 
+--------------
+
+
+
+### Build *.so files
+
+build:
+
+```bash
+powerpc-eabi-gcc \
+    -fPIC -fno-plt -shared -nostdlib \
+    -o out.so     test.c
+#  the .so file | the .c file
+```
+
+
+
+usage:
+
+```python
+import out
+```
+
+------
+
+
+
+## Install libogc2
+
+add this line to your *pacman.conf*
+```properties
+[libogc2-devkitpro]
+Server = https://packages.libogc2.org/devkitpro/linux/$arch
+```
+
+```bash
+sudo nano /opt/devkitpro/pacman/etc/pacman.conf
+```
 
 
 ## Changes
