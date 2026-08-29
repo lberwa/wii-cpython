@@ -9,6 +9,10 @@
 #define NETWORK_H22 1
 #endif
 #include <unistd.h>
+/* sys/features.h (via unistd.h) unconditionally sets __BSD_VISIBLE=0;
+   restore it so BSD types (u_short, etc.) and libogc BSD APIs are visible. */
+#undef __BSD_VISIBLE
+#define __BSD_VISIBLE 1
 #include <fcntl.h>
 #include <errno.h>
 #include <network.h>
@@ -27,13 +31,12 @@
 #define closesocket net_close
 #endif
 
+/* Use libogc's struct pollfd from <poll.h> to avoid redefinition conflicts. */
+#ifndef _SYS_POLL_H_
+#include <poll.h>
+#endif
 #ifndef CURL_WII_POLLFD_DEFINED
 #define CURL_WII_POLLFD_DEFINED
-struct pollfd {
-  int fd;
-  short events;
-  short revents;
-};
 #endif
 
 static int curl_wii_poll(struct pollfd *fds, unsigned int nfds, int timeout)

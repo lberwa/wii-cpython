@@ -240,9 +240,6 @@ static const PyConfigSpec PYPRECONFIG_SPEC[] = {
 #undef SYS_FLAG
 #undef NO_SYS
 
-#include <my_text_renderer.h>
-
-
 // Forward declarations
 static PyObject* config_get(const PyConfig *config, const PyConfigSpec *spec,
                             int use_sys);

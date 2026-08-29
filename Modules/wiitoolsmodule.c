@@ -30,10 +30,11 @@
 #include <stdio.h>
 #include <errno.h>
 #include <math.h>
-#include "../curl/include/curl/curl.h"
-#include "../build-wii/curl/mbedtls/install-wii/include/mbedtls/platform.h"
 #define NETWORK_H22
 #include <network.h>
+#include <poll.h>
+#include "../curl/include/curl/curl.h"
+#include "../build-wii/curl/mbedtls/install-wii/include/mbedtls/platform.h"
 
 #define __XSI_VISIBLE 600
 #define __POSIX_VISIBLE 200112

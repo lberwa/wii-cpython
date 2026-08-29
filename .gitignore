@@ -6,6 +6,9 @@ Mac/
 PC/
 PCbuild/
 
+
+glibc/
+
 aclocal.m4
 add2lib
 änderungen.txt

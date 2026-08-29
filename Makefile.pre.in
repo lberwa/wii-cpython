@@ -310,7 +310,7 @@ CURL_WII_RANLIB ?= $(if $(wildcard $(DEVKITPPC)/bin/powerpc-eabi-ranlib),$(DEVKI
 CURL_WII_MAKE ?= /usr/bin/make
 CURL_WII_COMPAT_DIR ?= $(abs_srcdir)/curl/wii/include
 MBEDTLS_WII_COMPAT_DIR ?= $(abs_srcdir)/curl/mbedtls/wii/include
-CURL_WII_COMMON_CFLAGS ?= $(OPT) -I$(DEVKITPRO)/libogc/include -I$(CURL_WII_COMPAT_DIR) -include $(CURL_WII_COMPAT_DIR)/curl_wii_net_compat.h -DHAVE_POLL=1 -DHAVE_SELECT=1 -DHAVE_FCNTL_O_NONBLOCK=1 -DHAVE_BOOL_T=1 -DHAVE_POSIX_STRERROR_R=1
+CURL_WII_COMMON_CFLAGS ?= $(OPT) -D__wii__ -I$(DEVKITPRO)/libogc/include -I$(CURL_WII_COMPAT_DIR) -include $(CURL_WII_COMPAT_DIR)/curl_wii_net_compat.h -DHAVE_POLL=1 -DHAVE_SELECT=1 -DHAVE_FCNTL_O_NONBLOCK=1 -DHAVE_BOOL_T=1 -DHAVE_POSIX_STRERROR_R=1
 # Default to locally built mbedTLS. Override CURL_WII_TLS_PREFIX to use system portlibs.
 CURL_WII_TLS_PREFIX ?= $(MBEDTLS_WII_INSTALL_DIR)
 CURL_WII_MBEDTLS_INCLUDE ?= $(CURL_WII_TLS_PREFIX)/include
@@ -328,7 +328,7 @@ MBEDTLS_WII_CMAKE_FLAGS ?= \
 	-DPYTHON_EXECUTABLE=$(abs_srcdir)/tools/venv-python.sh \
 	-DMBEDTLS_PYTHON_EXECUTABLE=$(abs_srcdir)/tools/venv-python.sh \
 	-DTF_PSA_CRYPTO_PYTHON_EXECUTABLE=$(abs_srcdir)/tools/venv-python.sh \
-	-DCMAKE_C_FLAGS='$(OPT) -I$(DEVKITPRO)/libogc/include -I$(MBEDTLS_WII_COMPAT_DIR) -DMBEDTLS_USER_CONFIG_FILE=\"mbedtls_wii_user_config.h\" -DTF_PSA_CRYPTO_USER_CONFIG_FILE=\"mbedtls_wii_user_config.h\"' \
+	-DCMAKE_C_FLAGS='$(OPT) -D__wii__ -I$(DEVKITPRO)/libogc/include -I$(MBEDTLS_WII_COMPAT_DIR) -DMBEDTLS_USER_CONFIG_FILE=\"mbedtls_wii_user_config.h\" -DTF_PSA_CRYPTO_USER_CONFIG_FILE=\"mbedtls_wii_user_config.h\"' \
 	-DCMAKE_INSTALL_PREFIX=$(MBEDTLS_WII_INSTALL_DIR) \
 	-DENABLE_PROGRAMS=OFF \
 	-DENABLE_TESTING=OFF \

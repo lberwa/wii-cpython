@@ -18,8 +18,6 @@
   #include <signal.h>             // SIGINT
 #endif
 
-#include <my_text_renderer.h>
-
 // ThreadError is just an alias to PyExc_RuntimeError
 #define ThreadError PyExc_RuntimeError
 

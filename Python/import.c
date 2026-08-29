@@ -66,9 +66,6 @@ is_interpreter_isolated(PyInterpreterState *interp)
 }
 #endif
 
-#include <my_text_renderer.h>
-
-
 /*******************************/
 /* process-global import state */
 /*******************************/

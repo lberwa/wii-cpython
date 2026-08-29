@@ -199,7 +199,10 @@
 #include "frozen_modules/site.h"
 #include "frozen_modules/stat.h"
 #include "frozen_modules/runpy.h"
+#ifdef WII_BUILD
 #include "frozen_modules/pkgutil.h"
+#endif
+#ifdef WII_BUILD
 #include "frozen_modules/enum.h"
 #include "frozen_modules/keyword.h"
 #include "frozen_modules/operator.h"
@@ -220,12 +223,15 @@
 #include "frozen_modules/zoneinfo.h"
 #include "frozen_modules/zoneinfo._tzpath.h"
 #include "frozen_modules/zoneinfo._common.h"
+#endif /* WII_BUILD */
+#ifdef WII_BUILD
 #include "frozen_modules/__hello__.h"
 #include "frozen_modules/__phello__.h"
 #include "frozen_modules/__phello__.ham.h"
 #include "frozen_modules/__phello__.ham.eggs.h"
 #include "frozen_modules/__phello__.spam.h"
 #include "frozen_modules/frozen_only.h"
+#endif /* WII_BUILD */
 /* End includes */
 
 static const struct _frozen bootstrap_modules[] = {
@@ -280,16 +286,20 @@ static const struct _frozen stdlib_modules[] = {
 
     /* runpy - run module with -m */
     {"runpy", _Py_M__runpy, (int)sizeof(_Py_M__runpy), false},
+#ifdef WII_BUILD
     {"pkgutil", _Py_M__pkgutil, (int)sizeof(_Py_M__pkgutil), false},
+#endif
 
     /* Wii extra frozen modules (keine .py-Dateien auf SD verfuegbar) */
-
+#ifdef WII_BUILD
     {"warnings",        _Py_M__warnings,        (int)sizeof(_Py_M__warnings),        false},
     {"_py_warnings",    _Py_M___py_warnings,    (int)sizeof(_Py_M___py_warnings),    false},
+#endif /* WII_BUILD */
 
     {0, 0, 0} /* stdlib sentinel */
 };
 static const struct _frozen test_modules[] = {
+#ifdef WII_BUILD
     {"__hello__", _Py_M____hello__, (int)sizeof(_Py_M____hello__), false},
     {"__hello_alias__", _Py_M____hello__, (int)sizeof(_Py_M____hello__), false},
 
@@ -298,6 +308,7 @@ static const struct _frozen test_modules[] = {
     {"__phello__.ham", _Py_M____phello___ham, (int)sizeof(_Py_M____phello___ham), true},
 
     {"__phello__.spam", _Py_M____phello___spam, (int)sizeof(_Py_M____phello___spam), false},
+#endif /* WII_BUILD */
 
     {0, 0, 0} /* test sentinel */
 };

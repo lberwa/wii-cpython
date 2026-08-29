@@ -14,7 +14,7 @@ AR := $(DEVKITPPC)/bin/powerpc-eabi-ar
 # Compiler-Flags
 INCLUDE += -I$(DEVKITPRO)/libogc/include
 
-CFLAGS += -g -Os -Wall -c -I$(INCDIR)
+CFLAGS += -g -Os -Wall -c -I$(INCDIR) -D__wii__ -DGEKKO
 CFLAGS += $(INCLUDE)
 CPPFLAGS += $(INCLUDE)
 

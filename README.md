@@ -36,12 +36,11 @@ __Python:__
 Build Instructions
 -----------------------
 
-__PC-build-tool:__
+__First, build the PC-build-tool:__
 
 ```bash
 make build-host -j$(nproc)
 ```
-
 This builds a Python toolchain on the PC to create frozen Python files for the Wii.
 
 
@@ -84,6 +83,14 @@ make clean
 ```
 
 This will clean the build.
+
+
+
+```bash
+rm -rf build-host/
+```
+
+This will remove the pc-host .
 
 
 
