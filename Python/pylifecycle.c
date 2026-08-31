@@ -1544,6 +1544,7 @@ pyinit_main(PyThreadState *tstate)
 
 #ifdef __WII__
 #include "../fat/include/pyfat.h"
+#include "../dlfcn/wii_dlfcn.h"
 #include "../bitmap/include/render_text.h"
 #endif
 
@@ -1873,6 +1874,14 @@ Py_Init_Custom(const char** import_paths, size_t *count)
         "        for _base in _bases:\n"
         "            if not _base.endswith('/'):\n"
         "                _base = _base + '/'\n"
+        "            _so = _base + _name + '.so'\n"
+        "            try:\n"
+        "                if os.path.isfile(_so):\n"
+        "                    _el = importlib.machinery.ExtensionFileLoader(\n"
+        "                        fullname, _so)\n"
+        "                    return _wii_spec(fullname, _el, _so)\n"
+        "            except Exception:\n"
+        "                pass\n"
         "            _mod = _base + _name + '.py'\n"
         "            try:\n"
         "                if os.path.isfile(_mod):\n"
@@ -1903,6 +1912,13 @@ Py_Init_Custom(const char** import_paths, size_t *count)
         "        return None\n"
         "sys.meta_path.insert(0, WiiSourceFinder())\n"
     );
+
+#if defined(WII_BUILD)
+    /* Symbol-Map laden: Wii-Aequivalent zu --export-dynamic.
+     * Ohne sie kann wii_dlopen() externe Symbole (.so -> libpython) nicht
+     * aufloesen und jeder C-Extension-Import schlaegt fehl. */
+    wii_dl_load_symbol_map("sd:/symbols.map");
+#endif
 
     return _PyStatus_OK();
 }

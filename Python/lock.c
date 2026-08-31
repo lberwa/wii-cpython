@@ -380,7 +380,11 @@ _PyOnceFlag_CallOnceSlow(_PyOnceFlag *flag, _Py_once_fn_t *fn, void *arg)
 static int
 recursive_mutex_is_owned_by(_PyRecursiveMutex *m, PyThread_ident_t tid)
 {
+#ifdef WII_BUILD
+    return m->thread == (uint32_t)tid;
+#else
     return _Py_atomic_load_ullong_relaxed(&m->thread) == tid;
+#endif
 }
 
 int
@@ -398,7 +402,11 @@ _PyRecursiveMutex_Lock(_PyRecursiveMutex *m)
         return;
     }
     PyMutex_Lock(&m->mutex);
+#ifdef WII_BUILD
+    m->thread = (uint32_t)thread;
+#else
     _Py_atomic_store_ullong_relaxed(&m->thread, thread);
+#endif
     assert(m->level == 0);
 }
 
@@ -412,7 +420,11 @@ _PyRecursiveMutex_LockTimed(_PyRecursiveMutex *m, PyTime_t timeout, _PyLockFlags
     }
     PyLockStatus s = _PyMutex_LockTimed(&m->mutex, timeout, flags);
     if (s == PY_LOCK_ACQUIRED) {
+#ifdef WII_BUILD
+        m->thread = (uint32_t)thread;
+#else
         _Py_atomic_store_ullong_relaxed(&m->thread, thread);
+#endif
         assert(m->level == 0);
     }
     return s;
@@ -439,7 +451,11 @@ _PyRecursiveMutex_TryUnlock(_PyRecursiveMutex *m)
         return 0;
     }
     assert(m->level == 0);
+#ifdef WII_BUILD
+    m->thread = 0;
+#else
     _Py_atomic_store_ullong_relaxed(&m->thread, 0);
+#endif
     PyMutex_Unlock(&m->mutex);
     return 0;
 }

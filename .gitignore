@@ -6,7 +6,10 @@ Mac/
 PC/
 PCbuild/
 
-
+# glibc-Quellbaum (249 MB): wird nicht gebaut, nur glibc/sysdeps/powerpc/
+# powerpc32/dl-machine.h diente als Referenz fuer PPC-Relocations (bereits
+# in dlfcn/wii_dlfcn.c umgesetzt). Vollstaendige Kopie liegt unter
+# /home/lew/Downloads/glibc-master/ ausserhalb des Repos.
 glibc/
 
 bitmap/lib/*.a

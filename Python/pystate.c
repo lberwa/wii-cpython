@@ -71,37 +71,128 @@ to avoid the expense of doing their own locking).
  */
 
 
-/* The attached thread state for the current thread. */
 #ifdef HAVE_ALIGNED_REQUIRED
-// On strict-alignment systems (Wii), use global variables instead of TLS
-// to avoid alignment crashes with thread_local
-PyThreadState *_Py_tss_tstate = NULL;
-#else
-_Py_thread_local PyThreadState *_Py_tss_tstate = NULL;
-#endif
+// ---------------------------------------------------------------------------
+// Wii: strict-alignment PowerPC hat kein funktionierendes ELF-TLS fuer die
+// LWP-Threads. Frueher waren _Py_tss_* EINFACHE GLOBALS -> von ALLEN Threads
+// geteilt. Folge: _PyThreadState_Attach() sah beim Anhaengen des Kindes noch
+// den tstate des Haupt-Threads -> "non-NULL old thread state" Fatal Error.
+// Loesung: echter Pro-Thread-Speicher, indiziert ueber LWP_GetSelf(), LOCK-
+// FREI (NICHT pthread_getspecific -> das nimmt pro Aufruf eine LWP-Mutex und
+// laege auf dem heissesten Interpreter-Pfad). current_fast_set/clear und
+// gilstate_* schreiben nur den EIGENEN Slot; das Anlegen eines neuen Slots
+// ist per CAS abgesichert. Lesen (current_fast_get) ist ein lock-freier Scan.
+// ---------------------------------------------------------------------------
+#include <ogc/lwp.h>              // lwp_t, LWP_GetSelf, LWP_THREAD_NULL
 
-/* The "bound" thread state used by PyGILState_Ensure(),
-   also known as a "gilstate." */
-#ifdef HAVE_ALIGNED_REQUIRED
-// On strict-alignment systems (Wii), use global variables instead of TLS
-PyThreadState *_Py_tss_gilstate = NULL;
-#else
-_Py_thread_local PyThreadState *_Py_tss_gilstate = NULL;
-#endif
+#define WII_TSS_MAX 64
+typedef struct {
+    volatile uint32_t   in_use;    // 0=frei, 1=belegt (per CAS geclaimt)
+    volatile lwp_t      thread;    // besitzender LWP-Thread
+    PyThreadState      *tstate;    // current-fast tstate
+    PyThreadState      *gilstate;  // gilstate (PyGILState)
+    PyInterpreterState *interp;    // interp des tstate
+} wii_tss_slot;
+static wii_tss_slot wii_tss_slots[WII_TSS_MAX];
 
-/* The interpreter of the attached thread state,
-   and is same as tstate->interp. */
-#ifdef HAVE_ALIGNED_REQUIRED
-// On strict-alignment systems (Wii), use global variables instead of TLS
-PyInterpreterState *_Py_tss_interp = NULL;
-#else
-_Py_thread_local PyInterpreterState *_Py_tss_interp = NULL;
-#endif
+static inline wii_tss_slot *
+wii_tss_find(void)
+{
+    lwp_t self = LWP_GetSelf();
+    for (int i = 0; i < WII_TSS_MAX; i++) {
+        if (wii_tss_slots[i].in_use && wii_tss_slots[i].thread == self) {
+            return &wii_tss_slots[i];
+        }
+    }
+    return NULL;
+}
+
+static wii_tss_slot *
+wii_tss_get_or_add(void)
+{
+    wii_tss_slot *s = wii_tss_find();
+    if (s != NULL) {
+        return s;
+    }
+    lwp_t self = LWP_GetSelf();
+    for (int i = 0; i < WII_TSS_MAX; i++) {
+        uint32_t expected = 0;
+        if (__atomic_compare_exchange_n(&wii_tss_slots[i].in_use, &expected, 1u,
+                                        0, __ATOMIC_ACQ_REL, __ATOMIC_RELAXED)) {
+            wii_tss_slots[i].tstate   = NULL;
+            wii_tss_slots[i].gilstate = NULL;
+            wii_tss_slots[i].interp   = NULL;
+            wii_tss_slots[i].thread   = self;
+            return &wii_tss_slots[i];
+        }
+    }
+    Py_FatalError("wii per-thread tstate table full");
+    return NULL;
+}
+
+// Slot des aktuellen Threads freigeben (beim Thread-Ende aufrufen). Exportiert
+// fuer Modules/_threadmodule.c (thread_run), damit die Tabelle nicht ueber
+// viele erzeugte Threads volllaeuft.
+void
+_Py_wii_tss_release_current(void)
+{
+    wii_tss_slot *s = wii_tss_find();
+    if (s != NULL) {
+        s->tstate = NULL;
+        s->gilstate = NULL;
+        s->interp = NULL;
+        s->thread = LWP_THREAD_NULL;
+        __atomic_store_n(&s->in_use, 0u, __ATOMIC_RELEASE);
+    }
+}
+
+// interp des aktuellen Threads (fuer den _PyInterpreterState_GET Header-Inline)
+PyInterpreterState *
+_Py_wii_current_interp(void)
+{
+    wii_tss_slot *s = wii_tss_find();
+    return s != NULL ? s->interp : NULL;
+}
 
 static inline PyThreadState *
 current_fast_get(void)
 {
-    //TP("current_fast_get");
+    wii_tss_slot *s = wii_tss_find();
+    return s != NULL ? s->tstate : NULL;
+}
+
+static inline void
+current_fast_set(_PyRuntimeState *Py_UNUSED(runtime), PyThreadState *tstate)
+{
+    assert(tstate != NULL);
+    assert(tstate->interp != NULL);
+    wii_tss_slot *s = wii_tss_get_or_add();
+    s->tstate = tstate;
+    s->interp = tstate->interp;
+}
+
+static inline void
+current_fast_clear(_PyRuntimeState *Py_UNUSED(runtime))
+{
+    wii_tss_slot *s = wii_tss_find();
+    if (s != NULL) {
+        s->tstate = NULL;
+        s->interp = NULL;
+    }
+}
+
+#else  // !HAVE_ALIGNED_REQUIRED : Original mit echtem thread-local TLS
+
+/* The attached thread state for the current thread. */
+_Py_thread_local PyThreadState *_Py_tss_tstate = NULL;
+/* The "bound" thread state used by PyGILState_Ensure() (a "gilstate"). */
+_Py_thread_local PyThreadState *_Py_tss_gilstate = NULL;
+/* The interpreter of the attached thread state (== tstate->interp). */
+_Py_thread_local PyInterpreterState *_Py_tss_interp = NULL;
+
+static inline PyThreadState *
+current_fast_get(void)
+{
     return _Py_tss_tstate;
 }
 
@@ -120,6 +211,7 @@ current_fast_clear(_PyRuntimeState *Py_UNUSED(runtime))
     _Py_tss_tstate = NULL;
     _Py_tss_interp = NULL;
 }
+#endif  // HAVE_ALIGNED_REQUIRED
 
 #define tstate_verify_not_active(tstate) \
     if (tstate == current_fast_get()) { \
@@ -143,6 +235,31 @@ _PyThreadState_GetCurrent(void)
    The GIL does no need to be held for these.
   */
 
+#ifdef HAVE_ALIGNED_REQUIRED
+// Wii: gilstate liegt im selben Pro-Thread-Slot (siehe oben).
+static inline PyThreadState *
+gilstate_get(void)
+{
+    wii_tss_slot *s = wii_tss_find();
+    return s != NULL ? s->gilstate : NULL;
+}
+
+static inline void
+gilstate_set(PyThreadState *tstate)
+{
+    assert(tstate != NULL);
+    wii_tss_get_or_add()->gilstate = tstate;
+}
+
+static inline void
+gilstate_clear(void)
+{
+    wii_tss_slot *s = wii_tss_find();
+    if (s != NULL) {
+        s->gilstate = NULL;
+    }
+}
+#else
 static inline PyThreadState *
 gilstate_get(void)
 {
@@ -161,6 +278,7 @@ gilstate_clear(void)
 {
     _Py_tss_gilstate = NULL;
 }
+#endif  // HAVE_ALIGNED_REQUIRED
 
 
 #ifndef NDEBUG
@@ -1366,7 +1484,11 @@ PyInterpreterState*
 PyInterpreterState_Get(void)
 {
     _Py_AssertHoldsTstate();
+#ifdef HAVE_ALIGNED_REQUIRED
+    PyInterpreterState *interp = _Py_wii_current_interp();
+#else
     PyInterpreterState *interp = _Py_tss_interp;
+#endif
     if (interp == NULL) {
         Py_FatalError("no current interpreter");
     }
@@ -2229,12 +2351,7 @@ _PyThreadState_Attach(PyThreadState *tstate)
     //TP("20.1.1");
     if (current_fast_get() != NULL) {
         //TP("20.1.2");
-        #if defined(WII_BUILD)
-        // Wii single-thread workaround: clear stale TLS instead of aborting
-        current_fast_clear(&_PyRuntime);
-        #else
         Py_FatalError("non-NULL old thread state");
-        #endif
         //TP("20.1.3");
     }
     //TP("20.2");

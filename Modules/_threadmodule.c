@@ -14,9 +14,17 @@
 #include "pycore_weakref.h"       // _PyWeakref_GET_REF()
 
 #include <stddef.h>               // offsetof()
+#include <stdio.h>
 #ifdef HAVE_SIGNAL_H
   #include <signal.h>             // SIGINT
 #endif
+
+#ifdef WII_BUILD
+// Pro-Thread-tstate-Slot freigeben (Definition in Python/pystate.c), aufgerufen
+// beim Thread-Ende, damit die LWP-Slot-Tabelle nicht volllaeuft.
+extern void _Py_wii_tss_release_current(void);
+#endif
+
 
 // ThreadError is just an alias to PyExc_RuntimeError
 #define ThreadError PyExc_RuntimeError
@@ -414,6 +422,9 @@ exit:
     // bpo-44434: Don't call explicitly PyThread_exit_thread(). On Linux with
     // the glibc, pthread_exit() can abort the whole process if dlopen() fails
     // to open the libgcc_s.so library (ex: EMFILE error).
+#ifdef WII_BUILD
+    _Py_wii_tss_release_current();   // Pro-Thread-Slot freigeben
+#endif
     return;
 }
 
@@ -490,6 +501,9 @@ ThreadHandle_start(ThreadHandle *self, PyObject *func, PyObject *args,
 
     // Unblock the thread
     _PyEvent_Notify(&boot->handle_ready);
+    // (Der frühere 3s-Diagnose-Poll-Loop wurde entfernt: Thread-Start + GIL
+    //  sind als funktionierend bestätigt. Das Kind loggt jetzt selbst
+    //  crash-sicher auf SD; keine kuenstliche Verzoegerung mehr.)
 
     return 0;
 
@@ -1144,22 +1158,18 @@ static PyObject *
 _thread_RLock_release_impl(rlockobject *self)
 /*[clinic end generated code: output=51f4a013c5fae2c5 input=d425daf1a5782e63]*/
 {
-#ifdef WII_BUILD
-    /* Wii notloesung: ignore stale releases */
     if (_PyRecursiveMutex_TryUnlock(&self->lock) < 0) {
-        PyErr_SetString(PyExc_RuntimeError,
-                        "cannot release un-acquired lock");
+        PyErr_Format(PyExc_RuntimeError,
+                     "cannot release un-acquired lock "
+                     "(owner=%" PY_FORMAT_THREAD_IDENT_T
+                     ", current=%" PY_FORMAT_THREAD_IDENT_T
+                     ", level=%zu)",
+                     (PyThread_ident_t)self->lock.thread,
+                     PyThread_get_thread_ident_ex(),
+                     self->lock.level);
         return NULL;
     }
     Py_RETURN_NONE;
-#else
-    if (_PyRecursiveMutex_TryUnlock(&self->lock) < 0) {
-        PyErr_SetString(PyExc_RuntimeError,
-                        "cannot release un-acquired lock");
-        return NULL;
-    }
-    Py_RETURN_NONE;
-#endif
 }
 /*[clinic input]
 _thread.RLock.__exit__
@@ -1212,7 +1222,15 @@ _thread_RLock__acquire_restore_impl(rlockobject *self, PyObject *state)
         return NULL;
 
     _PyRecursiveMutex_Lock(&self->lock);
+#ifdef WII_BUILD
+    // On Wii, the owner value coming back from Condition.wait() state restore
+    // has proven unstable in the native RLock path. The lock is always being
+    // reacquired by the current thread here, so restore ownership to the
+    // current thread explicitly instead of trusting the serialized owner.
+    self->lock.thread = (uint32_t)PyThread_get_thread_ident_ex();
+#else
     _Py_atomic_store_ullong_relaxed(&self->lock.thread, owner);
+#endif
     self->lock.level = (size_t)count - 1;
     Py_RETURN_NONE;
 }
@@ -1228,32 +1246,23 @@ static PyObject *
 _thread_RLock__release_save_impl(rlockobject *self)
 /*[clinic end generated code: output=d2916487315bea93 input=809d227cfc4a112c]*/
 {
-#ifdef WII_BUILD
-    /* Wii notloesung: allow release even if not owned by current thread */
     if (!_PyRecursiveMutex_IsLockedByCurrentThread(&self->lock)) {
-        PyErr_SetString(PyExc_RuntimeError,
-                        "cannot release un-acquired lock");
+        PyErr_Format(PyExc_RuntimeError,
+                     "cannot release un-acquired lock "
+                     "(owner=%" PY_FORMAT_THREAD_IDENT_T
+                     ", current=%" PY_FORMAT_THREAD_IDENT_T
+                     ", level=%zu)",
+                     (PyThread_ident_t)self->lock.thread,
+                     PyThread_get_thread_ident_ex(),
+                     self->lock.level);
         return NULL;
     }
 
-    PyThread_ident_t owner = self->lock.thread;
+    PyThread_ident_t owner = PyThread_get_thread_ident_ex();
     Py_ssize_t count = self->lock.level + 1;
     self->lock.level = 0;  // ensure the unlock releases the lock
     _PyRecursiveMutex_Unlock(&self->lock);
     return Py_BuildValue("n" Py_PARSE_THREAD_IDENT_T, count, owner);
-#else
-    if (!_PyRecursiveMutex_IsLockedByCurrentThread(&self->lock)) {
-        PyErr_SetString(PyExc_RuntimeError,
-                        "cannot release un-acquired lock");
-        return NULL;
-    }
-
-    PyThread_ident_t owner = self->lock.thread;
-    Py_ssize_t count = self->lock.level + 1;
-    self->lock.level = 0;  // ensure the unlock releases the lock
-    _PyRecursiveMutex_Unlock(&self->lock);
-    return Py_BuildValue("n" Py_PARSE_THREAD_IDENT_T, count, owner);
-#endif
 }
 
 
@@ -1945,7 +1954,6 @@ do_start_new_thread(thread_module_state *state, PyObject *func, PyObject *args,
         }
         return -1;
     }
-
     return 0;
 }
 
@@ -1983,7 +1991,6 @@ thread_PyThread_start_new_thread(PyObject *module, PyObject *fargs)
     if (handle == NULL) {
         return NULL;
     }
-
     int st =
         do_start_new_thread(state, func, args, kwargs, handle, /*daemon=*/1);
     if (st < 0) {

@@ -270,7 +270,7 @@ wait(300); // 5 Sekunden warten
         PRINT(status.err_msg);
         return status.exitcode;  // ggf. Programm beenden
     }
-    
+
     script_len = (size_t)(test_py_end - test_py);
     script = (char *)malloc(script_len + 1);
     if (script == NULL) {

@@ -14,8 +14,7 @@ WII_SD_SYNC_PY_GLOB := $(MAKEFILE_DIR)files/*.py
 INCLUDE += -I../build-wii
 INCLUDE += -I$(MAKEFILE_DIR)../build-wii
 INCLUDE += -I$(MAKEFILE_DIR)../Include
-INCLUDE += -I$(DEVKITPRO)/libogc/include
-INCLUDE += -I$(DEVKITPRO)/libogc/include/ogc
+INCLUDE += -I$(LIBOGC_INC)
 
 
 CFLAGS     += -Os -g -std=c99 -Wall -Wextra -fdata-sections -ffunction-sections -D__wii__ -DGEKKO
@@ -27,7 +26,7 @@ CPPFLAGS   += $(INCLUDE)
 # Includes & Libs
 LDFLAGS += -T$(DEVKITPPC)/powerpc-eabi/lib/rvl.ld -Wl,--gc-sections
 
-LDFLAGS    += -L$(DEVKITPRO)/libogc/lib/wii
+LDFLAGS    += -L$(LIBOGC_LIB)
 LDFLAGS    += -L$(MAKEFILE_DIR)../libs
 LDFLAGS    += -L$(MAKEFILE_DIR)..+
 LDFLAGS    += -L$(MAKEFILE_DIR)../gdbm/install-wii/lib
@@ -38,7 +37,7 @@ CPYTHON_BUILD := $(MAKEFILE_DIR)../libs
 
 
 #LIBS       := -lpython3.15 -lfatpy -lwiiuse -lbte -lbitmap -logc -lcurl -lmbedtls -lmbedx509 -lmbedcrypto -ltfpsacrypto
-LIBS := -lpython3.15 -lcurl -lmbedtls -lmbedx509 -lmbedcrypto -ltfpsacrypto -lz -lgdbm_compat -lgdbm -llzma -lbz2 -luuid -lfatpy -lwiiuse -lbte -lbitmap -logc -lm
+LIBS := -lpython3.15 -lwiidl -lcurl -lmbedtls -lmbedx509 -lmbedcrypto -ltfpsacrypto -lz -lgdbm_compat -lgdbm -llzma -lbz2 -luuid -lfatpy -lwiiuse -lbte -lbitmap -logc -lm
 LDFLAGS    += -L$(DEVKITPRO)/portlibs/ppc/lib
 
 
@@ -72,8 +71,39 @@ export OFILES := $(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(sFILES:.s=.o) $(SFILES:.S
 export INCLUDE += $(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
                   -I$(CURDIR)/$(BUILD)
 
-.PHONY: $(BUILD) clean sync_sd run
+# --- Dynamisch ladbares Python-C-Extension-Modul + Symbol-Map ---------------
+# spam.so wird per `import spam` ueber den Wii-dlopen-Loader geladen.
+# symbols.map ist das Wii-Aequivalent zu --export-dynamic: aus dem verlinkten
+# .elf per nm erzeugt, liefert es dem Loader die Adressen der CPython-API.
+PPCPREFIX  := $(DEVKITPPC)/bin/powerpc-eabi
+PYMOD_SO   := spam.so
+SYMBOL_MAP := symbols.map
+PYMOD_SRC  := pymodules/spam.c
+# WICHTIG: build-wii/pyconfig.h (echte generierte Config, gleiche ABI wie
+# libpython) - NICHT die Wurzel-pyconfig.h (die erzwingt Py_BUILD_CORE und
+# hat widerspruechliche Makros). Kein -I.. auf die Projektwurzel.
+PYMOD_INC  := -I$(MAKEFILE_DIR)../build-wii -I$(MAKEFILE_DIR)../Include
+
+.PHONY: $(BUILD) clean sync_sd run deploy_so
 .DEFAULT_GOAL := $(BUILD)
+
+$(PYMOD_SO): $(PYMOD_SRC)
+	$(PPCPREFIX)-gcc -Os -fPIC -fno-plt -shared -nostdlib $(PYMOD_INC) $< -o $@
+	@echo "gebaut: $@"
+
+$(SYMBOL_MAP): $(OUTPUT).elf
+	$(PPCPREFIX)-nm --defined-only $(OUTPUT).elf > $@
+	@echo "erzeugt: $@ ($$(wc -l <$@) Symbole)"
+
+# Kopiert spam.so + symbols.map nach WII_SD_SYNC (Dolphin-SD-Ordner).
+deploy_so: $(PYMOD_SO) $(SYMBOL_MAP)
+	@if [ -n "$(WII_SD_SYNC)" ] && [ -d "$(WII_SD_SYNC)" ] && [ -w "$(WII_SD_SYNC)" ]; then \
+		cp -f $(PYMOD_SO) "$(WII_SD_SYNC)/$(PYMOD_SO)"; \
+		cp -f $(SYMBOL_MAP) "$(WII_SD_SYNC)/$(SYMBOL_MAP)"; \
+		echo "SD sync: $(PYMOD_SO) + $(SYMBOL_MAP) -> $(WII_SD_SYNC)"; \
+	else \
+		echo "Note: WII_SD_SYNC nicht gesetzt/schreibbar - $(PYMOD_SO)/$(SYMBOL_MAP) nicht kopiert"; \
+	fi
 
 sync_sd:
 	@if [ -z "$(WII_SD_SYNC)" ] || [ ! -d "$(WII_SD_SYNC)" ]; then \
@@ -121,10 +151,12 @@ $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
 	@$(MAKE) --no-print-directory sync_sd
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
+	@# Nach dem Link: Modul bauen, Symbol-Map aus dem .elf erzeugen, beides deployen.
+	@$(MAKE) --no-print-directory deploy_so
 
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(OUTPUT).elf $(OUTPUT).dol
+	@rm -fr $(BUILD) $(OUTPUT).elf $(OUTPUT).dol $(PYMOD_SO) $(SYMBOL_MAP)
 
 else
 

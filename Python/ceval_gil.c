@@ -50,10 +50,6 @@
      (Note: this mechanism is enabled with FORCE_SWITCHING above)
 */
 
-#if defined(WII_BUILD) && !defined(WII_SINGLE_THREAD)
-#  define WII_SINGLE_THREAD
-#endif
-
 // Atomically copy the bits indicated by mask between two values.
 static inline void
 copy_eval_breaker_bits(uintptr_t *from, uintptr_t *to, uintptr_t mask)
@@ -114,9 +110,7 @@ update_eval_breaker_for_thread(PyInterpreterState *interp, PyThreadState *tstate
 #define TP(msg) ((void)0)
 #define WII_LOG(msg) TP(msg)
 
-#if defined(WII_BUILD)
-#  define WII_SINGLE_THREAD 1
-#else
+#if !defined(WII_SINGLE_THREAD)
 #  define WII_SINGLE_THREAD 0
 #endif
  

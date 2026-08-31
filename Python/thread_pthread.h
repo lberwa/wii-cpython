@@ -302,15 +302,21 @@ do_start_joinable_thread(void (*func)(void *), void *arg, pthread_t* out_id)
    non-arithmetic, e.g., musl typedefs it as a pointer. */
 static PyThread_ident_t
 _pthread_t_to_ident(pthread_t value) {
-// Cast through an integer type of the same size to avoid sign-extension.
+    // Cast through an integer type of the same size to avoid sign-extension.
+    //
+    // CPython uses 0 internally as the "no owner" sentinel for recursive
+    // mutexes. On Wii/libogc, pthread_t is backed by an unsigned 32-bit LWP
+    // handle and valid thread handles may also be small integers. Offset the
+    // exposed thread ident by 1 so no live thread ever collides with the
+    // unlocked sentinel.
 #if SIZEOF_PTHREAD_T == SIZEOF_VOID_P
-    return (uintptr_t) value;
+    return ((PyThread_ident_t)(uintptr_t)value) + 1;
 #elif SIZEOF_PTHREAD_T == SIZEOF_LONG
-    return (unsigned long) value;
+    return ((PyThread_ident_t)(unsigned long)value) + 1;
 #elif SIZEOF_PTHREAD_T == SIZEOF_INT
-    return (unsigned int) value;
+    return ((PyThread_ident_t)(unsigned int)value) + 1;
 #elif SIZEOF_PTHREAD_T == SIZEOF_LONG_LONG
-    return (unsigned long long) value;
+    return ((PyThread_ident_t)(unsigned long long)value) + 1;
 #else
 #error "Unsupported SIZEOF_PTHREAD_T value"
 #endif

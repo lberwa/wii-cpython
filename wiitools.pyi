@@ -632,6 +632,23 @@ def surface_blit(src: str, dst: str | None, x: int, y: int,
     *sx*, *sy*, *sw*, *sh* define the source region (defaults to the full surface)."""
     ...
 
+def surface_get_pixels(name: str) -> bytes:
+    """Return the raw RGBA pixel data of *name* as bytes (w*h*4 bytes, row-major)."""
+    ...
+
+def surface_set_pixels(name: str, data: bytes | bytearray) -> None:
+    """Overwrite the raw RGBA pixel data of *name*. *data* must be exactly w*h*4 bytes."""
+    ...
+
+def surface_flip(name: str, flip_x: int, flip_y: int) -> None:
+    """Mirror surface *name* in-place. flip_x=1 flips horizontal, flip_y=1 vertical."""
+    ...
+
+def surface_rotate_90(src: str, dst: str, times: int) -> tuple[int, int]:
+    """Rotate *src* by times×90° into *dst*. 1=90°CW, 2=180°, 3=90°CCW.
+    Returns (new_width, new_height)."""
+    ...
+
 # --------------- Network / HTTP ---------------
 
 def IsNetReady() -> int:

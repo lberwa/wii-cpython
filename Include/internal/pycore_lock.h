@@ -159,7 +159,11 @@ _PyOnceFlag_CallOnce(_PyOnceFlag *flag, _Py_once_fn_t *fn, void *arg)
 // A recursive mutex. The mutex should zero-initialized.
 typedef struct {
     PyMutex mutex;
+#ifdef WII_BUILD
+    uint32_t thread;
+#else
     unsigned long long thread;  // i.e., PyThread_get_thread_ident_ex()
+#endif
     size_t level;
 } _PyRecursiveMutex;
 

@@ -89,15 +89,13 @@ _Py_ThreadCanHandleSignals(PyInterpreterState *interp)
 /* Variable and static inline functions for in-line access to current thread
    and interpreter state */
 
-#if !defined(Py_BUILD_CORE_MODULE)
 #ifdef HAVE_ALIGNED_REQUIRED
-// On strict-alignment systems (Wii), use global variables instead of TLS
-extern PyThreadState *_Py_tss_tstate;
-extern PyInterpreterState *_Py_tss_interp;
-#else
+// Wii: kein funktionierendes TLS -> _Py_tss_* existieren nicht als Variablen.
+// Zugriff laeuft ueber Pro-Thread-Slot-Funktionen (Definition in pystate.c).
+PyAPI_FUNC(PyInterpreterState *) _Py_wii_current_interp(void);
+#elif !defined(Py_BUILD_CORE_MODULE)
 extern _Py_thread_local PyThreadState *_Py_tss_tstate;
 extern _Py_thread_local PyInterpreterState *_Py_tss_interp;
-#endif
 #endif
 
 #ifndef NDEBUG
@@ -121,7 +119,10 @@ PyAPI_FUNC(PyThreadState *) _PyThreadState_GetCurrent(void);
 static inline PyThreadState*
 _PyThreadState_GET(void)
 {
-#if !defined(Py_BUILD_CORE_MODULE)
+#if defined(HAVE_ALIGNED_REQUIRED)
+    // Wii: kein TLS -> ueber Pro-Thread-Slot-Funktion (LWP_GetSelf-indiziert)
+    return _PyThreadState_GetCurrent();
+#elif !defined(Py_BUILD_CORE_MODULE)
     return _Py_tss_tstate;
 #else
     return _PyThreadState_GetCurrent();
@@ -215,7 +216,10 @@ static inline PyInterpreterState* _PyInterpreterState_GET(void) {
     PyThreadState *tstate = _PyThreadState_GET();
     _Py_EnsureTstateNotNULL(tstate);
 #endif
-#if !defined(Py_BUILD_CORE_MODULE)
+#if defined(HAVE_ALIGNED_REQUIRED)
+    // Wii: kein TLS -> Pro-Thread-Slot (NULL-sicher, wie frueher _Py_tss_interp)
+    return _Py_wii_current_interp();
+#elif !defined(Py_BUILD_CORE_MODULE)
     return _Py_tss_interp;
 #else
     return _PyThreadState_GET()->interp;

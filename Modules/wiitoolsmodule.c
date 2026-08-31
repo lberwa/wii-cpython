@@ -3706,6 +3706,138 @@ static PyObject* py_surface_blit(PyObject *self, PyObject *args)
     return py_none();
 }
 
+/* surface_get_pixels(name) -> bytes  —  rohes RGBA-Puffer als bytes-Objekt */
+static PyObject* py_surface_get_pixels(PyObject *self, PyObject *args)
+{
+    const char *name;
+    wiitools_png_image *img;
+    (void)self;
+    if (!PyArg_ParseTuple(args, "s:surface_get_pixels", &name))
+        return NULL;
+    img = png_find_image(name);
+    if (img == NULL || img->rgba == NULL) {
+        PyErr_Format(PyExc_KeyError, "surface not found: '%s'", name);
+        return NULL;
+    }
+    return PyBytes_FromStringAndSize((const char *)img->rgba,
+                                     (Py_ssize_t)((size_t)img->w * img->h * 4u));
+}
+
+/* surface_set_pixels(name, data: bytes)  —  rohe RGBA-Daten in Surface schreiben */
+static PyObject* py_surface_set_pixels(PyObject *self, PyObject *args)
+{
+    const char *name;
+    const char *data;
+    Py_ssize_t data_len;
+    wiitools_png_image *img;
+    size_t expected;
+    (void)self;
+    if (!PyArg_ParseTuple(args, "sy#:surface_set_pixels", &name, &data, &data_len))
+        return NULL;
+    img = png_find_image(name);
+    if (img == NULL || img->rgba == NULL) {
+        PyErr_Format(PyExc_KeyError, "surface not found: '%s'", name);
+        return NULL;
+    }
+    expected = (size_t)img->w * img->h * 4u;
+    if ((size_t)data_len != expected) {
+        PyErr_Format(PyExc_ValueError,
+                     "data length %zd != surface size %zd (w=%u h=%u)",
+                     (Py_ssize_t)data_len, (Py_ssize_t)expected, img->w, img->h);
+        return NULL;
+    }
+    memcpy(img->rgba, data, expected);
+    if (img->tex_rgba8 != NULL) { free(img->tex_rgba8); img->tex_rgba8 = NULL; }
+    if (g_render_target == img) g_render_target_dirty = 1;
+    return py_none();
+}
+
+/* surface_flip(name, flip_x: int, flip_y: int)  —  Surface in-place spiegeln */
+static PyObject* py_surface_flip(PyObject *self, PyObject *args)
+{
+    const char *name;
+    int flip_x, flip_y;
+    wiitools_png_image *img;
+    unsigned char *tmp;
+    unsigned w, h, x, y;
+    (void)self;
+    if (!PyArg_ParseTuple(args, "sii:surface_flip", &name, &flip_x, &flip_y))
+        return NULL;
+    img = png_find_image(name);
+    if (img == NULL || img->rgba == NULL) {
+        PyErr_Format(PyExc_KeyError, "surface not found: '%s'", name);
+        return NULL;
+    }
+    if (!flip_x && !flip_y)
+        return py_none();
+    w = img->w; h = img->h;
+    tmp = (unsigned char *)malloc((size_t)w * h * 4u);
+    if (!tmp) { PyErr_NoMemory(); return NULL; }
+    for (y = 0; y < h; y++) {
+        for (x = 0; x < w; x++) {
+            unsigned sx = flip_x ? (w - 1u - x) : x;
+            unsigned sy = flip_y ? (h - 1u - y) : y;
+            unsigned si = (sy * w + sx) * 4u;
+            unsigned di = (y  * w + x)  * 4u;
+            tmp[di+0] = img->rgba[si+0]; tmp[di+1] = img->rgba[si+1];
+            tmp[di+2] = img->rgba[si+2]; tmp[di+3] = img->rgba[si+3];
+        }
+    }
+    memcpy(img->rgba, tmp, (size_t)w * h * 4u);
+    free(tmp);
+    if (img->tex_rgba8 != NULL) { free(img->tex_rgba8); img->tex_rgba8 = NULL; }
+    if (g_render_target == img) g_render_target_dirty = 1;
+    return py_none();
+}
+
+/* surface_rotate_90(src_name, dst_name, times: int) -> (w, h)
+ * times: 1 = 90° CW, 2 = 180°, 3 = 90° CCW  (pygame-Konvention) */
+static PyObject* py_surface_rotate_90(PyObject *self, PyObject *args)
+{
+    const char *src_name, *dst_name;
+    int times;
+    wiitools_png_image *src, *dst;
+    unsigned char *new_rgba;
+    unsigned sw, sh, dw, dh, x, y;
+    (void)self;
+    if (!PyArg_ParseTuple(args, "ssi:surface_rotate_90",
+                          &src_name, &dst_name, &times))
+        return NULL;
+    src = png_find_image(src_name);
+    if (src == NULL || src->rgba == NULL) {
+        PyErr_Format(PyExc_KeyError, "source not found: '%s'", src_name);
+        return NULL;
+    }
+    times = ((times % 4) + 4) % 4;
+    sw = src->w; sh = src->h;
+    dw = (times % 2 == 0) ? sw : sh;
+    dh = (times % 2 == 0) ? sh : sw;
+    new_rgba = (unsigned char *)malloc((size_t)dw * dh * 4u);
+    if (!new_rgba) { PyErr_NoMemory(); return NULL; }
+    for (y = 0; y < dh; y++) {
+        for (x = 0; x < dw; x++) {
+            unsigned ox, oy;
+            switch (times) {
+                case 1:  ox = sh - 1u - y; oy = x;           break; /* 90 CW  */
+                case 2:  ox = sw - 1u - x; oy = sh - 1u - y; break; /* 180    */
+                case 3:  ox = y;            oy = sw - 1u - x; break; /* 90 CCW */
+                default: ox = x;            oy = y;            break;
+            }
+            unsigned si = (oy * sw + ox) * 4u;
+            unsigned di = (y  * dw + x)  * 4u;
+            new_rgba[di+0] = src->rgba[si+0]; new_rgba[di+1] = src->rgba[si+1];
+            new_rgba[di+2] = src->rgba[si+2]; new_rgba[di+3] = src->rgba[si+3];
+        }
+    }
+    dst = png_get_or_create_image(dst_name);
+    if (!dst) { free(new_rgba); PyErr_NoMemory(); return NULL; }
+    png_unload_image_data(dst);
+    dst->rgba = new_rgba;
+    dst->w = dw;
+    dst->h = dh;
+    return Py_BuildValue("(ii)", (int)dw, (int)dh);
+}
+
 /* --------------- UPDATE --------------- */
 
 static void do_render_flush(void)
@@ -4686,6 +4818,10 @@ static PyMethodDef wiitools_methods[] = {
     {"surface_get_size", py_surface_get_size, METH_VARARGS, "surface_get_size(name) -> (w, h) or None"},
     {"blit", py_blit, METH_VARARGS, "blit(name, x, y)  Draw a surface to the screen (always bypasses render target)"},
     {"surface_blit", py_surface_blit, METH_VARARGS, "surface_blit(src, dst_or_None, x, y[, sx, sy, sw, sh])  Copy one surface into another"},
+    {"surface_get_pixels", py_surface_get_pixels, METH_VARARGS, "surface_get_pixels(name) -> bytes  Raw RGBA buffer of a surface"},
+    {"surface_set_pixels", py_surface_set_pixels, METH_VARARGS, "surface_set_pixels(name, data)  Write raw RGBA bytes into a surface"},
+    {"surface_flip", py_surface_flip, METH_VARARGS, "surface_flip(name, flip_x, flip_y)  Mirror a surface in-place"},
+    {"surface_rotate_90", py_surface_rotate_90, METH_VARARGS, "surface_rotate_90(src, dst, times) -> (w,h)  Rotate by multiples of 90 deg"},
     {"PAD_Init", pad_init, METH_VARARGS, "PAD_Init()"},
     {"PAD_Sync", pad_sync, METH_VARARGS, "PAD_Sync()"},
     {"PAD_ScanPads", pad_scanpads, METH_VARARGS, "PAD_ScanPads()"},

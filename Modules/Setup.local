@@ -5,9 +5,7 @@ DEVKITPRO?=$(DEVKITPRO)
 wiitools wiitoolsmodule.c \
     -I$(srcdir) \
     -I$(abs_srcdir)/curl/wii/include \
-    -I$(DEVKITPRO)/libogc/include \
-    -I$(DEVKITPRO)/libogc/gc \
-    -I$(DEVKITPRO)/libogc/gc/ogc \
+    -I$(LIBOGC_INC) \
     -I$(abs_srcdir)/curl/include \
     -I$(abs_srcdir)/build-wii/curl/mbedtls/install-wii/include \
     -L$(abs_srcdir)/build-wii/curl/build-wii/lib \
@@ -42,12 +40,25 @@ _uuid _uuidmodule.c \
     -luuid
 
 # Networking
+# select/poll: libogc hat net_select + net_poll (via curl_wii_net_compat.h:
+# #define select net_select, #define poll curl_wii_poll).
+# struct pollfd ist im Compat-Header definiert (kein poll.h auf der Wii),
+# daher -include statt HAVE_POLL_H.
+select selectmodule_wii.c \
+    -I$(LIBOGC_INC) \
+    -DHAVE_SELECT \
+    -DHAVE_POLL \
+    -UHAVE_EPOLL \
+    -UHAVE_KQUEUE
+
 _socket socketmodule.c \
     -I$(abs_srcdir)/curl/wii/include \
-    -I$(DEVKITPRO)/libogc/include \
+    -I$(LIBOGC_INC) \
     -DHAVE_SOCKET \
     -DHAVE_GETHOSTBYNAME \
-    -DHAVE_INET_ATON
+    -DHAVE_INET_ATON \
+    -DHAVE_GETADDRINFO \
+    -DENABLE_IPV6
 
 # TLS stub (import ssl works; operations raise NotImplementedError)
 _ssl _ssl_wii.c \

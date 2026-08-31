@@ -41,16 +41,17 @@ WII_DEFINES := \
 	-D__wii__ \
 	-D__PPC__ \
 	-D__powerpc__ \
-	-DWII_SINGLE_THREAD=1 \
 	#-DTERMINAL_PRINT_DEBUG
+LIBOGC_INC ?= $(DEVKITPRO)/libogc2/wii/include
+LIBOGC_LIB ?= $(DEVKITPRO)/libogc2/wii/lib
+export LIBOGC_INC
+export LIBOGC_LIB
+
 WII_INCLUDE_DIRS := \
 	-I. \
 	-I$(MAKEFILE_DIR)bitmap/include \
 	-I$(MAKEFILE_DIR)fat/include \
-	-I$(DEVKITPRO)/libogc/include \
-	-I$(DEVKITPRO)/libogc/include/ogc \
-	-I$(DEVKITPRO)/libogc/gc \
-	-I$(DEVKITPRO)/libogc/gc/ogc \
+	-I$(LIBOGC_INC) \
 	-I$(DEVKITPRO)/portlibs/ppc/include
 CFLAGS_WII := -Os -Wall $(WII_DEFINES) $(WII_INCLUDE_DIRS)
 CPPFLAGS_WII := $(WII_DEFINES) $(WII_INCLUDE_DIRS)
@@ -85,16 +86,19 @@ CONFIGURE_ENV= \
 	ax_cv_c_float_words_bigendian=yes \
 	ac_cv_file__dev_ptmx=no ac_cv_file__dev_ptc=no \
 	ac_cv_header_sys_resource_h=no ac_cv_func_getrlimit=no ac_cv_func_setrlimit=no \
-	ac_cv_header_sys_statvfs_h=no ac_cv_func_statvfs=no
+	ac_cv_header_sys_statvfs_h=no ac_cv_func_statvfs=no \
+	DYNLOADFILE="dynload_wii.o"
 
 CONFIGURE_FLAGS= \
 	--host=powerpc-eabi --build=$$(../config.guess) \
 	--with-build-python="$(BUILD_PYTHON)" \
 	--without-ensurepip --disable-shared --disable-ipv6 --with-mimalloc=no
 
+FROZEN_HEADERS := $(shell sed -n 's/^#include "frozen_modules\/\(.*\)"/Python\/frozen_modules\/\1/p' Python/frozen.c)
+
 .PHONY: all clean configure libpython build-host python curl ssl wiitest	\
- 		regen-importlib bitmap bitmap-clean fat fat-clean wiitest-clean py \
- 		gdbm gdbm-clean xz xz-clean uuid uuid-clean
+ 		regen-importlib frozen-modules bitmap bitmap-clean fat fat-clean wiitest-clean py \
+ 		gdbm gdbm-clean xz xz-clean uuid uuid-clean glibc glibc-clean
 
 all: wiitest
 
@@ -202,12 +206,32 @@ $(UUID_INSTALL)/lib/libuuid.a:
 uuid-clean:
 	@-rm -rf "$(UUID_BUILD)" "$(UUID_INSTALL)"
 
-cp-libs: python curl bitmap fat gdbm xz uuid
+# --- Wii dlopen loader (Ersatz fuer glibc-dlfcn/ld.so) ---
+# Baut den PPC-ELF-Runtime-Loader (dlfcn/wii_dlfcn.c) zu libwiidl.a.
+# Der Ordner glibc/ enthaelt nur den Upstream-Quellbaum als Referenz
+# (PPC-Relocation-Mathematik) und wird NICHT als Ganzes gebaut.
+GLIBC_DIR := $(MAKEFILE_DIR)dlfcn
+GLIBC_LIB := $(GLIBC_DIR)/libwiidl.a
+GLIBC_OBJ := $(GLIBC_DIR)/wii_dlfcn.o
+
+glibc: $(GLIBC_LIB)
+
+$(GLIBC_LIB): $(GLIBC_DIR)/wii_dlfcn.c $(GLIBC_DIR)/wii_dlfcn.h
+	$(CC) $(CFLAGS) $(CFLAGS_WII) -c "$(GLIBC_DIR)/wii_dlfcn.c" -o "$(GLIBC_OBJ)"
+	$(AR) rcs "$(GLIBC_LIB)" "$(GLIBC_OBJ)"
+
+glibc-clean:
+	@-rm -f "$(GLIBC_OBJ)" "$(GLIBC_LIB)"
+
+cp-libs: python curl bitmap fat gdbm xz uuid glibc
 	@rm -rf "$(LIB_DIR)"
 	@mkdir -p "$(LIB_DIR)"
+	@# Der Upstream-glibc-Quellbaum (glibc/) enthaelt ASCII-Linkerskripte
+	@# (glibc/htl/libpthread*.a), die keine echten Wii-Archive sind -> ausschliessen.
 	@find "$(MAKEFILE_DIR)" \
     -path "$(BUILD_HOST_DIR_ABS)" -prune -o \
     -path "$(LIB_DIR_ABS)" -prune -o \
+    -path "$(MAKEFILE_DIR)glibc" -prune -o \
     -name "*.a" -exec cp {} "$(LIB_DIR_ABS)" \;
 	@# Ensure we use the Wii build of libpython (avoid host overwrite).
 	@cp "$(BUILD_DIR_ABS)/libpython$(VERSION).a" "$(LIB_DIR_ABS)/"
@@ -253,14 +277,26 @@ $(BUILD_DIR)/Makefile: | $(BUILD_PYTHON)
 	@# Makefile.pre.in and config.status.
 	@touch "$(BUILD_DIR)/Makefile.pre"
 
-libpython: configure ssl curl $(BUILD_DIR)/Modules/wiitoolsmodule.o wii-frozen-modules
-	@# Guard: re-apply pyconfig.h patches if config.status wiped them,
-	@# and re-stamp Makefile.pre so it won't happen again this run.
-	@$(MAKE) -f $(MAKEFILE_DIR)Makefile wii-patch-pyconfig BUILD_DIR="$(BUILD_DIR)"
-	@touch "$(BUILD_DIR)/Makefile.pre"
+frozen-modules:
+	@missing=0; \
+	for file in $(FROZEN_HEADERS); do \
+		if [ ! -f "$$file" ]; then \
+			echo "missing frozen header: $$file"; \
+			missing=1; \
+			break; \
+		fi; \
+	done; \
+	if [ "$$missing" -ne 0 ]; then \
+		$(MAKE) regen-importlib; \
+	fi
+
+libpython: configure frozen-modules ssl curl $(BUILD_DIR)/Modules/wiitoolsmodule.o
 	@# Ensure build-wii uses our local module setup (e.g. math)
 	@cmp -s "$(srcdir)/Modules/Setup.local" "$(BUILD_DIR)/Modules/Setup.local" 2>/dev/null || \
 		cp "$(srcdir)/Modules/Setup.local" "$(BUILD_DIR)/Modules/Setup.local"
+	@# Interrupted builds can leave behind empty object files that make treats as
+	@# up-to-date. Drop them so they are rebuilt before archiving/linking.
+	@find "$(BUILD_DIR)" -name '*.o' -size 0 -print -delete 2>/dev/null || true
 	@# frozen.o has no header dependency in the generated Makefile; invalidate it
 	@# whenever frozen.c or any frozen_modules/*.h changed, so re-frozen stdlib
 	@# modules actually make it into libpython.
@@ -434,7 +470,7 @@ fat-clean:
 fat:
 	$(MAKE) -j$(CPU_CORES) -C $(MAKEFILE_DIR)fat wii-release
 
-clean: fat-clean wiitest-clean bitmap-clean
+clean: fat-clean wiitest-clean bitmap-clean glibc-clean
 	@-rm -rf "$(BUILD_DIR)"
 	@-rm -rf $(MAKEFILE_DIR)bitmap/build
 	@-rm -rf $(LIB_DIR)
