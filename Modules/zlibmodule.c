@@ -10,7 +10,7 @@
 #include "Python.h"
 #include "pycore_pyatomic_ft_wrappers.h" // FT_ATOMIC_STORE_CHAR_RELAXED
 
-#include "../zlib/zlib.h"
+#include <zlib.h>
 #include "stdbool.h"
 #include <stddef.h>               // offsetof()
 

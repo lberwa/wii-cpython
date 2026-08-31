@@ -1,9 +1,15 @@
 #!/bin/sh
-VENV_PY="/home/lew/.python-venv/bin/python"
-VENV_SITE="/home/lew/.python-venv/lib/python3.11/site-packages"
-if [ -n "$PYTHONPATH" ]; then
-  export PYTHONPATH="$VENV_SITE:$PYTHONPATH"
-else
-  export PYTHONPATH="$VENV_SITE"
-fi
-exec "$VENV_PY" "$@"
+# Portable wrapper: use a local venv if present, otherwise fall back to system python3.
+# cmake passes this script as PYTHON_EXECUTABLE so mbedTLS code-gen runs on any machine.
+
+for candidate in \
+    "/home/lew/.python-venv/bin/python" \
+    "/home/server/.python-venv/bin/python" \
+    "$(dirname "$0")/../.python-venv/bin/python" \
+    "$(which python3 2>/dev/null)" \
+    "$(which python 2>/dev/null)"; do
+    [ -x "$candidate" ] && exec "$candidate" "$@"
+done
+
+echo "venv-python.sh: kein Python gefunden" >&2
+exit 1

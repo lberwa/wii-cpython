@@ -1,6 +1,7 @@
 """Python part of the warnings subsystem."""
 
 import sys
+import _contextvars
 import _thread
 
 
@@ -82,11 +83,7 @@ class _GlobalContext(_Context):
 _global_context = _GlobalContext()
 
 
-if _use_context:
-    import _contextvars
-    _warnings_context = _contextvars.ContextVar('warnings_context')
-else:
-    _warnings_context = None
+_warnings_context = _contextvars.ContextVar('warnings_context')
 
 
 def _get_context():

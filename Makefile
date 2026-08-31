@@ -12,6 +12,8 @@ BUILD_DIR_ABS := $(abspath $(BUILD_DIR))
 LIB_DIR_ABS := $(abspath $(LIB_DIR))
 BUILD_HOST_DIR_ABS := $(abspath $(BUILD_HOST_DIR))
 HOST_BUILD_PYTHON := $(abspath $(BUILD_HOST_DIR))/python
+HOST_VENV_DIR    := $(abspath $(BUILD_HOST_DIR))/venv
+HOST_VENV_PYTHON := $(HOST_VENV_DIR)/bin/python
 SYSTEM_PYTHON3 := $(shell command -v python3 2>/dev/null)
 BUILD_PYTHON ?= $(HOST_BUILD_PYTHON)
 CONFIG_SITE_FILE := $(abspath config.site)
@@ -48,7 +50,8 @@ WII_INCLUDE_DIRS := \
 	-I$(DEVKITPRO)/libogc/include \
 	-I$(DEVKITPRO)/libogc/include/ogc \
 	-I$(DEVKITPRO)/libogc/gc \
-	-I$(DEVKITPRO)/libogc/gc/ogc
+	-I$(DEVKITPRO)/libogc/gc/ogc \
+	-I$(DEVKITPRO)/portlibs/ppc/include
 CFLAGS_WII := -Os -Wall $(WII_DEFINES) $(WII_INCLUDE_DIRS)
 CPPFLAGS_WII := $(WII_DEFINES) $(WII_INCLUDE_DIRS)
 MACHDEP=		wii
@@ -211,14 +214,22 @@ cp-libs: python curl bitmap fat gdbm xz uuid
 	@echo "Copied libraries to $(LIB_DIR)"
 
 
-build-host: $(HOST_BUILD_PYTHON)
+build-host: $(HOST_VENV_PYTHON)
 
 $(HOST_BUILD_PYTHON):
 	@mkdir -p "$(BUILD_HOST_DIR)"
 	cd "$(BUILD_HOST_DIR)" && \
-	CONFIG_SITE= ../configure --without-ensurepip && \
+	CONFIG_SITE= ../configure && \
 	: > Modules/Setup.local && \
 	$(MAKE) -j$(CPU_CORES)
+	@"$(HOST_BUILD_PYTHON)" -c "import ssl" 2>/dev/null || \
+	    { echo "ERROR: build-host/python was built without SSL. Run 'sudo apt install libssl-dev' then 'rm -rf build-host && make build-host'."; exit 1; }
+
+$(HOST_VENV_PYTHON): $(HOST_BUILD_PYTHON)
+	@echo "--- Erstelle venv in $(HOST_VENV_DIR) und installiere jinja2 ---"
+	@rm -rf "$(HOST_VENV_DIR)"
+	"$(HOST_BUILD_PYTHON)" -m venv "$(HOST_VENV_DIR)"
+	"$(HOST_VENV_PYTHON)" -m pip install --quiet jinja2
 
 configure: $(BUILD_DIR)/Makefile
 
@@ -261,6 +272,11 @@ libpython: configure ssl curl $(BUILD_DIR)/Modules/wiitoolsmodule.o wii-frozen-m
 	$(MAKE) -j$(CPU_CORES) -C  "$(BUILD_DIR)" libpython$(VERSION).a
 	@# Add wiitools to the library
 	$(AR) rcs "$(BUILD_DIR)/libpython$(VERSION).a" "$(BUILD_DIR)/Modules/wiitoolsmodule.o"
+	@# Compile and add Wii socket stubs (functions declared in libogc but not implemented)
+	$(CC) $(CFLAGS) $(CFLAGS_WII) -I"$(srcdir)/Include" -I"$(BUILD_DIR)" -DPy_BUILD_CORE \
+		-c "$(srcdir)/Modules/wii_socket_stubs.c" \
+		-o "$(BUILD_DIR)/Modules/wii_socket_stubs.o"
+	$(AR) rcs "$(BUILD_DIR)/libpython$(VERSION).a" "$(BUILD_DIR)/Modules/wii_socket_stubs.o"
 
 python: libpython
 
@@ -334,10 +350,12 @@ $(BUILD_DIR)/Modules/wiitoolsmodule.o: curl $(srcdir)/Modules/wiitoolsmodule.c
 		-o "$(BUILD_DIR)/Modules/wiitoolsmodule.o"
 
 ssl: configure
-	$(MAKE) -j$(CPU_CORES) -C "$(BUILD_DIR)" mbedtls-wii
+	@test -x "$(HOST_VENV_PYTHON)" || \
+	    { echo "ERROR: $(HOST_VENV_DIR) not found. Please run: make build-host"; exit 1; }
+	$(MAKE) -j$(CPU_CORES) -C "$(BUILD_DIR)" mbedtls-wii PYTHON="$(HOST_VENV_PYTHON)"
 
 curl: ssl
-	$(MAKE) -j$(CPU_CORES) -C "$(BUILD_DIR)" curl-wii
+	$(MAKE) -j$(CPU_CORES) -C "$(BUILD_DIR)" curl-wii PYTHON="$(HOST_VENV_PYTHON)"
 
 regen-importlib:
 	@PYTHON_FOR_REGEN=$${PYTHON_FOR_REGEN:-/usr/bin/python3}; \

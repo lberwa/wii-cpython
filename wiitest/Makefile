@@ -15,11 +15,12 @@ INCLUDE += -I../build-wii
 INCLUDE += -I$(MAKEFILE_DIR)../build-wii
 INCLUDE += -I$(MAKEFILE_DIR)../Include
 INCLUDE += -I$(DEVKITPRO)/libogc/include
+INCLUDE += -I$(DEVKITPRO)/libogc/include/ogc
 
 
-CFLAGS     += -Os -g -std=c99 -Wall -Wextra -fdata-sections -ffunction-sections 
+CFLAGS     += -Os -g -std=c99 -Wall -Wextra -fdata-sections -ffunction-sections -D__wii__ -DGEKKO
 CXXFLAGS   := $(CFLAGS)
-CPPFLAGS   += -Os -g 
+CPPFLAGS   += -Os -g -D__wii__ -DGEKKO
 CFLAGS     += $(INCLUDE)
 CPPFLAGS   += $(INCLUDE)
 

@@ -1,4 +1,5 @@
-export DEVKITPRO := /opt/devkitpro
+DEVKITPRO ?= /opt/devkitpro
+export DEVKITPRO
 export DEVKITPPC := $(DEVKITPRO)/devkitPPC
 
 TARGET := hello_world

@@ -20,7 +20,7 @@ freeze operator               Lib/operator.py
 freeze copyreg                Lib/copyreg.py
 freeze reprlib                Lib/reprlib.py
 freeze warnings               Lib/warnings.py
-freeze _py_warnings           Lib/warnings.py
+freeze _py_warnings           Lib/_py_warnings.py
 freeze threading              Lib/threading.py
 freeze weakref                Lib/weakref.py
 freeze _weakrefset            Lib/_weakrefset.py

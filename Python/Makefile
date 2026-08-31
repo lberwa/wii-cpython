@@ -1,9 +1,10 @@
 # Stub Makefile for Python (add2lib only)
-CC = /opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc
-OPT = -mhard-float  -I/opt/devkitpro/extras/bitmap/include -g -O0 -Wall -Wstrict-prototypes -fPIC -Os -Wall -msoft-float #-DTERMINAL_PRINT_DEBUG
+DEVKITPRO ?= /opt/devkitpro
+CC = $(DEVKITPRO)/devkitPPC/bin/powerpc-eabi-gcc
+OPT = -mhard-float  -I$(DEVKITPRO)/extras/bitmap/include -g -O0 -Wall -Wstrict-prototypes -fPIC -Os -Wall -msoft-float #-DTERMINAL_PRINT_DEBUG
 CFLAGS = $(OPT) -I../Include -I.. -DHAVE_CONFIG_H
-AR = /opt/devkitpro/devkitPPC/bin/powerpc-eabi-ar
-RANLIB = /opt/devkitpro/devkitPPC/bin/powerpc-eabi-ranlib
+AR = $(DEVKITPRO)/devkitPPC/bin/powerpc-eabi-ar
+RANLIB = $(DEVKITPRO)/devkitPPC/bin/powerpc-eabi-ranlib
 # 0000oooo
 all:
 

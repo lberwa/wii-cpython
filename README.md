@@ -36,8 +36,14 @@ __Python:__
 Build Instructions
 -----------------------
 
-__First, build the PC-build-tool:__
+__First, install the dependencies__
+```bash
+sudo apt install libssl-dev cmake
+dkp-pacman install wii-dev ppc-zlib ppc-bzip2
+```
 
+
+__Then, build the PC-build-tool:__
 ```bash
 make build-host -j$(nproc)
 ```
@@ -46,7 +52,6 @@ This builds a Python toolchain on the PC to create frozen Python files for the W
 
 
 __Build:__
-
 ```bash
 make py -j$(nproc)
 ```
@@ -56,7 +61,6 @@ This will make a cpython.a.
 
 
 __or if you want to test it:__
-
 ```bash
 make -j$(nproc)
 ```
@@ -66,7 +70,6 @@ This will make a cpython.a and a boot.dol in wiitest/.
 
 
 __Install:__
-
 ```bash
 sudo make install DEVKITPRO="/PATH/devkitpro" DEVKITPPC="/PATH/devkitpro/devkitPPC"
 
@@ -77,7 +80,6 @@ This will copy your library .a files to DEVKITPRO/portlibs/ppc/lib and the *.h h
 
 
 __Clean:__
-
 ```bash
 make clean
 ```

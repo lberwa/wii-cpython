@@ -22,14 +22,18 @@ _math_integer mathintegermodule.c
 
 # General-purpose C extensions
 array arraymodule.c
-binascii binascii.c
+binascii binascii.c \
+    -I$(DEVKITPRO)/portlibs/ppc/include
 _bisect _bisectmodule.c
 _pickle _pickle.c
 _random _randommodule.c
 _statistics _statisticsmodule.c
 _struct _struct.c
 unicodedata unicodedata.c
-zlib zlibmodule.c
+zlib zlibmodule.c \
+    -I$(DEVKITPRO)/portlibs/ppc/include \
+    -L$(DEVKITPRO)/portlibs/ppc/lib \
+    -lz
 _zoneinfo _zoneinfo.c
 _uuid _uuidmodule.c \
     -DHAVE_UUID_UUID_H \
@@ -43,8 +47,7 @@ _socket socketmodule.c \
     -I$(DEVKITPRO)/libogc/include \
     -DHAVE_SOCKET \
     -DHAVE_GETHOSTBYNAME \
-    -DHAVE_INET_ATON \
-    -DHAVE_GETADDRINFO
+    -DHAVE_INET_ATON
 
 # TLS stub (import ssl works; operations raise NotImplementedError)
 _ssl _ssl_wii.c \

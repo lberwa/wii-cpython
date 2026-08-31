@@ -737,6 +737,10 @@ tracemalloc_clear_traces_unlocked(void)
 PyStatus
 _PyTraceMalloc_Init(void)
 {
+#ifdef WII_BUILD
+    tracemalloc_config.initialized = TRACEMALLOC_INITIALIZED;
+    return _PyStatus_OK();
+#endif
     assert(tracemalloc_config.initialized == TRACEMALLOC_NOT_INITIALIZED);
 
     PyMem_GetAllocator(PYMEM_DOMAIN_RAW, &allocators.raw);
@@ -783,6 +787,9 @@ _PyTraceMalloc_Init(void)
 static void
 tracemalloc_deinit(void)
 {
+#ifdef WII_BUILD
+    return;
+#endif
     if (tracemalloc_config.initialized != TRACEMALLOC_INITIALIZED)
         return;
     tracemalloc_config.initialized = TRACEMALLOC_FINALIZED;

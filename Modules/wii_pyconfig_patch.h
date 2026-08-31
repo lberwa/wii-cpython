@@ -39,4 +39,19 @@ typedef unsigned int    u_int;
 #undef HAVE_NET_IF_H
 #undef HAVE_HSTRERROR
 
+/* Socket functions not available in libogc */
+#undef HAVE_SENDMSG
+#undef HAVE_RECVMSG
+#undef HAVE_SOCKETPAIR
+#undef HAVE_GETSERVBY
+#undef HAVE_GETPROTOBYNAME
+#undef HAVE_GETHOSTBYADDR
+#undef HAVE_SELECT
+#undef HAVE_H_ERRNO
+#undef HAVE_GETADDRINFO
+#undef HAVE_GETNAMEINFO
+
+/* ioctl not available on Wii -- _Py_set_blocking stubs out without it */
+#undef HAVE_IOCTL
+
 #endif /*Py_PYCONFIG_H*/
