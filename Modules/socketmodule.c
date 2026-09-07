@@ -6196,9 +6196,13 @@ socket_gethostbyname_ex(PyObject *self, PyObject *args)
         goto finally;
     }
     socket_state *state = get_module_state(self);
+#ifdef HAVE_GETADDRINFO
     if (setipaddr(state, name, SAS2SA(&addr), sizeof(addr), AF_INET) < 0) {
         goto finally;
     }
+#else
+    memset(&addr, 0, sizeof(addr));
+#endif
     Py_BEGIN_ALLOW_THREADS
 #ifdef HAVE_GETHOSTBYNAME_R
 #if   defined(HAVE_GETHOSTBYNAME_R_6_ARG)

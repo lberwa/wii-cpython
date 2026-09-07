@@ -1,10 +1,10 @@
-/* netinet/in.h stub for Wii */
+/* netinet/in.h stub fuer Wii */
 #ifndef _NETINET_IN_H
 #define _NETINET_IN_H
 
-/* Forward to libogc's real netinet/in.h for struct in_addr, AF_INET, etc.
-   Avoids circular include (network.h → <netinet/in.h> → <network.h>). */
-#include_next <netinet/in.h>
+#if WII_LIBOGC == 2
+/* libogc2 hat kein netinet/in.h — Socket-Typen kommen aus network.h */
+#include <network.h>
 
 #ifndef IPPROTO_IP
 #  define IPPROTO_IP   0
@@ -49,7 +49,7 @@ extern const struct in6_addr in6addr_loopback;
 #define _STRUCT_SOCKADDR_IN6
 struct sockaddr_in6 {
     uint8_t         sin6_len;
-    uint8_t         sin6_family;   /* AF_INET6 */
+    uint8_t         sin6_family;
     uint16_t        sin6_port;
     uint32_t        sin6_flowinfo;
     struct in6_addr sin6_addr;
@@ -68,5 +68,10 @@ struct sockaddr_in6 {
      ((const uint32_t *)(a))[2] == 0 && \
      ((const uint32_t *)(a))[3] == htonl(1))
 
+#else /* WII_LIBOGC == 1 */
+/* libogc hat ein vollstaendiges netinet/in.h */
+#include_next <netinet/in.h>
+
+#endif /* WII_LIBOGC */
 
 #endif /* _NETINET_IN_H */

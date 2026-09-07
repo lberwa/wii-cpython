@@ -12,6 +12,11 @@
 #include <my_text_renderer.h>
 #include "../fat/include/pyfat.h"
 #include <gccore.h>
+#if WII_LIBOGC == 2
+#include <ogc/timesupp.h>
+#else
+#include <ogc/lwp_watchdog.h>
+#endif
 #include <video.h>
 #include <wiiuse/wpad.h>
 #include <ogc/pad.h>
@@ -32,7 +37,9 @@
 #include <math.h>
 #define NETWORK_H22
 #include <network.h>
-#include <poll.h>
+#if WII_LIBOGC == 1
+#include <poll.h>   /* POLLIN, POLLOUT etc. — nicht in libogc1 network.h */
+#endif
 #include "../curl/include/curl/curl.h"
 #include "../build-wii/curl/mbedtls/install-wii/include/mbedtls/platform.h"
 
@@ -4310,7 +4317,7 @@ WT_SET_1(SYS_SetGBSMode, u16)
 
 static PyObject* wt_SYS_Time(PyObject *self, PyObject *args) {
     (void)self; if (!PyArg_ParseTuple(args, ":SYS_Time")) return NULL;
-    return PyLong_FromUnsignedLongLong((unsigned long long)SYS_Time());
+    return PyLong_FromUnsignedLongLong((unsigned long long)gettime());
 }
 static PyObject* wt_SYS_GetWirelessID(PyObject *self, PyObject *args) {
     (void)self; long chan;
@@ -4344,7 +4351,11 @@ static volatile u32 g_sys_power_events = 0;
 static volatile u32 g_sys_reset_events = 0;
 static volatile u32 g_sys_alarm_events = 0;
 static void wt_sys_power_cb(void) { g_sys_power_events++; }
+#if WII_LIBOGC == 2
+static void wt_sys_reset_cb(void) { g_sys_reset_events++; }
+#else
 static void wt_sys_reset_cb(u32 irq, void *ctx) { (void)irq; (void)ctx; g_sys_reset_events++; }
+#endif
 static void wt_sys_alarm_cb(syswd_t alarm, void *cbarg) { (void)alarm; (void)cbarg; g_sys_alarm_events++; }
 
 static PyObject* wt_SYS_SetPowerCallback(PyObject *self, PyObject *args) {
@@ -4611,7 +4622,12 @@ static PyObject* wt_if_config(PyObject *self, PyObject *args) {
     (void)self; int use_dhcp = 1, retries = 20;
     char ip[16] = "", nm[16] = "", gw[16] = "";
     if (!PyArg_ParseTuple(args, "|pi:if_config", &use_dhcp, &retries)) return NULL;
+#if WII_LIBOGC == 2
+    (void)retries;
+    s32 r = if_config(ip, nm, gw, use_dhcp ? true : false);
+#else
     s32 r = if_config(ip, nm, gw, use_dhcp ? true : false, retries);
+#endif
     if (r < 0) return PyLong_FromLong((long)r);
     return Py_BuildValue("{s:s,s:s,s:s}", "ip", ip, "netmask", nm, "gateway", gw);
 }

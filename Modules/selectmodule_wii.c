@@ -14,6 +14,22 @@
 #endif
 #include <network.h>
 
+/* poll.h vorab einbinden, BEVOR selectmodule.c es via HAVE_POLL_H erneut
+ * einbindet und BEVOR "#define poll wii_poll" gesetzt wird.
+ *
+ * Warum: libogc1 hat ein echtes <poll.h> das struct pollfd und int poll()
+ * deklariert. Wuerde selectmodule.c's #include <poll.h> nach dem
+ * "#define poll wii_poll" eingebunden, wuerde der Praeprozessor
+ * "int poll(...)" zu "int wii_poll(...)" expandieren -> Typkonflikt mit
+ * der bereits definierten "static int wii_poll(...)".
+ * Durch fruehes Einbinden ist der Include-Guard (_SYS_POLL_H_ oder
+ * _WII_POLL_H) gesetzt, sodass der spaetere Include ein No-Op ist. */
+#if defined(HAVE_POLL_H)
+#  include <poll.h>
+#elif defined(HAVE_SYS_POLL_H)
+#  include <sys/poll.h>
+#endif
+
 /* Bridge: newlib fd_set (64 slots) -> libogc ogc_fd_set (16 slots) */
 typedef struct { uint8_t fd_bits[2]; } ogc_fd_set;
 
@@ -39,12 +55,7 @@ static int wii_select(int nfds, fd_set *rfds, fd_set *wfds, fd_set *efds,
 }
 #define select wii_select
 
-/* poll Bridge: struct pollfd (newlib-kompatibel) -> net_poll */
-#ifndef CURL_WII_POLLFD_DEFINED
-#define CURL_WII_POLLFD_DEFINED
-struct pollfd { int fd; short events; short revents; };
-#endif
-
+/* poll Bridge: struct pollfd kommt bereits von poll.h (oben eingebunden) */
 static int wii_poll(struct pollfd *fds, unsigned int nfds, int timeout) {
     struct pollsd mapped[32];
     if (nfds > 32u) return -1;

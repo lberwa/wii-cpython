@@ -15,6 +15,7 @@ INCLUDE += -I../build-wii
 INCLUDE += -I$(MAKEFILE_DIR)../build-wii
 INCLUDE += -I$(MAKEFILE_DIR)../Include
 INCLUDE += -I$(LIBOGC_INC)
+INCLUDE += -I$(LIBOGC_INC)/ogc
 
 
 CFLAGS     += -Os -g -std=c99 -Wall -Wextra -fdata-sections -ffunction-sections -D__wii__ -DGEKKO
@@ -26,7 +27,12 @@ CPPFLAGS   += $(INCLUDE)
 # Includes & Libs
 LDFLAGS += -T$(DEVKITPPC)/powerpc-eabi/lib/rvl.ld -Wl,--gc-sections
 
-LDFLAGS    += -L$(LIBOGC_LIB)
+# wii_rules ueberschreibt LIBOGC_LIB immer auf libogc-v1 — direkt von LIBOGC ableiten
+ifeq ($(LIBOGC),2)
+LDFLAGS    += -L$(DEVKITPRO)/libogc2/wii/lib
+else
+LDFLAGS    += -L$(DEVKITPRO)/libogc/lib/wii
+endif
 LDFLAGS    += -L$(MAKEFILE_DIR)../libs
 LDFLAGS    += -L$(MAKEFILE_DIR)..+
 LDFLAGS    += -L$(MAKEFILE_DIR)../gdbm/install-wii/lib

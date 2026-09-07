@@ -32,6 +32,12 @@ static bool autoscroll = true;
 static int current_line = 0;
 static int current_col = 0;
 
+/* Reentrant mutex — schützt alle Terminal-Zustandsvariablen und VIDEO_Flush.
+   Reentrant weil terminal_feed() → terminal_render() beide unter demselben Lock laufen. */
+static mutex_t g_term_mutex = 0;
+static bool g_term_mutex_inited = false;
+#define TERM_LOCK()   do { if (g_term_mutex_inited) LWP_MutexLock(g_term_mutex); } while(0)
+#define TERM_UNLOCK() do { if (g_term_mutex_inited) LWP_MutexUnlock(g_term_mutex); } while(0)
 
 // globale Variablen
 GXRModeObj* rmode;
@@ -78,6 +84,8 @@ int video_init_done = 0;
 void video_init_custom() {
     if (!video_init_done) {
         VIDEO_Init();
+        LWP_MutexInit(&g_term_mutex, true);   // true = reentrant
+        g_term_mutex_inited = true;
         video_init_done = 1;
     } else {
         /* After rendering_init() the retrace callback is still registered.
@@ -142,7 +150,8 @@ void render_bild() {
 // wir zeichnen direkt in den sichtbaren Framebuffer, der ohnehin jeden Frame
 // ausgegeben wird. Das war der Flaschenhals (2 VSyncs pro Zeile ~ 33 ms).
 void terminal_render(void) {
-    if (framebuffer == NULL) return;
+    TERM_LOCK();
+    if (framebuffer == NULL) { TERM_UNLOCK(); return; }
     clear_screen_ohne_bild("black");
 
     int extra = (cur_len > 0) ? 1 : 0;      // offene Teilzeile mitzeichnen
@@ -157,11 +166,14 @@ void terminal_render(void) {
 
     VIDEO_Flush();          // nur Flush, kein WaitVSync
     term_dirty = 0;
+    TERM_UNLOCK();
 }
 
 void terminal_flush(void) {
+    TERM_LOCK();
     if (term_dirty)
         terminal_render();
+    TERM_UNLOCK();
 }
 
 static void terminal_add_line(const char *line) {
@@ -213,10 +225,13 @@ static void terminal_feed(const char *text, int len, int flush_partial) {
 
 void terminal_write(const char *text, int len) {
     if (text == NULL || len <= 0) return;
-    terminal_feed(text, len, 0);                // Teilzeilen puffern (Stream)
+    TERM_LOCK();
+    terminal_feed(text, len, 0);
+    TERM_UNLOCK();
 }
 
 void terminal_clear(void) {
+    TERM_LOCK();
     for (int i = 0; i < TERM_MAX_LINES; i++)
         term_buffer[i][0] = '\0';
     total_lines = 0;
@@ -225,6 +240,7 @@ void terminal_clear(void) {
     term_dirty = 1;
     if (framebuffer != NULL)
         terminal_render();
+    TERM_UNLOCK();
 }
 
 void terminal_set_autoscroll(bool enabled) {
@@ -235,6 +251,8 @@ void terminal_set_autoscroll(bool enabled) {
 // das ganze Meldungen übergibt (z.B. terminal_print("start")).
 void terminal_print(const char *text) {
     if (text == NULL) return;
+    TERM_LOCK();
     terminal_feed(text, (int)strlen(text), 1);
+    TERM_UNLOCK();
 }
 

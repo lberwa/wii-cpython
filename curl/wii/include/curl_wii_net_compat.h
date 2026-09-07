@@ -9,10 +9,13 @@
 #define NETWORK_H22 1
 #endif
 #include <unistd.h>
-/* sys/features.h (via unistd.h) unconditionally sets __BSD_VISIBLE=0;
-   restore it so BSD types (u_short, etc.) and libogc BSD APIs are visible. */
+/* sys/features.h (via unistd.h) sets __BSD_VISIBLE=0 and __POSIX_VISIBLE=0
+   when compiled with -std=c11 (no _DEFAULT_SOURCE / _POSIX_C_SOURCE defined).
+   Restore both so libogc BSD/POSIX headers expose INET_ADDRSTRLEN, sockaddr_in6, etc. */
 #undef __BSD_VISIBLE
 #define __BSD_VISIBLE 1
+#undef __POSIX_VISIBLE
+#define __POSIX_VISIBLE 200112
 #include <fcntl.h>
 #include <errno.h>
 #include <network.h>

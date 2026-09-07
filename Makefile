@@ -35,15 +35,23 @@ READELF := $(DEVKITPPC)/bin/powerpc-eabi-readelf
 
 OPT=			-mhard-float -g -Os -Wall -Wstrict-prototypes -fPIC -fdata-sections -ffunction-sections
 CFLAGS=			$(OPT)
-WII_DEFINES := \
+WII_DEFINES = \
 	-DWII_BUILD \
 	-D__WII__ \
 	-D__wii__ \
 	-D__PPC__ \
 	-D__powerpc__ \
+	-DWII_LIBOGC=$(LIBOGC) \
 	#-DTERMINAL_PRINT_DEBUG
-LIBOGC_INC ?= $(DEVKITPRO)/libogc2/wii/include
-LIBOGC_LIB ?= $(DEVKITPRO)/libogc2/wii/lib
+LIBOGC ?= 1
+ifeq ($(LIBOGC),2)
+  LIBOGC_INC ?= $(DEVKITPRO)/libogc2/wii/include
+  LIBOGC_LIB ?= $(DEVKITPRO)/libogc2/wii/lib
+else
+  LIBOGC_INC ?= $(DEVKITPRO)/libogc/include
+  LIBOGC_LIB ?= $(DEVKITPRO)/libogc/lib/wii
+endif
+export LIBOGC
 export LIBOGC_INC
 export LIBOGC_LIB
 
@@ -51,7 +59,9 @@ WII_INCLUDE_DIRS := \
 	-I. \
 	-I$(MAKEFILE_DIR)bitmap/include \
 	-I$(MAKEFILE_DIR)fat/include \
+	-I$(MAKEFILE_DIR)curl/wii/include \
 	-I$(LIBOGC_INC) \
+	-I$(LIBOGC_INC)/ogc \
 	-I$(DEVKITPRO)/portlibs/ppc/include
 CFLAGS_WII := -Os -Wall $(WII_DEFINES) $(WII_INCLUDE_DIRS)
 CPPFLAGS_WII := $(WII_DEFINES) $(WII_INCLUDE_DIRS)
@@ -272,6 +282,8 @@ $(BUILD_DIR)/Makefile: | $(BUILD_PYTHON)
 	@touch "$(BUILD_DIR)/Makefile"
 	@# Apply Wii-specific pyconfig.h additions once, right after configure.
 	@$(MAKE) -f $(MAKEFILE_DIR)Makefile wii-patch-pyconfig BUILD_DIR="$(BUILD_DIR)"
+	@# Apply Wii-specific build-wii/Makefile patches (module build rules).
+	@$(MAKE) -f $(MAKEFILE_DIR)Makefile wii-patch-makefile BUILD_DIR="$(BUILD_DIR)"
 	@# Prevent build-wii's make from re-running config.status (which would
 	@# overwrite pyconfig.h).  Touch Makefile.pre so it is newer than both
 	@# Makefile.pre.in and config.status.
@@ -297,6 +309,12 @@ libpython: configure frozen-modules ssl curl $(BUILD_DIR)/Modules/wiitoolsmodule
 	@# Interrupted builds can leave behind empty object files that make treats as
 	@# up-to-date. Drop them so they are rebuilt before archiving/linking.
 	@find "$(BUILD_DIR)" -name '*.o' -size 0 -print -delete 2>/dev/null || true
+	@# build-wii's sub-make regenerates Makefile when Makefile.pre is newer (the
+	@# configure step's "touch Makefile.pre" leaves it newer than the patched
+	@# Makefile). Re-apply the patch and then touch Makefile so it is definitively
+	@# newer than Makefile.pre -- prevents the sub-make from reverting the patches.
+	@$(MAKE) -f $(MAKEFILE_DIR)Makefile wii-patch-makefile BUILD_DIR="$(BUILD_DIR)"
+	@touch "$(BUILD_DIR)/Makefile"
 	@# frozen.o has no header dependency in the generated Makefile; invalidate it
 	@# whenever frozen.c or any frozen_modules/*.h changed, so re-frozen stdlib
 	@# modules actually make it into libpython.
@@ -365,6 +383,20 @@ wii-patch-pyconfig:
 	    sed -i 's|#endif /\*Py_PYCONFIG_H\*/||g' "$(BUILD_DIR)/pyconfig.h"; \
 	    cat "$(srcdir)/Modules/wii_pyconfig_patch.h" >> "$(BUILD_DIR)/pyconfig.h"; \
 	fi
+
+# Idempotently patch build-wii/Makefile with Wii-specific module build rules.
+# Marker: WII_MAKEFILE_PATCHED in a comment at the top of the Makefile.
+.PHONY: wii-patch-makefile
+wii-patch-makefile:
+	@if grep -q 'WII_MAKEFILE_PATCHED' "$(BUILD_DIR)/Makefile" 2>/dev/null; then exit 0; fi; \
+	echo "Patching $(BUILD_DIR)/Makefile with Wii module build rules"; \
+	sed -i 's|\(Modules/selectmodule_wii\.o:.*\); \$$(CC)  -I\$$(LIBOGC_INC) -DHAVE_SELECT|\1; $$(CC)  -I$$(abs_srcdir)/curl/wii/include -I$$(LIBOGC_INC) -DHAVE_SELECT|' \
+	    "$(BUILD_DIR)/Makefile"; \
+	sed -i 's|-DHAVE_GETADDRINFO -DENABLE_IPV6 |-DHAVE_GETADDRINFO -DHAVE_GETNAMEINFO |g' \
+	    "$(BUILD_DIR)/Makefile"; \
+	sed -i 's|-I\$$(abs_srcdir)/curl/wii/include -I\$$(LIBOGC_INC) -DHAVE_SOCKET|-I$$(abs_srcdir)/curl/wii/include -I$$(LIBOGC_INC) -I$$(LIBOGC_INC)/ogc -include $$(abs_srcdir)/curl/wii/include/curl_wii_net_compat.h -DHAVE_SOCKET|' \
+	    "$(BUILD_DIR)/Makefile"; \
+	echo '# WII_MAKEFILE_PATCHED' >> "$(BUILD_DIR)/Makefile"
 
 wiitools-build: $(BUILD_DIR)/Modules/wiitoolsmodule.o
 

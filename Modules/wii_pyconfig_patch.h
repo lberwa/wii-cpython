@@ -39,7 +39,7 @@ typedef unsigned int    u_int;
 #undef HAVE_NET_IF_H
 #undef HAVE_HSTRERROR
 
-/* Socket functions not available in libogc */
+/* Socket-Funktionen die in libogc und libogc2 fehlen */
 #undef HAVE_SENDMSG
 #undef HAVE_RECVMSG
 #undef HAVE_SOCKETPAIR
@@ -48,10 +48,21 @@ typedef unsigned int    u_int;
 #undef HAVE_GETHOSTBYADDR
 #undef HAVE_SELECT
 #undef HAVE_H_ERRNO
-#undef HAVE_GETADDRINFO
-#undef HAVE_GETNAMEINFO
+/* getaddrinfo/getnameinfo: wii_socket_stubs.c liefert Implementierungen.
+   HAVE_GETADDRINFO kommt via -DHAVE_GETADDRINFO auf der Kommandozeile. */
 
 /* ioctl not available on Wii -- _Py_set_blocking stubs out without it */
 #undef HAVE_IOCTL
+
+/* struct sockaddr_storage: libogc/libogc2 bietet es an (via socket.h oder Stub) */
+#define HAVE_SOCKADDR_STORAGE 1
+/* sin6_len fehlt in libogc's struct sockaddr_in6; HAVE_SOCKADDR_SA_LEN unterdrücken */
+#undef HAVE_SOCKADDR_SA_LEN
+/* struct addrinfo: libogc/libogc2 stellen es bereit (via netdb.h stub oder direkt) */
+#define HAVE_ADDRINFO 1
+
+/* uuid: libuuid liegt in uuid/install-wii/include/uuid/uuid.h */
+#undef HAVE_UUID_H
+#define HAVE_UUID_UUID_H 1
 
 #endif /*Py_PYCONFIG_H*/

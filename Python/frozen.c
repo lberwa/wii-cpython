@@ -199,10 +199,7 @@
 #include "frozen_modules/site.h"
 #include "frozen_modules/stat.h"
 #include "frozen_modules/runpy.h"
-#ifdef WII_BUILD
 #include "frozen_modules/pkgutil.h"
-#endif
-#ifdef WII_BUILD
 #include "frozen_modules/enum.h"
 #include "frozen_modules/keyword.h"
 #include "frozen_modules/operator.h"
@@ -232,7 +229,6 @@
 #include "frozen_modules/__phello__.ham.eggs.h"
 #include "frozen_modules/__phello__.spam.h"
 #include "frozen_modules/frozen_only.h"
-#endif /* WII_BUILD */
 /* End includes */
 
 static const struct _frozen bootstrap_modules[] = {
@@ -409,7 +405,6 @@ static const struct _frozen stdlib_modules[] = {
     /* runpy - run module with -m */
     {"runpy", _Py_M__runpy, (int)sizeof(_Py_M__runpy), false},
 
-#ifdef WII_BUILD
     /* wii extra stdlib */
     {"pkgutil", _Py_M__pkgutil, (int)sizeof(_Py_M__pkgutil), false},
     {"enum", _Py_M__enum, (int)sizeof(_Py_M__enum), false},
@@ -437,12 +432,9 @@ static const struct _frozen stdlib_modules[] = {
     {"zoneinfo._common", _Py_M__zoneinfo__common, (int)sizeof(_Py_M__zoneinfo__common), false},
     {"zoneinfo._tzpath", _Py_M__zoneinfo__tzpath, (int)sizeof(_Py_M__zoneinfo__tzpath), false},
     {"zoneinfo._zoneinfo", _Py_M__zoneinfo__zoneinfo, (int)sizeof(_Py_M__zoneinfo__zoneinfo), false},
-#endif /* WII_BUILD */
-
     {0, 0, 0} /* stdlib sentinel */
 };
 static const struct _frozen test_modules[] = {
-#ifdef WII_BUILD
     {"__hello__", _Py_M____hello__, (int)sizeof(_Py_M____hello__), false},
     {"__hello_alias__", _Py_M____hello__, (int)sizeof(_Py_M____hello__), false},
     {"__phello_alias__", _Py_M____hello__, (int)sizeof(_Py_M____hello__), true},
@@ -454,8 +446,6 @@ static const struct _frozen test_modules[] = {
     {"__phello__.ham.eggs", _Py_M____phello___ham_eggs, (int)sizeof(_Py_M____phello___ham_eggs), false},
     {"__phello__.spam", _Py_M____phello___spam, (int)sizeof(_Py_M____phello___spam), false},
     {"__hello_only__", _Py_M__frozen_only, (int)sizeof(_Py_M__frozen_only), false},
-#endif /* WII_BUILD */
-
     {0, 0, 0} /* test sentinel */
 };
 const struct _frozen *_PyImport_FrozenBootstrap = bootstrap_modules;

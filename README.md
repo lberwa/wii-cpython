@@ -45,7 +45,7 @@ sudo apt install libssl-dev cmake
 dkp-pacman install wii-dev ppc-zlib ppc-bzip2
 ```
 
-__PC-build-tool:__
+if you want to build with libogc2:
 ```bash
 dkp-pacman -S libogc2
 ```
@@ -62,7 +62,7 @@ This builds a Python toolchain on the PC to create frozen Python files for the W
 
 __Build:__
 ```bash
-make py -j$(nproc)
+make py -j$(nproc) LIBOGC=1 # or 2 if you want to use libogc2/
 ```
 
 This will make a cpython.a.
@@ -71,7 +71,7 @@ This will make a cpython.a.
 
 __or if you want to test it:__
 ```bash
-make -j$(nproc)
+make -j$(nproc) LIBOGC=1 # or 2 if you want to use libogc2/
 ```
 
 This will make a cpython.a and a boot.dol in wiitest/.
@@ -80,7 +80,7 @@ This will make a cpython.a and a boot.dol in wiitest/.
 
 __Install:__
 ```bash
-sudo make install DEVKITPRO="/PATH/devkitpro" DEVKITPPC="/PATH/devkitpro/devkitPPC"
+sudo make install DEVKITPRO="/PATH/devkitpro" DEVKITPPC="/PATH/devkitpro/devkitPPC" LIBOGC=1 # or 2 if you want to use libogc2/
 
 ```
 
