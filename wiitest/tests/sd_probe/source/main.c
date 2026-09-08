@@ -7,7 +7,7 @@
 #include <sys/stat.h>
 #include <string.h>
 
-#include "../../../../fat/include/pyfat.h"
+#include <fat.h>
 
 static void wait_vsync_frames(int frames) {
     for (int i = 0; i < frames; i++) {

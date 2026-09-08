@@ -58,7 +58,6 @@ export LIBOGC_LIB
 WII_INCLUDE_DIRS := \
 	-I. \
 	-I$(MAKEFILE_DIR)bitmap/include \
-	-I$(MAKEFILE_DIR)fat/include \
 	-I$(MAKEFILE_DIR)curl/wii/include \
 	-I$(LIBOGC_INC) \
 	-I$(LIBOGC_INC)/ogc \
@@ -107,7 +106,7 @@ CONFIGURE_FLAGS= \
 FROZEN_HEADERS := $(shell sed -n 's/^#include "frozen_modules\/\(.*\)"/Python\/frozen_modules\/\1/p' Python/frozen.c)
 
 .PHONY: all clean configure libpython build-host python curl ssl wiitest	\
- 		regen-importlib frozen-modules bitmap bitmap-clean fat fat-clean wiitest-clean py \
+ 		regen-importlib frozen-modules bitmap bitmap-clean wiitest-clean py \
  		gdbm gdbm-clean xz xz-clean uuid uuid-clean glibc glibc-clean
 
 all: wiitest
@@ -233,7 +232,7 @@ $(GLIBC_LIB): $(GLIBC_DIR)/wii_dlfcn.c $(GLIBC_DIR)/wii_dlfcn.h
 glibc-clean:
 	@-rm -f "$(GLIBC_OBJ)" "$(GLIBC_LIB)"
 
-cp-libs: python curl bitmap fat gdbm xz uuid glibc
+cp-libs: python curl bitmap gdbm xz uuid glibc
 	@rm -rf "$(LIB_DIR)"
 	@mkdir -p "$(LIB_DIR)"
 	@# Der Upstream-glibc-Quellbaum (glibc/) enthaelt ASCII-Linkerskripte
@@ -306,15 +305,22 @@ libpython: configure frozen-modules ssl curl $(BUILD_DIR)/Modules/wiitoolsmodule
 	@# Ensure build-wii uses our local module setup (e.g. math)
 	@cmp -s "$(srcdir)/Modules/Setup.local" "$(BUILD_DIR)/Modules/Setup.local" 2>/dev/null || \
 		cp "$(srcdir)/Modules/Setup.local" "$(BUILD_DIR)/Modules/Setup.local"
+	@# configure runs makesetup with an empty Setup.local, producing a Makefile
+	@# with MODOBJS=[] and a config.c that references only bootstrap modules.
+	@# With -j8, the archive rule can complete with those empty MODOBJS before
+	@# make restarts after detecting that our Setup.local caused Makefile to be
+	@# regenerated -- leaving all PyInit_* symbols out of libpython.a.
+	@# Fix: delete config.c here so makesetup is forced to run as the very first
+	@# step (single-threaded) and produce both a correct Makefile and config.c
+	@# before any compilation starts.
+	@rm -f "$(BUILD_DIR)/Modules/config.c"
+	@$(MAKE) -j1 -C "$(BUILD_DIR)" Modules/config.c
+	@# Re-apply Wii-specific patches (makesetup just overwrote Makefile).
+	@$(MAKE) -f $(MAKEFILE_DIR)Makefile wii-patch-makefile BUILD_DIR="$(BUILD_DIR)"
+	@touch "$(BUILD_DIR)/Makefile"
 	@# Interrupted builds can leave behind empty object files that make treats as
 	@# up-to-date. Drop them so they are rebuilt before archiving/linking.
 	@find "$(BUILD_DIR)" -name '*.o' -size 0 -print -delete 2>/dev/null || true
-	@# build-wii's sub-make regenerates Makefile when Makefile.pre is newer (the
-	@# configure step's "touch Makefile.pre" leaves it newer than the patched
-	@# Makefile). Re-apply the patch and then touch Makefile so it is definitively
-	@# newer than Makefile.pre -- prevents the sub-make from reverting the patches.
-	@$(MAKE) -f $(MAKEFILE_DIR)Makefile wii-patch-makefile BUILD_DIR="$(BUILD_DIR)"
-	@touch "$(BUILD_DIR)/Makefile"
 	@# frozen.o has no header dependency in the generated Makefile; invalidate it
 	@# whenever frozen.c or any frozen_modules/*.h changed, so re-frozen stdlib
 	@# modules actually make it into libpython.
@@ -452,19 +458,40 @@ py:
 install: py
 	@if [ "$$(id -u)" != "0" ]; then \
 		echo ""; \
-		echo "please try "sudo make install""; \
+		echo "please try \"sudo make install\""; \
 		echo ""; \
 		exit 1; \
 	fi
 	@mkdir -p $(DEVKITPRO)/portlibs/ppc/lib
 	@mkdir -p $(DEVKITPRO)/portlibs/ppc/include/Python
-	
+	@mkdir -p $(DEVKITPRO)/portlibs/ppc/include/curl
+
 	@cp -r libs/* $(DEVKITPRO)/portlibs/ppc/lib
 	@cp -r Include/* $(DEVKITPRO)/portlibs/ppc/include/Python
+	@cp "$(BUILD_DIR)/pyconfig.h" $(DEVKITPRO)/portlibs/ppc/include/Python/pyconfig.h
+	@cp curl/include/curl/*.h $(DEVKITPRO)/portlibs/ppc/include/curl/
 
 	@chmod a+w libs/
 
 	@echo "Installation complete."
+
+remove:
+	@if [ "$$(id -u)" != "0" ]; then \
+		echo ""; \
+		echo "please try \"sudo make remove\""; \
+		echo ""; \
+		exit 1; \
+	fi
+	@rm -rf $(DEVKITPRO)/portlibs/ppc/include/Python
+	@rm -rf $(DEVKITPRO)/portlibs/ppc/include/curl
+	@if [ -d "$(LIB_DIR)" ]; then \
+		for f in "$(LIB_DIR)"/*.a; do \
+			rm -f "$(DEVKITPRO)/portlibs/ppc/lib/$$(basename $$f)"; \
+		done; \
+	else \
+		echo "Warning: $(LIB_DIR)/ not found, run 'make py' first to remove .a files accurately"; \
+	fi
+	@echo "Removal complete."
 
 wiitest: py
 	@if [ -d "wiitest" ]; then \
@@ -496,13 +523,7 @@ endif
 wiitest-clean:
 	@$(MAKE) -C $(MAKEFILE_DIR)wiitest clean
 
-fat-clean:
-	@$(MAKE) -C $(MAKEFILE_DIR)fat ogc-clean
-
-fat:
-	$(MAKE) -j$(CPU_CORES) -C $(MAKEFILE_DIR)fat wii-release
-
-clean: fat-clean wiitest-clean bitmap-clean glibc-clean
+clean: wiitest-clean bitmap-clean glibc-clean
 	@-rm -rf "$(BUILD_DIR)"
 	@-rm -rf $(MAKEFILE_DIR)bitmap/build
 	@-rm -rf $(LIB_DIR)

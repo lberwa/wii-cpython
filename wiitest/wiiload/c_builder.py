@@ -27,7 +27,7 @@ parts: list[str] = []
 
 parts.append("""
 #include <gccore.h>
-#include "../../../fat/include/pyfat.h"
+#include <fat.h>
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>

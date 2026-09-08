@@ -12,7 +12,6 @@ MAKEFILE_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
 INCLUDE += -I$(DEVKITPRO)/libogc/include
 INCLUDE += -I$(MAKEFILE_DIR)../../../bitmap/include
-INCLUDE += -I$(MAKEFILE_DIR)../../../fat/include
 
 CFLAGS     += -Os -g -std=c99 -Wall -Wextra
 CPPFLAGS   += -Os -g

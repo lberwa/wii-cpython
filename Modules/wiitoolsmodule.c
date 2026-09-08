@@ -10,7 +10,7 @@
 #endif
 
 #include <my_text_renderer.h>
-#include "../fat/include/pyfat.h"
+#include <fat.h>
 #include <gccore.h>
 #if WII_LIBOGC == 2
 #include <ogc/timesupp.h>

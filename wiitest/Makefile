@@ -42,8 +42,8 @@ LDFLAGS    += -L$(MAKEFILE_DIR)../uuid/install-wii/lib
 CPYTHON_BUILD := $(MAKEFILE_DIR)../libs
 
 
-#LIBS       := -lpython3.15 -lfatpy -lwiiuse -lbte -lbitmap -logc -lcurl -lmbedtls -lmbedx509 -lmbedcrypto -ltfpsacrypto
-LIBS := -lpython3.15 -lwiidl -lcurl -lmbedtls -lmbedx509 -lmbedcrypto -ltfpsacrypto -lz -lgdbm_compat -lgdbm -llzma -lbz2 -luuid -lfatpy -lwiiuse -lbte -lbitmap -logc -lm
+#LIBS       := -lpython3.15 -lfat -lwiiuse -lbte -lbitmap -logc -lcurl -lmbedtls -lmbedx509 -lmbedcrypto -ltfpsacrypto
+LIBS := -lpython3.15 -lwiidl -lcurl -lmbedtls -lmbedx509 -lmbedcrypto -ltfpsacrypto -lz -lgdbm_compat -lgdbm -llzma -lbz2 -luuid -lfat -lwiiuse -lbte -lbitmap -logc -lm
 LDFLAGS    += -L$(DEVKITPRO)/portlibs/ppc/lib
 
 

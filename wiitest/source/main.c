@@ -48,7 +48,7 @@ extern const unsigned char test_py_end[];
  #define PRINT SYS_Report
 #endif
 
-#include "../../fat/include/pyfat.h"
+#include <fat.h>
 
 #ifdef PNG
 
@@ -101,7 +101,7 @@ void wait(int time) {
 #include <stdio.h>
 #include <dirent.h>
 #include <string.h>
-#include "../../fat/include/pyfat.h"      // für fatInitDefault
+#include <fat.h>
 
 void list_dir(const char *path, int level) {
     DIR *dir = opendir(path);
@@ -261,7 +261,7 @@ wait(300); // 5 Sekunden warten
     size_t count = 3;
 
     //Py_Initalize_Custom(NULL, NULL); 
-    PyStatus status = Py_Init_Custom((const char*[]){ "sd:/", "sd:", "sd:/python"}, &count);
+    PyStatus status = Py_Init_Custom((const char*[]){ "sd:/", "sd:", "sd:/python"}, &count, NULL);
 
     if (status._type != _PyStatus_TYPE_OK) {
         // Init ist fehlgeschlagen

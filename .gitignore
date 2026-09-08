@@ -13,6 +13,10 @@ PCbuild/
 glibc/
 
 bitmap/lib/*.a
+bitmap/build/
+
+dlfcn/*.a
+dlfcn/*.o
 
 aclocal.m4
 add2lib
@@ -53,7 +57,7 @@ build-host/libpython3.15.a
 build-host2
 build-host3/
 build-host/
-fat/source_fork_backup/
+fat/
 
 CLAUDE.md
 
@@ -84,3 +88,4 @@ wiitest/**/*.d
 zlib/
 zlib2/
 
+wiitest/symbols.map

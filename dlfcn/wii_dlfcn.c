@@ -72,6 +72,7 @@ static int  g_err_set = 0;
 static const wii_dl_sym  *g_exports  = NULL;
 static size_t             g_nexports = 0;
 static wii_dl_resolver_t  g_resolver = NULL;
+static int                g_map_loaded = 0;
 
 static void *read_file(const char *path, size_t *out_size);
 
@@ -186,6 +187,7 @@ long wii_dl_load_symbol_map(const char *path) {
     g_map_len = n;
 
     wii_dl_set_resolver(symbol_map_resolver);
+    g_map_loaded = 1;
     return (long)n;
 }
 
@@ -248,7 +250,13 @@ static int apply_rela(wii_module *m, const Elf32_Rela *r) {
         } else {
             /* extern: im Hauptprogramm nachschlagen */
             void *addr = resolve_extern(name);
-            if (!addr) { set_error("unresolved symbol: %s", name); return -1; }
+            if (!addr) {
+                if (!g_map_loaded)
+                    set_error("no symbols.map loaded (pass path to Py_Init_Custom)", NULL);
+                else
+                    set_error("unresolved symbol: %s", name);
+                return -1;
+            }
             symval = (uint32_t)(uintptr_t)addr;
         }
     }

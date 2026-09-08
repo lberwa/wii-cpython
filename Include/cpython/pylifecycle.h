@@ -22,9 +22,12 @@ PyAPI_FUNC(PyStatus) Py_PreInitializeFromArgs(
 /*
    Py_Init_Custom is a function where you can but in just the
    pathes and run it without any other configuration.
+   symbols_map_path: path to a symbols.map file (nm --defined-only output)
+   for the Wii dlopen loader; pass NULL to skip.
 */
 PyAPI_FUNC(PyStatus)
-Py_Init_Custom(const char** import_paths, size_t *count);
+Py_Init_Custom(const char** import_paths, size_t *count,
+               const char *symbols_map_path);
 
 /* Initialization and finalization */
 

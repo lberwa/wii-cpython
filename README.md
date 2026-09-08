@@ -84,9 +84,14 @@ sudo make install DEVKITPRO="/PATH/devkitpro" DEVKITPPC="/PATH/devkitpro/devkitP
 
 ```
 
-This will copy your library .a files to DEVKITPRO/portlibs/ppc/lib and the *.h headers to the include directory.
+This will copy the `.a` files to `DEVKITPRO/portlibs/ppc/lib`, the Python headers to `portlibs/ppc/include/Python/` (including `pyconfig.h`), and the curl headers to `portlibs/ppc/include/curl/`.
 
+__Remove:__
+```bash
+sudo make remove DEVKITPRO="/PATH/devkitpro"
+```
 
+This will delete everything that `make install` placed in portlibs: the `Python/` and `curl/` include directories and all installed `.a` files. Other packages in portlibs are not affected. Run `make py` before `make remove` if you have run `make clean` in the meantime (so that `libs/` exists and the file list is accurate).
 
 __Clean:__
 ```bash
@@ -137,11 +142,14 @@ int main() {
     //################
 	size_t count = 2;
 	
-	// if you don't want import paths
-	//Py_Initialize_Custom(NULL, NULL); 
+	// if you don't want import paths and no symbol map:
+	//Py_Init_Custom(NULL, NULL, NULL);
 	
     // you can now import from "sd:" and sd:/python
-    PyStatus status = Py_Init_Custom((const char*[]){ "sd:/", "sd:/python"}, &count);
+    // third argument: path to symbols.map (from `nm --defined-only hello_world.elf`)
+    // for the Wii dlopen loader — pass NULL to skip
+    PyStatus status = Py_Init_Custom((const char*[]){ "sd:/", "sd:/python"}, &count,
+                                     "sd:/symbols.map");
     
     // return if failed to initialize Python
     if (status._type != _PyStatus_TYPE_OK) { 

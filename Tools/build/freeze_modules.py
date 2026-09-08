@@ -695,7 +695,8 @@ def main():
 
     # Regen build-related files.
     regen_makefile(modules)
-    regen_pcbuild(modules)
+    if os.path.isdir(os.path.join(ROOT_DIR, 'PCbuild')):
+        regen_pcbuild(modules)
     regen_frozen(modules)
 
 
