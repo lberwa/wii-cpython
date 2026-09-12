@@ -5,6 +5,7 @@ iOS/
 Mac/
 PC/
 PCbuild/
+Tools/wasm/
 
 # glibc-Quellbaum (249 MB): wird nicht gebaut, nur glibc/sysdeps/powerpc/
 # powerpc32/dl-machine.h diente als Referenz fuer PPC-Relocations (bereits
