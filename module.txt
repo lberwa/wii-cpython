@@ -1,54 +1,90 @@
-| Modul              | Beschreibung                         | (✅)
-| ------------------ | ------------------------------------ | 
-| `_asyncio`         | C-Beschleuniger für asyncio          |  ❌
-| `array`            | Speicheroptimierte Arrays            |  ✅
-| `binascii`         | Hex-, Base64- und Binärkonvertierung |  ✅
-| `_bisect`          | Binäre Suche in sortierten Listen    |  ✅
-| `_bz2`             | BZip2-Kompression                    |  ✅
-| `cmath`            | Mathematik mit komplexen Zahlen      |  ✅
-| `_csv`             | Schneller CSV-Parser                 |  ✅
-| `_dbm`             | DBM-Datenbanken                      |  ✅
-| `_elementtree`     | XML-Verarbeitung                     |  ✅
-| `fcntl`            | Unix-Dateideskriptor-Steuerung       |  ❌
-| `_gdbm`            | GNU DBM-Datenbanken                  |  ✅
-| `grp`              | Unix-Gruppeninformationen            |  ❌
-| `hashlib`          | Hashfunktionen (SHA, MD5, ...)       |  ✅ (pure Python, nutzt _md5/_sha*)
-| `_heapq`           | Prioritätswarteschlangen             |  ✅
-| `hmac`             | HMAC-Signaturen                      |  ✅
-| `_interpchannels`  | Interpreter-Kommunikation            |  ❌
-| `_interpqueues`    | Interpreter-Warteschlangen           |  ❌
-| `_interpreters`    | Mehrere Python-Interpreter           |  ❌
-| `_json`            | Schneller JSON-Parser                |  ✅
-| `_lsprof`          | Profiler (`cProfile`)                |  ✅
-| `_lzma`            | LZMA/XZ-Kompression                  |  ✅
-| `md5`              | Altes MD5-Modul                      |  ✅ (als `_md5`)
-| `mmap`             | Memory-Mapped Files                  |  ❌
-| `_pickle`          | Schneller Pickle-Serializer          |  ✅
-| `_posixsubprocess` | Prozessstart-Unterstützung           |  ❌ (TODO: implement a bash terminal for the Wii)
-| `pwd`              | Unix-Benutzerinformationen           |  ❌
-| `pyexpat`          | XML-Parser Expat                     |  ✅
-| `_queue`           | Thread-Warteschlangen                |  ❌
-| `_random`          | Schneller Zufallszahlengenerator     |  ✅
-| `readline`         | Kommandozeilen-Editing               |  ❌
-| `_scproxy`         | macOS Proxy-Unterstützung            |  ❌
-| `select`           | Socket-/Datei-Multiplexing           |  ❌
-| `sha1`             | SHA-1 Implementierung                |  ✅ (als `_sha1`)
-| `sha2`             | SHA-2 Implementierung                |  ✅ (als `_sha2`)
-| `sha3`             | SHA-3 Implementierung                |  ✅ (als `_sha3`)
-| `signal`           | Signalbehandlung                     |  ✅ (bereits built-in)
-| `socket`           | Netzwerk-Sockets                     |  ✅ (lwIP via libogc)
-| `_ssl`             | TLS/SSL-Unterstützung                |  ✅ (stub; import ssl ok, RAND_bytes via PSA)
-| `_statistics`      | Statistik-Hilfsfunktionen            |  ✅
-| `_struct`          | Binärdaten packen/entpacken          |  ✅
-| `symtable`         | Python-Symboltabellen                |  ✅ (bereits built-in)
-| `syslog`           | Unix-Systemlog                       |  ❌
-| `termios`          | Terminal-Steuerung                   |  ❌ (TODO: implement a bash terminal for the Wii)
-| `_tkinter`         | Tk-GUI                               |  ❌ (TODO: implement tkinter for the wii)
-| `unicodedata`      | Unicode-Datenbank                    |  ✅
-| `_uuid`            | UUID-Erzeugung                       |  ✅ (libuuid aus ./uuid/)
-| `_winapi`          | Windows-API                          |  ❌
-| `xxlimited`        | CPython-Testmodul                    |  ❌
-| `xxlimited_35`     | CPython-Testmodul                    |  ❌
-| `xxsubtype`        | CPython-Testmodul                    |  ❌
-| `zlib`             | Deflate-/ZIP-Kompression             |  ✅
-| `_zoneinfo`        | Zeitzonen-Datenbank                  |  ✅
+| Modul                    | Beschreibung                                      | Status |
+| ------------------------ | ------------------------------------------------- | ------ |
+| `_abc`                   | C-Kern für `abc`-Modul                            | ✅ (built-in) |
+| `_asyncio`               | C-Beschleuniger für asyncio                       | ✅ |
+| `array`                  | Speicheroptimierte Arrays                         | ✅ |
+| `binascii`               | Hex-, Base64- und Binärkonvertierung              | ✅ |
+| `_bisect`                | Binäre Suche in sortierten Listen                 | ✅ |
+| `_bz2`                   | BZip2-Kompression                                 | ✅ |
+| `cmath`                  | Mathematik mit komplexen Zahlen                   | ✅ |
+| `_codecs`                | Codec-Registrierung                               | ✅ (built-in) |
+| `_codecs_cn`             | CJK-Codecs Chinesisch (Festland)                  | ✅ (.so SD-Karte) |
+| `_codecs_hk`             | CJK-Codecs Chinesisch (Hongkong)                  | ✅ (.so SD-Karte) |
+| `_codecs_iso2022`        | CJK-Codecs ISO-2022                               | ✅ (.so SD-Karte) |
+| `_codecs_jp`             | CJK-Codecs Japanisch                              | ✅ (.so SD-Karte) |
+| `_codecs_kr`             | CJK-Codecs Koreanisch                             | ✅ (.so SD-Karte) |
+| `_codecs_tw`             | CJK-Codecs Chinesisch (Taiwan)                    | ✅ (.so SD-Karte) |
+| `_collections`           | C-Kern für `collections`                          | ✅ (built-in) |
+| `_contextvars`           | Kontextvariablen                                  | ✅ (built-in) |
+| `_csv`                   | Schneller CSV-Parser                              | ✅ |
+| `_ctypes`                | Foreign Function Interface (libffi PPC-SYSV)      | ✅ (.so SD-Karte) |
+| `_datetime`              | C-Beschleuniger für `datetime`                    | ✅ (.so SD-Karte) |
+| `_dbm`                   | DBM-Datenbanken (ndbm-Interface)                  | ✅ |
+| `_decimal`               | C-Beschleuniger für `decimal` (libmpdec inline)   | ✅ (.so SD-Karte) |
+| `_elementtree`           | XML-Verarbeitung                                  | ✅ |
+| `errno`                  | POSIX-Fehlercodes                                 | ✅ (built-in) |
+| `fcntl`                  | Unix-Dateideskriptor-Steuerung                    | ❌ (POSIX only) |
+| `_functools`             | C-Kern für `functools`                            | ✅ (built-in) |
+| `gc`                     | Garbage Collector                                 | ✅ (built-in) |
+| `_gdbm`                  | GNU DBM-Datenbanken                               | ✅ |
+| `grp`                    | Unix-Gruppeninformationen                         | ❌ (POSIX only) |
+| `_hashlib`               | Hash-Backend (Wii-Shim → HACL* built-ins)         | ✅ (.py SD-Karte, leitet zu _md5/_sha*/_blake2 weiter) |
+| `_heapq`                 | Prioritätswarteschlangen                          | ✅ |
+| `_hmac`                  | HMAC (HACL*)                                      | ✅ |
+| `_interpchannels`        | Interpreter-Kommunikation                         | ❌ |
+| `_interpqueues`          | Interpreter-Warteschlangen                        | ❌ |
+| `_interpreters`          | Mehrere Python-Interpreter                        | ❌ |
+| `_io`                    | C-Kern für I/O                                    | ✅ (built-in) |
+| `itertools`              | Iterator-Hilfswerkzeuge                           | ✅ (built-in) |
+| `_json`                  | Schneller JSON-Parser                             | ✅ |
+| `_lsprof`                | Profiler (`cProfile`)                             | ✅ |
+| `_lzma`                  | LZMA/XZ-Kompression                              | ✅ |
+| `marshal`                | Binäres Python-Objektformat                       | ✅ (built-in) |
+| `math`                   | Mathematische Funktionen                          | ✅ |
+| `_md5`                   | MD5-Hashfunktion (HACL*)                          | ✅ |
+| `mmap`                   | Memory-Mapped Files                               | ❌ (kein mmap auf Wii) |
+| `_multibytecodec`        | CJK-Multibyte-Codec-Framework                     | ✅ (.so SD-Karte) |
+| `_multiprocessing`       | Unterstützung für `multiprocessing`               | ❌ (kein fork() auf Wii) |
+| `_opcode`                | Bytecode-Operatoren                               | ✅ (built-in) |
+| `_operator`              | C-Kern für `operator`                             | ✅ (built-in) |
+| `_pickle`                | Schneller Pickle-Serializer                       | ✅ |
+| `_posixsubprocess`       | Prozessstart (`fork`/`exec`)                      | ❌ (kein fork() auf Wii) |
+| `posix`                  | POSIX-Syscalls                                    | ✅ (stub, SD-Dateizugriff) |
+| `pty`                    | Pseudo-Terminals                                  | ❌ (Linux only) |
+| `pwd`                    | Unix-Benutzerinformationen                        | ❌ (POSIX only) |
+| `pyexpat`                | XML-Parser Expat                                  | ✅ |
+| `_queue`                 | C-Impl. für `queue.SimpleQueue`                   | ✅ (.so SD-Karte) |
+| `_random`                | Schneller Zufallszahlengenerator                  | ✅ |
+| `readline`               | Kommandozeilen-Editing                            | ❌ |
+| `resource`               | Unix-Ressourcenlimits                             | ❌ (POSIX only) |
+| `_scproxy`               | macOS Proxy-Unterstützung                         | ❌ (macOS only) |
+| `select`                 | Socket-/Datei-Multiplexing                        | ✅ (selectmodule_wii.c, net_select + net_poll) |
+| `_sha1`                  | SHA-1 (HACL*)                                     | ✅ |
+| `_sha2`                  | SHA-2 (HACL*)                                     | ✅ |
+| `_sha3`                  | SHA-3 (HACL*)                                     | ✅ |
+| `_signal`                | Signal-Behandlung                                 | ✅ (built-in) |
+| `_socket`                | Netzwerk-Sockets (lwIP via libogc)                | ✅ |
+| `_sqlite3`               | SQLite-Datenbank (Amalgamation 3.46.0)            | ✅ (.so SD-Karte, OMIT_WAL/OMIT_MMAP) |
+| `_sre`                   | C-Kern für Regex                                  | ✅ (built-in) |
+| `_ssl`                   | TLS/SSL (mbedTLS 4.0, PSA API)                    | ✅ (vollständig implementiert) |
+| `_stat`                  | Datei-Stat-Konstanten                             | ✅ (built-in) |
+| `_statistics`            | Statistik-Hilfsfunktionen                         | ✅ |
+| `_string`                | C-Kern für String-Formatierung                    | ✅ (built-in) |
+| `_struct`                | Binärdaten packen/entpacken                       | ✅ |
+| `syslog`                 | Unix-Systemlog                                    | ❌ (POSIX only) |
+| `termios`                | Terminal-Steuerung                                | ❌ (POSIX only) |
+| `_thread`                | Low-Level-Threading                               | ✅ (built-in, GIL-Stubs) |
+| `time`                   | Zeitfunktionen                                    | ✅ (built-in) |
+| `_tkinter`               | Tk-GUI                                            | ❌ |                                  ####
+| `_tracemalloc`           | Speicher-Tracing                                  | ✅ (built-in) |
+| `unicodedata`            | Unicode-Datenbank                                 | ✅ |
+| `_uuid`                  | UUID-Erzeugung (libuuid)                          | ✅ |
+| `_warnings`              | C-Kern für `warnings`                             | ✅ (built-in) |
+| `_weakref`               | Schwache Referenzen                               | ✅ (built-in) |
+| `_winapi`                | Windows-API                                       | ❌ (Windows only) |
+| `wiitools`               | Wii-Hardware (libogc, curl, mbedTLS, LodePNG)     | ✅ (custom) |
+| `xxlimited`              | CPython-Testmodul (Limited API)                   | ✅ (.so SD-Karte) |
+| `xxlimited_35`           | CPython-Testmodul (Limited API 3.5)               | ✅ (.so SD-Karte) |
+| `xxsubtype`              | CPython-Testmodul (Subtypen)                      | ✅ (.so SD-Karte) |
+| `zlib`                   | Deflate-/ZIP-Kompression                          | ✅ |
+| `_zoneinfo`              | Zeitzonen-Datenbank                               | ✅ |

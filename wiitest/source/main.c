@@ -258,10 +258,11 @@ wait(300); // 5 Sekunden warten
     PRINT("\n\nFertig.\n");
 #endif
 
-    size_t count = 3;
+    size_t count = 4;
 
-    //Py_Initalize_Custom(NULL, NULL); 
-    PyStatus status = Py_Init_Custom((const char*[]){ "sd:/", "sd:", "sd:/python"}, &count, NULL);
+    //Py_Initalize_Custom(NULL, NULL);
+    /* sd:/hello/python: pip and other SD-card packages installed by wiiload */
+    PyStatus status = Py_Init_Custom((const char*[]){ "sd:/", "sd:", "sd:/python", "sd:/hello/python"}, &count, NULL);
 
     if (status._type != _PyStatus_TYPE_OK) {
         // Init ist fehlgeschlagen

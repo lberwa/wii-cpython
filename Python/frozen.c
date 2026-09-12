@@ -212,12 +212,9 @@
 #include "frozen_modules/_weakrefset.h"
 #include "frozen_modules/copy.h"
 #include "frozen_modules/_compat_pickle.h"
-#include "frozen_modules/xml.h"
 #include "frozen_modules/xml.dom.h"
-#include "frozen_modules/xml.etree.h"
 #include "frozen_modules/xml.parsers.h"
 #include "frozen_modules/xml.sax.h"
-#include "frozen_modules/xml.etree.ElementPath.h"
 #include "frozen_modules/struct.h"
 #include "frozen_modules/zoneinfo.h"
 #include "frozen_modules/zoneinfo._common.h"
@@ -229,6 +226,36 @@
 #include "frozen_modules/__phello__.ham.eggs.h"
 #include "frozen_modules/__phello__.spam.h"
 #include "frozen_modules/frozen_only.h"
+/* wii: __future__ (needed by pip and many stdlib modules) */
+#include "frozen_modules/__future__.h"
+/* wii: asyncio, networking, pip dependencies */
+#include "frozen_modules/signal.h"
+#include "frozen_modules/base64.h"
+#include "frozen_modules/socket.h"
+#include "frozen_modules/ssl.h"
+#include "frozen_modules/selectors.h"
+#include "frozen_modules/locale.h"
+#include "frozen_modules/queue.h"
+#include "frozen_modules/contextlib.h"
+#include "frozen_modules/string.h"
+#include "frozen_modules/string.templatelib.h"
+#include "frozen_modules/hashlib.h"
+#include "frozen_modules/json.h"
+#include "frozen_modules/json.decoder.h"
+#include "frozen_modules/json.encoder.h"
+#include "frozen_modules/json.scanner.h"
+#include "frozen_modules/ipaddress.h"
+#include "frozen_modules/bisect.h"
+#include "frozen_modules/tempfile.h"
+#include "frozen_modules/shutil.h"
+#include "frozen_modules/fnmatch.h"
+#include "frozen_modules/glob.h"
+#include "frozen_modules/pathlib.h"
+#include "frozen_modules/pathlib._local.h"
+#include "frozen_modules/pathlib._os.h"
+#include "frozen_modules/pathlib.types.h"
+#include "frozen_modules/random.h"
+#include "frozen_modules/datetime.h"
 /* End includes */
 
 static const struct _frozen bootstrap_modules[] = {
@@ -419,19 +446,48 @@ static const struct _frozen stdlib_modules[] = {
     {"_weakrefset", _Py_M___weakrefset, (int)sizeof(_Py_M___weakrefset), false},
     {"copy", _Py_M__copy, (int)sizeof(_Py_M__copy), false},
     {"_compat_pickle", _Py_M___compat_pickle, (int)sizeof(_Py_M___compat_pickle), false},
-    {"xml", _Py_M__xml, (int)sizeof(_Py_M__xml), true},
-    {"xml.__init__", _Py_M__xml, (int)sizeof(_Py_M__xml), false},
     {"xml.dom", _Py_M__xml_dom, (int)sizeof(_Py_M__xml_dom), true},
-    {"xml.etree", _Py_M__xml_etree, (int)sizeof(_Py_M__xml_etree), true},
     {"xml.parsers", _Py_M__xml_parsers, (int)sizeof(_Py_M__xml_parsers), true},
     {"xml.sax", _Py_M__xml_sax, (int)sizeof(_Py_M__xml_sax), true},
-    {"xml.etree.ElementPath", _Py_M__xml_etree_ElementPath, (int)sizeof(_Py_M__xml_etree_ElementPath), false},
     {"struct", _Py_M__struct, (int)sizeof(_Py_M__struct), false},
     {"zoneinfo", _Py_M__zoneinfo, (int)sizeof(_Py_M__zoneinfo), true},
     {"zoneinfo.__init__", _Py_M__zoneinfo, (int)sizeof(_Py_M__zoneinfo), false},
     {"zoneinfo._common", _Py_M__zoneinfo__common, (int)sizeof(_Py_M__zoneinfo__common), false},
     {"zoneinfo._tzpath", _Py_M__zoneinfo__tzpath, (int)sizeof(_Py_M__zoneinfo__tzpath), false},
     {"zoneinfo._zoneinfo", _Py_M__zoneinfo__zoneinfo, (int)sizeof(_Py_M__zoneinfo__zoneinfo), false},
+    {"__future__", _Py_M____future__, (int)sizeof(_Py_M____future__), false},
+    /* wii asyncio and networking */
+    {"signal", _Py_M__signal, (int)sizeof(_Py_M__signal), false},
+    {"base64", _Py_M__base64, (int)sizeof(_Py_M__base64), false},
+    {"socket", _Py_M__socket, (int)sizeof(_Py_M__socket), false},
+    {"ssl", _Py_M__ssl, (int)sizeof(_Py_M__ssl), false},
+    {"selectors", _Py_M__selectors, (int)sizeof(_Py_M__selectors), false},
+    {"locale", _Py_M__locale, (int)sizeof(_Py_M__locale), false},
+    {"queue", _Py_M__queue, (int)sizeof(_Py_M__queue), false},
+    {"contextlib", _Py_M__contextlib, (int)sizeof(_Py_M__contextlib), false},
+    {"string", _Py_M__string, (int)sizeof(_Py_M__string), true},
+    {"string.__init__", _Py_M__string, (int)sizeof(_Py_M__string), false},
+    {"string.templatelib", _Py_M__string_templatelib, (int)sizeof(_Py_M__string_templatelib), false},
+    /* wii pip dependencies */
+    {"hashlib", _Py_M__hashlib, (int)sizeof(_Py_M__hashlib), false},
+    {"json", _Py_M__json, (int)sizeof(_Py_M__json), true},
+    {"json.__init__", _Py_M__json, (int)sizeof(_Py_M__json), false},
+    {"json.decoder", _Py_M__json_decoder, (int)sizeof(_Py_M__json_decoder), false},
+    {"json.encoder", _Py_M__json_encoder, (int)sizeof(_Py_M__json_encoder), false},
+    {"json.scanner", _Py_M__json_scanner, (int)sizeof(_Py_M__json_scanner), false},
+    {"ipaddress", _Py_M__ipaddress, (int)sizeof(_Py_M__ipaddress), false},
+    {"bisect", _Py_M__bisect, (int)sizeof(_Py_M__bisect), false},
+    {"tempfile", _Py_M__tempfile, (int)sizeof(_Py_M__tempfile), false},
+    {"shutil", _Py_M__shutil, (int)sizeof(_Py_M__shutil), false},
+    {"fnmatch", _Py_M__fnmatch, (int)sizeof(_Py_M__fnmatch), false},
+    {"glob", _Py_M__glob, (int)sizeof(_Py_M__glob), false},
+    {"pathlib", _Py_M__pathlib, (int)sizeof(_Py_M__pathlib), true},
+    {"pathlib.__init__", _Py_M__pathlib, (int)sizeof(_Py_M__pathlib), false},
+    {"pathlib._local", _Py_M__pathlib__local, (int)sizeof(_Py_M__pathlib__local), false},
+    {"pathlib._os", _Py_M__pathlib__os, (int)sizeof(_Py_M__pathlib__os), false},
+    {"pathlib.types", _Py_M__pathlib_types, (int)sizeof(_Py_M__pathlib_types), false},
+    {"random", _Py_M__random, (int)sizeof(_Py_M__random), false},
+    {"datetime", _Py_M__datetime, (int)sizeof(_Py_M__datetime), false},
     {0, 0, 0} /* stdlib sentinel */
 };
 static const struct _frozen test_modules[] = {
@@ -459,7 +515,6 @@ static const struct _module_alias aliases[] = {
     {"collections.__init__", "<collections"},
     {"encodings.__init__", "<encodings"},
     {"importlib.__init__", "<importlib"},
-    {"xml.__init__", "<xml"},
     {"zoneinfo.__init__", "<zoneinfo"},
     {"__hello_alias__", "__hello__"},
     {"__phello_alias__", "__hello__"},

@@ -19,13 +19,11 @@ math mathmodule.c
 _math_integer mathintegermodule.c
 
 # General-purpose C extensions
-array arraymodule.c
+# Moved to SD card .so files (see wiitest/Makefile so-modules target):
+# _bisect _random _statistics cmath _csv _lsprof _asyncio _queue _heapq array
 binascii binascii.c \
     -I$(DEVKITPRO)/portlibs/ppc/include
-_bisect _bisectmodule.c
 _pickle _pickle.c
-_random _randommodule.c
-_statistics _statisticsmodule.c
 _struct _struct.c
 unicodedata unicodedata.c
 zlib zlibmodule.c \
@@ -69,8 +67,6 @@ _bz2 _bz2module.c \
     -I$(DEVKITPRO)/portlibs/ppc/include \
     -L$(DEVKITPRO)/portlibs/ppc/lib \
     -lbz2
-cmath cmathmodule.c
-_csv _csv.c
 _dbm _dbmmodule.c \
     -DUSE_NDBM \
     -I$(abs_srcdir)/gdbm/install-wii/include \
@@ -84,10 +80,8 @@ _gdbm _gdbmmodule.c \
     -L$(abs_srcdir)/gdbm/install-wii/lib \
     -lgdbm
 
-# Priority queue / JSON / profiler
-_heapq _heapqmodule.c
+# Priority queue / JSON
 _json _json.c
-_lsprof _lsprof.c rotatingtree.c
 
 # Hash modules (HACL* — each .c compiled exactly once)
 _md5 md5module.c \
@@ -110,6 +104,12 @@ _sha3 sha3module.c \
     -I$(abs_srcdir)/Modules/_hacl/include \
     -I$(abs_srcdir)/Modules/_hacl \
     -D_BSD_SOURCE -D_DEFAULT_SOURCE
+# blake2b + blake2s (scalar only on PPC; HACL sources already compiled via _hmac)
+_blake2 blake2module.c \
+    -I$(abs_srcdir)/Modules/_hacl/include \
+    -I$(abs_srcdir)/Modules/_hacl \
+    -D_BSD_SOURCE -D_DEFAULT_SOURCE
+
 # hmac: includes HMAC + Blake2 (non-SIMD) since Hacl_HMAC.c references Blake2
 _hmac hmacmodule.c \
     _hacl/Hacl_HMAC.c \

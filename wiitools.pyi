@@ -1,3 +1,5 @@
+from typing import TypedDict
+
 __version__ = "0.2"
 
 # ---------------------------------------------------------------------------
@@ -390,7 +392,8 @@ def WPAD_ControlSpeaker(chan: int, enable: int) -> int:
     ...
 
 def WPAD_ReadEvent(chan: int) -> tuple[int, bytes]:
-    """Read one queued event from *chan*. Returns (ret_code, raw_WPADData_bytes)."""
+    """Read one queued event from *chan*. Returns (ret_code, raw_WPADData_bytes).
+    Note: the raw bytes are returned as-is; use WPAD_Data for a parsed dict."""
     ...
 
 def WPAD_DroppedEvents(chan: int) -> int:
@@ -478,32 +481,106 @@ def WPAD_EncodeData(flag: int, pcm_bytes: bytes, out_len: int) -> tuple[bytes, b
     """Encode raw s16 PCM samples for the Wiimote speaker. Returns (status_bytes, encoded_bytes)."""
     ...
 
-def WPAD_Data(chan: int) -> bytes | None:
-    """Return the raw WPADData struct bytes for *chan*, or None if unavailable."""
+class WPADNunchukDict(TypedDict):
+    """Dict returned by WPAD_Expansion() for a Nunchuk."""
+    type:   str                       # "nunchuk"
+    btns:   int                       # button bitmask (WPAD_NUNCHUK_BUTTON_*)
+    js_x:   float                     # raw joystick X position
+    js_y:   float                     # raw joystick Y position
+    orient: tuple[float, float, float]  # roll, pitch, yaw in degrees
+    gforce: tuple[float, float, float]  # x, y, z g-forces
+    accel:  tuple[int, int, int]        # raw accelerometer x, y, z
+
+class WPADClassicDict(TypedDict):
+    """Dict returned by WPAD_Expansion() for a Classic Controller."""
+    type:       str    # "classic"
+    btns:       int    # button bitmask (WPAD_CLASSIC_BUTTON_*)
+    ljs_x:      float  # left joystick X
+    ljs_y:      float  # left joystick Y
+    rjs_x:      float  # right joystick X
+    rjs_y:      float  # right joystick Y
+    l_shoulder: float  # left shoulder (0.0–1.0)
+    r_shoulder: float  # right shoulder (0.0–1.0)
+
+class WPADGuitarDict(TypedDict):
+    """Dict returned by WPAD_Expansion() for a Guitar Hero 3 controller."""
+    type:   str    # "guitar"
+    btns:   int    # button bitmask (WPAD_GUITAR_HERO_3_BUTTON_*)
+    whammy: float  # whammy bar (0.0–1.0)
+    js_x:   float  # joystick X
+    js_y:   float  # joystick Y
+
+class WPADUnknownDict(TypedDict):
+    """Dict returned by WPAD_Expansion() for an unrecognised expansion."""
+    type: str    # "unknown"
+    raw:  bytes  # raw expansion_t bytes
+
+class WPADIRDict(TypedDict):
+    """IR pointer position dict returned inside WPADDataDict and by WPAD_IR()."""
+    valid:    int    # 1 if the bounded position is valid
+    x:        float  # bounded X coordinate (0..screen width)
+    y:        float  # bounded Y coordinate (0..screen height)
+    ax:       float  # raw X coordinate
+    ay:       float  # raw Y coordinate
+    angle:    float  # angle of the Wiimote to the sensor bar (degrees)
+    distance: float  # pixel width of the sensor bar
+    z:        float  # calculated distance in metres
+
+class WPADDataDict(TypedDict):
+    """Dict returned by WPAD_Data()."""
+    err:          int
+    data_present: int
+    battery_level: int
+    btns_h:       int   # buttons held
+    btns_l:       int   # buttons released this frame
+    btns_d:       int   # buttons pressed this frame
+    btns_u:       int   # buttons up this frame
+    ir:           WPADIRDict
+    orient:       tuple[float, float, float, float, float]  # roll, pitch, yaw, a_roll, a_pitch
+    gforce:       tuple[float, float, float]                # x, y, z g-forces
+    accel:        tuple[int, int, int]                      # raw accelerometer x, y, z
+    expansion:    WPADNunchukDict | WPADClassicDict | WPADGuitarDict | WPADUnknownDict | None
+
+def WPAD_Data(chan: int) -> WPADDataDict | None:
+    """Return a structured dict of WPADData for *chan*, or None if unavailable.
+    Fields: err, data_present, battery_level, btns_h/l/d/u (int bitmasks),
+    ir (dict with valid/x/y/ax/ay/angle/distance/z),
+    orient (roll, pitch, yaw, a_roll, a_pitch),
+    gforce (x, y, z), accel (x, y, z), expansion (typed dict or None)."""
     ...
 
 def WPAD_BatteryLevel(chan: int) -> int:
     """Return the battery level (0-4) for *chan*."""
     ...
 
-def WPAD_IR(chan: int) -> bytes:
-    """Return the raw ir_t struct bytes for *chan* (pointer position, validity, etc.)."""
+def WPAD_IR(chan: int) -> WPADIRDict:
+    """Return IR pointer data for *chan* as a dict.
+    Keys: valid (int), x, y, ax, ay, angle, distance, z (all float)."""
     ...
 
-def WPAD_Orientation(chan: int) -> bytes:
-    """Return the raw orient_t struct bytes for *chan* (pitch, roll, yaw in degrees)."""
+def WPAD_Orientation(chan: int) -> tuple[float, float, float, float, float]:
+    """Return orientation for *chan* as (roll, pitch, yaw, a_roll, a_pitch) in degrees.
+    Smoothed values range -180..180. a_roll and a_pitch are absolute/unsmoothed."""
     ...
 
-def WPAD_GForce(chan: int) -> bytes:
-    """Return the raw gforce_t struct bytes for *chan* (x, y, z g-force as floats)."""
+def WPAD_GForce(chan: int) -> tuple[float, float, float]:
+    """Return gravity forces for *chan* as (x, y, z) floats (in g units)."""
     ...
 
-def WPAD_Accel(chan: int) -> bytes:
-    """Return the raw vec3w_t struct bytes for *chan* (raw accelerometer x/y/z)."""
+def WPAD_Accel(chan: int) -> tuple[int, int, int]:
+    """Return raw accelerometer readings for *chan* as (x, y, z) unsigned ints."""
     ...
 
-def WPAD_Expansion(chan: int) -> bytes:
-    """Return the raw expansion_t struct bytes for *chan* (Nunchuk, Classic, etc.)."""
+def WPAD_Expansion(chan: int) -> WPADNunchukDict | WPADClassicDict | WPADGuitarDict | WPADUnknownDict | None:
+    """Return expansion controller data for *chan* as a typed dict, or None if no expansion is attached.
+
+    The ``type`` key identifies the device:
+    - ``None``        — no expansion (WPAD_EXP_NONE)
+    - ``"nunchuk"``   — Nunchuk: btns, js_x, js_y, orient, gforce, accel
+    - ``"classic"``   — Classic Controller: btns, ljs_x, ljs_y, rjs_x, rjs_y, l_shoulder, r_shoulder
+    - ``"guitar"``    — Guitar Hero 3: btns, whammy, js_x, js_y
+    - ``"unknown"``   — Balance Board or unrecognised device: raw bytes
+    """
     ...
 
 # --------------- GameCube controller (PAD) ---------------
@@ -520,8 +597,24 @@ def PAD_ScanPads() -> int:
     """Read all connected GameCube controllers into an internal buffer."""
     ...
 
-def PAD_Read() -> tuple[int, bytes]:
-    """Read raw PADStatus data for all channels. Returns (connected_mask, raw_status_bytes)."""
+class PADStatusDict(TypedDict):
+    """Dict returned per channel by PAD_Read() and PAD_Clamp(). All fields are ints."""
+    button:    int
+    stickX:    int
+    stickY:    int
+    substickX: int
+    substickY: int
+    triggerL:  int
+    triggerR:  int
+    analogA:   int
+    analogB:   int
+    err:       int
+
+def PAD_Read() -> tuple[int, list[PADStatusDict]]:
+    """Read PADStatus for all 4 channels.
+    Returns (connected_mask, [chan0_dict, chan1_dict, chan2_dict, chan3_dict]).
+    Each dict has keys: button, stickX, stickY, substickX, substickY,
+    triggerL, triggerR, analogA, analogB, err."""
     ...
 
 def PAD_Reset(mask: int) -> int:
@@ -532,8 +625,9 @@ def PAD_Recalibrate(mask: int) -> int:
     """Recalibrate the controllers indicated by the channel bitmask *mask*."""
     ...
 
-def PAD_Clamp() -> bytes:
-    """Clamp all PADStatus values to valid ranges and return the raw status bytes."""
+def PAD_Clamp() -> list[PADStatusDict]:
+    """Clamp all PADStatus values to valid ranges.
+    Returns [chan0_dict, chan1_dict, chan2_dict, chan3_dict] with same keys as PAD_Read()."""
     ...
 
 def PAD_ControlMotor(chan: int, cmd: int) -> None:

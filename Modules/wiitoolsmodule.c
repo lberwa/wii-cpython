@@ -20,6 +20,7 @@
 #include <video.h>
 #include <wiiuse/wpad.h>
 #include <ogc/pad.h>
+#include <wiikeyboard/keyboard.h>
 #include <gx.h>
 #include <assert.h>
 #include <ogc/conf.h>
@@ -38,7 +39,15 @@
 #define NETWORK_H22
 #include <network.h>
 #if WII_LIBOGC == 1
-#include <poll.h>   /* POLLIN, POLLOUT etc. — nicht in libogc1 network.h */
+#include <netinet/in.h>  /* struct in_addr, struct sockaddr_in, in_addr_t */
+#include <arpa/inet.h>   /* inet_ntoa, inet_aton, htons, htonl */
+#include <poll.h>        /* POLLIN, POLLOUT etc. — nicht in libogc1 network.h */
+#else
+/* libogc2: in_addr_t fehlt in network.h; u32 s_addr wird verwendet */
+#ifndef _IN_ADDR_T_DECLARED
+typedef u32 in_addr_t;
+#define _IN_ADDR_T_DECLARED
+#endif
 #endif
 #include "../curl/include/curl/curl.h"
 #include "../build-wii/curl/mbedtls/install-wii/include/mbedtls/platform.h"
@@ -1522,9 +1531,15 @@ static PyObject* rendering_init(PyObject *self, PyObject *args) {
 	VIDEO_Init();
 	video_init_done = 1;
 	screenMode = VIDEO_GetPreferredMode(NULL);
+#if WII_LIBOGC == 2
+	frameBuffer[0] = MEM_K0_TO_K1(SYS_AllocateFramebuffer((const GXRModeObj*)screenMode));
+	frameBuffer[1] = MEM_K0_TO_K1(SYS_AllocateFramebuffer((const GXRModeObj*)screenMode));
+	frameBuffer[2] = MEM_K0_TO_K1(SYS_AllocateFramebuffer((const GXRModeObj*)screenMode));
+#else
 	frameBuffer[0] = MEM_K0_TO_K1(SYS_AllocateFramebuffer(screenMode));
 	frameBuffer[1] = MEM_K0_TO_K1(SYS_AllocateFramebuffer(screenMode));
 	frameBuffer[2] = MEM_K0_TO_K1(SYS_AllocateFramebuffer(screenMode));
+#endif
 
 	MQ_Init(&frame_draw, 3);
 	MQ_Init(&frame_empty, 3);
@@ -2912,14 +2927,47 @@ static PyObject* pad_scanpads(PyObject *self, PyObject *args)
     return PyLong_FromLong((long)PAD_ScanPads());
 }
 
+static PyObject* pad_status_to_dict(const PADStatus *s)
+{
+    return Py_BuildValue("{s:i,s:i,s:i,s:i,s:i,s:i,s:i,s:i,s:i,s:i}",
+        "button",    (int)(s->button),
+        "stickX",    (int)(s->stickX),
+        "stickY",    (int)(s->stickY),
+        "substickX", (int)(s->substickX),
+        "substickY", (int)(s->substickY),
+        "triggerL",  (int)(s->triggerL),
+        "triggerR",  (int)(s->triggerR),
+        "analogA",   (int)(s->analogA),
+        "analogB",   (int)(s->analogB),
+        "err",       (int)(s->err));
+}
+
+static PyObject* pad_status_list(void)
+{
+    PyObject *lst = PyList_New(PAD_CHANMAX);
+    int i;
+    if (lst == NULL) return NULL;
+    for (i = 0; i < PAD_CHANMAX; i++) {
+        PyObject *d = pad_status_to_dict(&g_pad_status[i]);
+        if (d == NULL) { Py_DECREF(lst); return NULL; }
+        PyList_SET_ITEM(lst, i, d);
+    }
+    return lst;
+}
+
 static PyObject* pad_read(PyObject *self, PyObject *args)
 {
     u32 r;
+    PyObject *lst, *res;
     (void)self;
     if (!PyArg_ParseTuple(args, ":PAD_Read"))
         return NULL;
     r = PAD_Read(g_pad_status);
-    return Py_BuildValue("iy#", (int)r, (char *)g_pad_status, (int)sizeof(g_pad_status));
+    lst = pad_status_list();
+    if (lst == NULL) return NULL;
+    res = Py_BuildValue("(iO)", (int)r, lst);
+    Py_DECREF(lst);
+    return res;
 }
 
 static PyObject* pad_reset(PyObject *self, PyObject *args)
@@ -2946,7 +2994,7 @@ static PyObject* pad_clamp(PyObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, ":PAD_Clamp"))
         return NULL;
     PAD_Clamp(g_pad_status);
-    return PyBytes_FromStringAndSize((char *)g_pad_status, (Py_ssize_t)sizeof(g_pad_status));
+    return pad_status_list();
 }
 
 static PyObject* pad_control_motor(PyObject *self, PyObject *args)
@@ -3455,6 +3503,7 @@ static PyObject* wpad_data(PyObject *self, PyObject *args)
 {
     int chan;
     WPADData *data;
+    PyObject *res, *ir_dict, *orient_tuple, *gforce_tuple, *accel_tuple, *exp_bytes;
     (void)self;
     if (!PyArg_ParseTuple(args, "i:WPAD_Data", &chan))
         return NULL;
@@ -3463,7 +3512,110 @@ static PyObject* wpad_data(PyObject *self, PyObject *args)
     data = WPAD_Data(chan);
     if (data == NULL)
         return py_none();
-    return Py_BuildValue("y#", (const char *)data, (int)sizeof(*data));
+
+    ir_dict = Py_BuildValue("{s:i,s:f,s:f,s:f,s:f,s:f,s:f,s:f}",
+        "valid",    data->ir.valid,
+        "x",        data->ir.x,
+        "y",        data->ir.y,
+        "ax",       data->ir.ax,
+        "ay",       data->ir.ay,
+        "angle",    data->ir.angle,
+        "distance", data->ir.distance,
+        "z",        data->ir.z);
+    if (ir_dict == NULL) return NULL;
+
+    orient_tuple = Py_BuildValue("(fffff)",
+        data->orient.roll, data->orient.pitch, data->orient.yaw,
+        data->orient.a_roll, data->orient.a_pitch);
+    if (orient_tuple == NULL) { Py_DECREF(ir_dict); return NULL; }
+
+    gforce_tuple = Py_BuildValue("(fff)",
+        data->gforce.x, data->gforce.y, data->gforce.z);
+    if (gforce_tuple == NULL) { Py_DECREF(ir_dict); Py_DECREF(orient_tuple); return NULL; }
+
+    accel_tuple = Py_BuildValue("(iii)",
+        (int)data->accel.x, (int)data->accel.y, (int)data->accel.z);
+    if (accel_tuple == NULL) {
+        Py_DECREF(ir_dict); Py_DECREF(orient_tuple); Py_DECREF(gforce_tuple);
+        return NULL;
+    }
+
+    /* expansion_t: structured dict based on type, same logic as wpad_expansion() */
+    {
+        struct expansion_t *ep = &data->exp;
+        switch (ep->type) {
+        case WPAD_EXP_NONE:
+            exp_bytes = Py_None; Py_INCREF(Py_None);
+            break;
+        case WPAD_EXP_NUNCHUK: {
+            struct nunchuk_t *n = &ep->nunchuk;
+            exp_bytes = Py_BuildValue(
+                "{s:s,s:i,s:f,s:f,s:(fff),s:(fff),s:(iii)}",
+                "type",  "nunchuk",
+                "btns",  (int)(unsigned char)n->btns,
+                "js_x",  (float)n->js.pos.x,
+                "js_y",  (float)n->js.pos.y,
+                "orient",(double)n->orient.roll,(double)n->orient.pitch,(double)n->orient.yaw,
+                "gforce",(double)n->gforce.x,(double)n->gforce.y,(double)n->gforce.z,
+                "accel", (int)n->accel.x,(int)n->accel.y,(int)n->accel.z);
+            break;
+        }
+        case WPAD_EXP_CLASSIC: {
+            struct classic_ctrl_t *c = &ep->classic;
+            exp_bytes = Py_BuildValue(
+                "{s:s,s:i,s:f,s:f,s:f,s:f,s:f,s:f}",
+                "type",      "classic",
+                "btns",      (int)(unsigned int)c->btns,
+                "ljs_x",     (float)c->ljs.pos.x,
+                "ljs_y",     (float)c->ljs.pos.y,
+                "rjs_x",     (float)c->rjs.pos.x,
+                "rjs_y",     (float)c->rjs.pos.y,
+                "l_shoulder",(double)c->l_shoulder,
+                "r_shoulder",(double)c->r_shoulder);
+            break;
+        }
+        case WPAD_EXP_GUITARHERO3: {
+            struct guitar_hero_3_t *g = &ep->gh3;
+            exp_bytes = Py_BuildValue(
+                "{s:s,s:i,s:f,s:f,s:f}",
+                "type",  "guitar",
+                "btns",  (int)(unsigned int)g->btns,
+                "whammy",(double)g->whammy_bar,
+                "js_x",  (float)g->js.pos.x,
+                "js_y",  (float)g->js.pos.y);
+            break;
+        }
+        default:
+            exp_bytes = Py_BuildValue(
+                "{s:s,s:y#}",
+                "type","unknown",
+                "raw", (const char *)ep,(int)sizeof(*ep));
+            break;
+        }
+    }
+    if (exp_bytes == NULL) {
+        Py_DECREF(ir_dict); Py_DECREF(orient_tuple);
+        Py_DECREF(gforce_tuple); Py_DECREF(accel_tuple);
+        return NULL;
+    }
+
+    res = Py_BuildValue("{s:i,s:k,s:i,s:k,s:k,s:k,s:k,s:O,s:O,s:O,s:O,s:O}",
+        "err",           (int)data->err,
+        "data_present",  (unsigned long)data->data_present,
+        "battery_level", (int)data->battery_level,
+        "btns_h",        (unsigned long)data->btns_h,
+        "btns_l",        (unsigned long)data->btns_l,
+        "btns_d",        (unsigned long)data->btns_d,
+        "btns_u",        (unsigned long)data->btns_u,
+        "ir",            ir_dict,
+        "orient",        orient_tuple,
+        "gforce",        gforce_tuple,
+        "accel",         accel_tuple,
+        "expansion",     exp_bytes);
+
+    Py_DECREF(ir_dict); Py_DECREF(orient_tuple);
+    Py_DECREF(gforce_tuple); Py_DECREF(accel_tuple); Py_DECREF(exp_bytes);
+    return res;
 }
 
 static PyObject* wpad_battery_level(PyObject *self, PyObject *args)
@@ -3488,7 +3640,15 @@ static PyObject* wpad_ir(PyObject *self, PyObject *args)
         return NULL;
     memset(&ir, 0, sizeof(ir));
     WPAD_IR(chan, &ir);
-    return Py_BuildValue("y#", (const char *)&ir, (int)sizeof(ir));
+    return Py_BuildValue("{s:i,s:f,s:f,s:f,s:f,s:f,s:f,s:f}",
+        "valid",    ir.valid,
+        "x",        ir.x,
+        "y",        ir.y,
+        "ax",       ir.ax,
+        "ay",       ir.ay,
+        "angle",    ir.angle,
+        "distance", ir.distance,
+        "z",        ir.z);
 }
 
 static PyObject* wpad_orientation(PyObject *self, PyObject *args)
@@ -3502,7 +3662,9 @@ static PyObject* wpad_orientation(PyObject *self, PyObject *args)
         return NULL;
     memset(&orient, 0, sizeof(orient));
     WPAD_Orientation(chan, &orient);
-    return Py_BuildValue("y#", (const char *)&orient, (int)sizeof(orient));
+    return Py_BuildValue("(fffff)",
+        orient.roll, orient.pitch, orient.yaw,
+        orient.a_roll, orient.a_pitch);
 }
 
 static PyObject* wpad_gforce(PyObject *self, PyObject *args)
@@ -3516,7 +3678,7 @@ static PyObject* wpad_gforce(PyObject *self, PyObject *args)
         return NULL;
     memset(&gforce, 0, sizeof(gforce));
     WPAD_GForce(chan, &gforce);
-    return Py_BuildValue("y#", (const char *)&gforce, (int)sizeof(gforce));
+    return Py_BuildValue("(fff)", gforce.x, gforce.y, gforce.z);
 }
 
 static PyObject* wpad_accel(PyObject *self, PyObject *args)
@@ -3530,7 +3692,7 @@ static PyObject* wpad_accel(PyObject *self, PyObject *args)
         return NULL;
     memset(&accel, 0, sizeof(accel));
     WPAD_Accel(chan, &accel);
-    return Py_BuildValue("y#", (const char *)&accel, (int)sizeof(accel));
+    return Py_BuildValue("(iii)", (int)accel.x, (int)accel.y, (int)accel.z);
 }
 
 static PyObject* wpad_expansion(PyObject *self, PyObject *args)
@@ -3544,7 +3706,55 @@ static PyObject* wpad_expansion(PyObject *self, PyObject *args)
         return NULL;
     memset(&exp, 0, sizeof(exp));
     WPAD_Expansion(chan, &exp);
-    return Py_BuildValue("y#", (const char *)&exp, (int)sizeof(exp));
+
+    switch (exp.type) {
+    case WPAD_EXP_NONE:
+        Py_RETURN_NONE;
+
+    case WPAD_EXP_NUNCHUK: {
+        struct nunchuk_t *n = &exp.nunchuk;
+        return Py_BuildValue(
+            "{s:s, s:i, s:f, s:f, s:(fff), s:(fff), s:(iii)}",
+            "type",   "nunchuk",
+            "btns",   (int)(unsigned char)n->btns,
+            "js_x",   (float)n->js.pos.x,
+            "js_y",   (float)n->js.pos.y,
+            "orient", (double)n->orient.roll, (double)n->orient.pitch, (double)n->orient.yaw,
+            "gforce", (double)n->gforce.x, (double)n->gforce.y, (double)n->gforce.z,
+            "accel",  (int)n->accel.x, (int)n->accel.y, (int)n->accel.z);
+    }
+
+    case WPAD_EXP_CLASSIC: {
+        struct classic_ctrl_t *c = &exp.classic;
+        return Py_BuildValue(
+            "{s:s, s:i, s:f, s:f, s:f, s:f, s:f, s:f}",
+            "type",      "classic",
+            "btns",      (int)(unsigned int)c->btns,
+            "ljs_x",     (float)c->ljs.pos.x,
+            "ljs_y",     (float)c->ljs.pos.y,
+            "rjs_x",     (float)c->rjs.pos.x,
+            "rjs_y",     (float)c->rjs.pos.y,
+            "l_shoulder",(double)c->l_shoulder,
+            "r_shoulder",(double)c->r_shoulder);
+    }
+
+    case WPAD_EXP_GUITARHERO3: {
+        struct guitar_hero_3_t *g = &exp.gh3;
+        return Py_BuildValue(
+            "{s:s, s:i, s:f, s:f, s:f}",
+            "type",   "guitar",
+            "btns",   (int)(unsigned int)g->btns,
+            "whammy", (double)g->whammy_bar,
+            "js_x",   (float)g->js.pos.x,
+            "js_y",   (float)g->js.pos.y);
+    }
+
+    default:
+        return Py_BuildValue(
+            "{s:s, s:y#}",
+            "type", "unknown",
+            "raw",  (const char *)&exp, (int)sizeof(exp));
+    }
 }
 
 /* --------------- Surface API --------------- */
@@ -4054,10 +4264,13 @@ static PyObject* init(PyObject *self, PyObject *args)
     VIDEO_Init();
 
 	rmode3 = VIDEO_GetPreferredMode(NULL);
+#if WII_LIBOGC == 2
+    framebuffer3 = MEM_K0_TO_K1(SYS_AllocateFramebuffer((const GXRModeObj*)rmode3));
+	xfb2 = MEM_K0_TO_K1(SYS_AllocateFramebuffer((const GXRModeObj*)rmode3));
+#else
     framebuffer3 = MEM_K0_TO_K1(SYS_AllocateFramebuffer(rmode3));
-
-
 	xfb2 = MEM_K0_TO_K1(SYS_AllocateFramebuffer(rmode3));
+#endif
 
     fatInitDefault();
 
@@ -4372,7 +4585,7 @@ static PyObject* wt_SYS_GetPowerEvent(PyObject *self, PyObject *args) {
 static PyObject* wt_SYS_SetResetCallback(PyObject *self, PyObject *args) {
     (void)self; int enable;
     if (!PyArg_ParseTuple(args, "p:SYS_SetResetCallback", &enable)) return NULL;
-    SYS_SetResetCallback(enable ? wt_sys_reset_cb : NULL);
+    SYS_SetResetCallback(enable ? (resetcallback)wt_sys_reset_cb : NULL);
     return py_none();
 }
 static PyObject* wt_SYS_GetResetEvent(PyObject *self, PyObject *args) {
@@ -4793,6 +5006,193 @@ static PyObject* wt_net_poll(PyObject *self, PyObject *args) {
     return out;
 }
 
+/* =========================================================
+ * WiiStdin — sys.stdin replacement for Wii.
+ * Provides readline() via USB keyboard (if connected) or
+ * Wiimote WPAD character-picker as fallback.
+ *
+ * WPAD controls:
+ *   Up/Down   : cycle character in current mode
+ *   Right     : append selected character to buffer
+ *   Left / B  : backspace (delete last character)
+ *   Button 1  : insert space
+ *   Plus/Minus: switch mode (abc → ABC → 123 → abc)
+ *   A         : confirm (send line, like Enter)
+ *
+ * Keyboard (USB, if connected):
+ *   All printable keys work, Enter confirms, Backspace deletes.
+ * ========================================================= */
+
+#define WII_STDIN_BUFMAX 255
+
+typedef enum {
+    WII_MODE_LOWER = 0,
+    WII_MODE_UPPER = 1,
+    WII_MODE_DIGIT = 2,
+    WII_MODE_COUNT = 3,
+} WiiInputMode;
+
+static const char *wii_mode_chars[3] = {
+    "abcdefghijklmnopqrstuvwxyz",
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    "0123456789",
+};
+static const int wii_mode_len[3]    = { 26, 26, 10 };
+static const char *wii_mode_name[3] = { "abc", "ABC", "123" };
+
+typedef struct {
+    PyObject_HEAD
+    int kb_ok; /* 1 if KEYBOARD_Init succeeded */
+} WiiStdinObject;
+
+static PyObject *WiiStdin_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
+{
+    (void)args; (void)kwds;
+    WiiStdinObject *self = (WiiStdinObject *)type->tp_alloc(type, 0);
+    if (!self) return NULL;
+    self->kb_ok = (KEYBOARD_Init(NULL) >= 0);
+    return (PyObject *)self;
+}
+
+static void WiiStdin_dealloc(WiiStdinObject *self)
+{
+    if (self->kb_ok) {
+        KEYBOARD_Deinit();
+        self->kb_ok = 0;
+    }
+    Py_TYPE(self)->tp_free((PyObject *)self);
+}
+
+static void wii_stdin_display(const char *buf, int len,
+                               int char_idx, WiiInputMode mode)
+{
+    /* Build: \r[abc] hello[e]_  so it replaces the previous status line.
+     * terminal_print does not necessarily support \r — we always write
+     * a fresh line, keeping it short so the screen does not flood. */
+    char line[WII_STDIN_BUFMAX + 64];
+    char preview = wii_mode_chars[mode][char_idx];
+    /* copy buffer, NUL-terminate */
+    char tmp[WII_STDIN_BUFMAX + 4];
+    memcpy(tmp, buf, len);
+    tmp[len] = '\0';
+    snprintf(line, sizeof(line), "[%s] %s[%c]\n", wii_mode_name[mode], tmp, preview);
+    terminal_print(line);
+}
+
+static PyObject *WiiStdin_readline(WiiStdinObject *self, PyObject *args)
+{
+    (void)args;
+    char buf[WII_STDIN_BUFMAX + 2];
+    int  len      = 0;
+    int  char_idx = 0;
+    WiiInputMode mode = WII_MODE_LOWER;
+
+    terminal_print("[INPUT] Up/Dn:char  Rt:add  B/Lt:del  1:spc  +/-:mode  A:ok\n");
+    wii_stdin_display(buf, len, char_idx, mode);
+
+    for (;;) {
+        int changed = 0;
+
+        /* --- USB keyboard polling --- */
+        if (self->kb_ok) {
+            keyboard_event kev;
+            while (KEYBOARD_GetEvent(&kev) > 0) {
+                if (kev.type != KEYBOARD_PRESSED) continue;
+                u16 sym = kev.symbol;
+                if (sym == KS_Return) {
+                    goto confirm;
+                } else if (sym == KS_BackSpace || sym == KS_Delete) {
+                    if (len > 0) { len--; changed = 1; }
+                } else if (sym == KS_Escape) {
+                    terminal_print("\n");
+                    return PyUnicode_FromString("\n");
+                } else if (sym >= KS_space && sym < 0x80) {
+                    if (len < WII_STDIN_BUFMAX) {
+                        buf[len++] = (char)sym;
+                        changed = 1;
+                    }
+                }
+            }
+        }
+
+        /* --- Wiimote polling --- */
+        WPAD_ScanPads();
+        u32 btns = WPAD_ButtonsDown(0);
+
+        if (btns & WPAD_BUTTON_A) goto confirm;
+
+        if (btns & WPAD_BUTTON_UP) {
+            char_idx = (char_idx + 1) % wii_mode_len[mode];
+            changed = 1;
+        }
+        if (btns & WPAD_BUTTON_DOWN) {
+            char_idx = (char_idx - 1 + wii_mode_len[mode]) % wii_mode_len[mode];
+            changed = 1;
+        }
+        if (btns & WPAD_BUTTON_RIGHT) {
+            if (len < WII_STDIN_BUFMAX) {
+                buf[len++] = wii_mode_chars[mode][char_idx];
+                changed = 1;
+            }
+        }
+        if ((btns & WPAD_BUTTON_LEFT) || (btns & WPAD_BUTTON_B)) {
+            if (len > 0) { len--; changed = 1; }
+        }
+        if (btns & WPAD_BUTTON_1) {
+            if (len < WII_STDIN_BUFMAX) { buf[len++] = ' '; changed = 1; }
+        }
+        if (btns & WPAD_BUTTON_PLUS) {
+            mode = (WiiInputMode)((mode + 1) % WII_MODE_COUNT);
+            char_idx = 0; changed = 1;
+        }
+        if (btns & WPAD_BUTTON_MINUS) {
+            mode = (WiiInputMode)((mode + WII_MODE_COUNT - 1) % WII_MODE_COUNT);
+            char_idx = 0; changed = 1;
+        }
+
+        if (changed)
+            wii_stdin_display(buf, len, char_idx, mode);
+
+        VIDEO_WaitVSync();
+        continue;
+
+    confirm:
+        buf[len++] = '\n';
+        buf[len]   = '\0';
+        terminal_print("\n");
+        return PyUnicode_FromStringAndSize(buf, len);
+    }
+}
+
+/* Minimal stream interface so io.TextIOWrapper / builtins.input() are happy. */
+static PyObject *WiiStdin_read(WiiStdinObject *self, PyObject *args)
+{
+    return WiiStdin_readline(self, args);
+}
+static PyObject *WiiStdin_readable(PyObject *self, PyObject *args)
+{ (void)self; (void)args; Py_RETURN_TRUE; }
+static PyObject *WiiStdin_writable(PyObject *self, PyObject *args)
+{ (void)self; (void)args; Py_RETURN_FALSE; }
+
+static PyMethodDef WiiStdin_methods[] = {
+    {"readline", (PyCFunction)WiiStdin_readline, METH_VARARGS, "Read one line via WPAD/keyboard"},
+    {"read",     (PyCFunction)WiiStdin_read,     METH_VARARGS, "Read via WPAD/keyboard"},
+    {"readable", WiiStdin_readable,              METH_NOARGS,  "Returns True"},
+    {"writable", WiiStdin_writable,              METH_NOARGS,  "Returns False"},
+    {NULL, NULL, 0, NULL}
+};
+
+static PyTypeObject WiiStdinType = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    .tp_name      = "wiitools.WiiStdin",
+    .tp_basicsize = sizeof(WiiStdinObject),
+    .tp_flags     = Py_TPFLAGS_DEFAULT,
+    .tp_doc       = "Wii stdin: WPAD character picker + USB keyboard",
+    .tp_methods   = WiiStdin_methods,
+    .tp_new       = WiiStdin_new,
+    .tp_dealloc   = (destructor)WiiStdin_dealloc,
+};
+
 /* --- Modul-Init (net-Thread + Netzwerk) exponiert bereits: net_init --- */
 
 static PyMethodDef wiitools_methods[] = {
@@ -4841,10 +5241,10 @@ static PyMethodDef wiitools_methods[] = {
     {"PAD_Init", pad_init, METH_VARARGS, "PAD_Init()"},
     {"PAD_Sync", pad_sync, METH_VARARGS, "PAD_Sync()"},
     {"PAD_ScanPads", pad_scanpads, METH_VARARGS, "PAD_ScanPads()"},
-    {"PAD_Read", pad_read, METH_VARARGS, "PAD_Read() -> (ret, status_bytes)"},
+    {"PAD_Read", pad_read, METH_VARARGS, "PAD_Read() -> (connected_mask, [chan0_dict, chan1_dict, chan2_dict, chan3_dict])"},
     {"PAD_Reset", pad_reset, METH_VARARGS, "PAD_Reset(mask)"},
     {"PAD_Recalibrate", pad_recalibrate, METH_VARARGS, "PAD_Recalibrate(mask)"},
-    {"PAD_Clamp", pad_clamp, METH_VARARGS, "PAD_Clamp() -> status_bytes"},
+    {"PAD_Clamp", pad_clamp, METH_VARARGS, "PAD_Clamp() -> [chan0_dict, chan1_dict, chan2_dict, chan3_dict]"},
     {"PAD_ControlMotor", pad_control_motor, METH_VARARGS, "PAD_ControlMotor(chan, cmd)"},
     {"PAD_SetSpec", pad_set_spec, METH_VARARGS, "PAD_SetSpec(spec)"},
     {"PAD_ButtonsUp", pad_buttons_up, METH_VARARGS, "Button released? (button, chan) -> 0/1 (chan<0=any)"},
@@ -4887,13 +5287,13 @@ static PyMethodDef wiitools_methods[] = {
     {"WPAD_Rumble", wpad_rumble, METH_VARARGS, "WPAD_Rumble(chan, status)"},
     {"WPAD_SetIdleThresholds", wpad_set_idle_thresholds, METH_VARARGS, "WPAD_SetIdleThresholds(chan,btns,ir,accel,js,wb,mp)"},
     {"WPAD_EncodeData", wpad_encode_data, METH_VARARGS, "WPAD_EncodeData(flag, pcm_bytes, out_len) -> (status_bytes, encoded_bytes)"},
-    {"WPAD_Data", wpad_data, METH_VARARGS, "WPAD_Data(chan) -> raw WPADData bytes"},
+    {"WPAD_Data", wpad_data, METH_VARARGS, "WPAD_Data(chan) -> dict{err,data_present,battery_level,btns_h/l/d/u,ir,orient,gforce,accel,expansion} or None"},
     {"WPAD_BatteryLevel", wpad_battery_level, METH_VARARGS, "WPAD_BatteryLevel(chan)"},
-    {"WPAD_IR", wpad_ir, METH_VARARGS, "WPAD_IR(chan) -> raw ir_t bytes"},
-    {"WPAD_Orientation", wpad_orientation, METH_VARARGS, "WPAD_Orientation(chan) -> raw orient_t bytes"},
-    {"WPAD_GForce", wpad_gforce, METH_VARARGS, "WPAD_GForce(chan) -> raw gforce_t bytes"},
-    {"WPAD_Accel", wpad_accel, METH_VARARGS, "WPAD_Accel(chan) -> raw vec3w_t bytes"},
-    {"WPAD_Expansion", wpad_expansion, METH_VARARGS, "WPAD_Expansion(chan) -> raw expansion_t bytes"},
+    {"WPAD_IR", wpad_ir, METH_VARARGS, "WPAD_IR(chan) -> dict{valid,x,y,ax,ay,angle,distance,z}"},
+    {"WPAD_Orientation", wpad_orientation, METH_VARARGS, "WPAD_Orientation(chan) -> (roll, pitch, yaw, a_roll, a_pitch) floats in degrees"},
+    {"WPAD_GForce", wpad_gforce, METH_VARARGS, "WPAD_GForce(chan) -> (x, y, z) g-force floats"},
+    {"WPAD_Accel", wpad_accel, METH_VARARGS, "WPAD_Accel(chan) -> (x, y, z) raw accelerometer ints"},
+    {"WPAD_Expansion", wpad_expansion, METH_VARARGS, "WPAD_Expansion(chan) -> None | dict with 'type' key (nunchuk/classic/guitar/unknown)"},
 
 	{"terminal_init",  terminal_init,  METH_VARARGS, "Init Debug screen"},
 	{"rendering_init", rendering_init, METH_VARARGS, "Init rendering screen"},
@@ -5073,6 +5473,11 @@ PyInit_wiitools(void)
     m = PyModule_Create(&wiitools_module);
     if (m == NULL)
         return NULL;
+
+    /* Register WiiStdin type (sys.stdin replacement) */
+    if (PyType_Ready(&WiiStdinType) < 0) return NULL;
+    Py_INCREF(&WiiStdinType);
+    PyModule_AddObject(m, "WiiStdin", (PyObject *)&WiiStdinType);
 
     /* Register WPADState named-tuple type */
     WPADState_Type = PyStructSequence_NewType(&WPADState_desc);

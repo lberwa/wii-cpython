@@ -2144,6 +2144,203 @@ def menu_dlopen_so():
     wait_a()
 
 
+def test_pip():
+    print("=== pip test ===")
+
+    # 0. Smoke-test re with \W before touching pip
+    import re
+    try:
+        re.compile(r"\W+")
+        print("re \\W+: OK")
+        re.compile(r"[\w\W]")
+        print("re [\\w\\W]: OK")
+    except Exception as e:
+        print("re compile error: " + repr(e))
+        return
+
+    # 1. import pip (from sd:/python/pip/ or sd:/hello/python/pip/)
+    import os
+    os.environ["NO_COLOR"] = "1"   # disable rich colour → skips ReprHighlighter regex
+    import pip
+    print("pip version: " + pip.__version__)
+
+    # 2. show installed packages via importlib.metadata
+    try:
+        from importlib.metadata import packages_distributions
+        pkgs = packages_distributions()
+        print("installed packages (" + str(len(pkgs)) + "):")
+        for name in sorted(pkgs)[:10]:
+            print("  " + name + " -> " + str(pkgs[name]))
+        if len(pkgs) > 10:
+            print("  ... and " + str(len(pkgs) - 10) + " more")
+    except Exception as e:
+        print("importlib.metadata error: " + repr(e))
+
+    # 3. pip list (dry-run, no network, no colour)
+    import io, sys
+    buf = io.StringIO()
+    old_stdout = sys.stdout
+    sys.stdout = buf
+    try:
+        from pip._internal.cli.main import main as pip_main
+        pip_main(["list", "--no-index"])
+    except SystemExit:
+        pass
+    except Exception as e:
+        print("[pip list error] " + repr(e), file=old_stdout)
+        import traceback
+        traceback.print_exc(file=old_stdout)
+    finally:
+        sys.stdout = old_stdout
+    out = buf.getvalue().strip()
+    if out:
+        lines = out.splitlines()
+        print("pip list output (" + str(len(lines)) + " lines):")
+        for l in lines[:15]:
+            print("  " + l)
+
+    print("pip import: OK")
+
+
+def test_input():
+    section("input() / sys.stdin (WiiStdin)")
+
+    # 1. Pruefen ob sys.stdin korrekt gesetzt ist
+    try:
+        import sys
+        t = type(sys.stdin).__name__
+        ok("sys.stdin type", t)
+        ok("sys.stdin.readable()", sys.stdin.readable())
+    except Exception as e:
+        fail("sys.stdin", e)
+
+    # 2. input() mit Prompt — Benutzer gibt Text ein
+    print("")
+    print("Bitte einen Text eingeben (Wiimote oder USB-Tastatur):")
+    try:
+        entered = input(">> ")
+        ok("input() zurueckgegeben", repr(entered))
+        ok("input() ist str", isinstance(entered, str))
+        ok("input() Laenge", len(entered))
+    except Exception as e:
+        fail("input()", e)
+        return
+
+    # 3. Nochmal mit leerem Enter — leere Eingabe testen
+    print("Nochmal Enter druecken ohne Eingabe (Leerzeile):")
+    try:
+        empty = input("")
+        ok("leere Eingabe", repr(empty))
+    except Exception as e:
+        fail("leere Eingabe", e)
+
+    # 4. sys.stdin.readline() direkt
+    print("sys.stdin.readline() direkt (einen Satz eingeben):")
+    try:
+        import sys
+        line = sys.stdin.readline()
+        ok("sys.stdin.readline()", repr(line))
+        ok("endet mit \\n", line.endswith("\n"))
+    except Exception as e:
+        fail("sys.stdin.readline()", e)
+
+
+def test_terminal_ctrl():
+    section("Terminal-Steuerzeichen & ANSI")
+    import time, sys
+
+    def _pause(msg="A druecken"):
+        print("  [" + msg + "]")
+        wait_a(3000)
+
+    # --- 1. \r: gleiche Zeile ueberschreiben ---
+    print("=== \\r: Zahl zaehlt hoch in EINER Zeile ===")
+    for i in range(11):
+        print(f"\rFortschritt: {i}/10  ", end="", flush=True)
+        time.sleep(0.3)
+    print("")
+    ok("\\r Zeilenueberschreiben")
+    _pause()
+
+    # --- 2. \b: Backspace ---
+    print("=== \\b: soll nur 'XYZ' zeigen (nicht 'ABCXYZ') ===")
+    sys.stdout.write("ABC\b\b\bXYZ\n")
+    sys.stdout.flush()
+    ok("\\b Backspace")
+    _pause()
+
+    # --- 3. \t: Tabulator ---
+    print("=== \\t: Spalten ausgerichtet ===")
+    print("A\tB\tC")
+    print("Lang\tKurz\tX")
+    print("12345678\t2\t3")
+    ok("\\t Tabulator")
+    _pause()
+
+    # --- 4. \v / \a ---
+    sys.stdout.write("vor-\\v\vnach-\\v\n")
+    sys.stdout.flush()
+    sys.stdout.write("\a")   # Bell ignorieren
+    sys.stdout.flush()
+    ok("\\v und \\a (kein Crash)")
+
+    # --- 5. ANSI-Farben 30-37 (je eine Zeile) ---
+    print("=== ANSI-Farben 30-37 ===")
+    farben = [
+        (30, "30 Schwarz"), (31, "31 Rot"),     (32, "32 Gruen"),  (33, "33 Gelb"),
+        (34, "34 Blau"),    (35, "35 Magenta"), (36, "36 Cyan"),   (37, "37 Grau"),
+    ]
+    for code, name in farben:
+        print(f"\033[{code}m{name}\033[0m")
+    ok("ANSI 30-37 (jede Zeile = andere Farbe?)")
+    _pause()
+
+    # --- 6. ANSI-Hellfarben 90-97 ---
+    print("=== ANSI-Hellfarben 90-97 ===")
+    for code, name in farben:
+        print(f"\033[{code + 60}m{code + 60} {name[3:]}\033[0m")
+    ok("ANSI 90-97 (helle Varianten)")
+    _pause()
+
+    # --- 7. Bold ---
+    print("=== Bold ===")
+    print("Normal | \033[1mFett\033[0m | \033[1;31mFett+Rot\033[0m | \033[1;32mFett+Gruen\033[0m")
+    ok("\\033[1m Bold")
+    _pause()
+
+    # --- 8. Fortschrittsbalken ---
+    print("=== Fortschrittsbalken (\\r + Farbe) ===")
+    total = 30
+    for i in range(total + 1):
+        filled = i * 20 // total
+        bar = "\033[32m" + "#" * filled + "\033[0m" + "-" * (20 - filled)
+        print(f"\r[{bar}] {i * 100 // total:3d}%", end="", flush=True)
+        time.sleep(0.05)
+    print("")
+    ok("Fortschrittsbalken")
+    _pause()
+
+    # --- 9. \033[K Zeile loeschen ---
+    print("=== \\033[K: nur 'XXX' soll sichtbar bleiben ===")
+    sys.stdout.write("AAAABBBBCCCC\r\033[KXXX\n")
+    sys.stdout.flush()
+    ok("\\033[K Zeile loeschen")
+    _pause()
+
+    # --- 10. \033[2J Bildschirm loeschen ---
+    print("=== \\033[2J: Bildschirm KOMPLETT loeschen ===")
+    print("In 2 Sekunden sollte alles schwarz werden...")
+    time.sleep(2.0)
+    sys.stdout.write("\033[2J")
+    sys.stdout.flush()
+    # kurz schwarz lassen, dann OK melden
+    time.sleep(1.0)
+    ok("\\033[2J Bildschirm geloescht")
+    _pause("War der Schirm kurz schwarz? A=ja")
+
+    print("Terminal-Test fertig.")
+
+
 MENU = [
     ("Alle Tests",    run_all_tests),
     ("dlopen .so",    menu_dlopen_so),
@@ -2168,6 +2365,9 @@ MENU = [
     ("threading",     lambda: _run_single(test_threading)),
     ("write sd",      lambda: _run_single(test_write_sd)),
     ("write usb",     lambda: _run_single(test_write_usb)),
+    ("terminal ctrl",  lambda: _run_single(test_terminal_ctrl)),
+    ("input()",        lambda: _run_single(test_input)),
+    ("pip",            lambda: _run_single(test_pip)),
     ("frozen modules", lambda: _run_single(test_frozen_modules)),
     ("builtin modules", lambda: _run_single(test_builtin_modules)),
     ("module tests",   module_test_menu),

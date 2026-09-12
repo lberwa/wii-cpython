@@ -1716,7 +1716,12 @@ Py_Init_Custom(const char** import_paths, size_t *count,
 
     // Minimal filesystem/stdlib setup (match your SD layout)
     PyConfig_SetString(&config, &config.program_name, L"python");
+    PyConfig_SetString(&config, &config.executable, L"sd:/python/python");
     PyConfig_SetString(&config, &config.home, L"sd:/python");
+    PyConfig_SetString(&config, &config.prefix, L"sd:/python");
+    PyConfig_SetString(&config, &config.exec_prefix, L"sd:/python");
+    PyConfig_SetString(&config, &config.base_prefix, L"sd:/python");
+    PyConfig_SetString(&config, &config.base_exec_prefix, L"sd:/python");
     config.module_search_paths_set = 1;
     PyWideStringList_Append(&config.module_search_paths, L"sd:/python");
     PyWideStringList_Append(&config.module_search_paths, L"sd:/python/Lib");
@@ -1774,6 +1779,26 @@ Py_Init_Custom(const char** import_paths, size_t *count,
         }
     }
 
+    /* Set sys.stdin to WiiStdin (WPAD picker + USB keyboard).
+     * wiitools is a builtin module, so the import always works here. */
+    {
+        PyObject *wt = PyImport_ImportModule("wiitools");
+        if (wt) {
+            PyObject *cls = PyObject_GetAttrString(wt, "WiiStdin");
+            if (cls) {
+                PyObject *inst = PyObject_CallNoArgs(cls);
+                if (inst) {
+                    PySys_SetObject("stdin",    inst);
+                    PySys_SetObject("__stdin__", inst);
+                    Py_DECREF(inst);
+                }
+                Py_DECREF(cls);
+            }
+            Py_DECREF(wt);
+        }
+        PyErr_Clear();
+    }
+
     /* Install Wii SD/USB source finder (from test.py). */
     (void)PyRun_SimpleString(
         "import sys, os\n"
@@ -1807,7 +1832,7 @@ Py_Init_Custom(const char** import_paths, size_t *count,
         "        with open(self.path, 'rb') as _f:\n"
         "            data = _f.read()\n"
         "        if not data:\n"
-        "            raise ImportError('empty module source: ' + self.path)\n"
+        "            return  # empty __init__.py is a valid empty package\n"
         #ifdef EXTERN_SD_IMPORT_TEST
         "        if self.path.startswith('sd:'):\n"
         "            try:\n"

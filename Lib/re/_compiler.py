@@ -284,10 +284,15 @@ def _optimize_charset(charset, iscased=None, fixup=None, fixes=None):
                             charmap[i] = 1
                 elif op is NEGATE:
                     out.append((op, av))
-                elif op is CATEGORY and tail and (CATEGORY, CH_NEGATE[av]) in tail:
-                    # Optimize [\s\S] etc.
-                    out = [] if out else _CHARSET_ALL
-                    return out, False
+                elif op is CATEGORY and tail:
+                    # Optimize [\s\S] etc. — use .get() to guard against
+                    # KeyError on big-endian targets (WII PPC) where
+                    # _NamedIntConstant dict lookups can fail unexpectedly.
+                    _neg = CH_NEGATE.get(av)
+                    if _neg is not None and (CATEGORY, _neg) in tail:
+                        out = [] if out else _CHARSET_ALL
+                        return out, False
+                    tail.append((op, av))
                 else:
                     tail.append((op, av))
             except IndexError:
