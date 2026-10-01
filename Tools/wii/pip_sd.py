@@ -27,6 +27,10 @@ PIP_WHEEL   = os.path.join(ROOT, "Lib", "ensurepip", "_bundled",
                            "pip-26.0.1-py3-none-any.whl")
 WII_FOLDER  = os.path.join(ROOT, "wii-folder")
 WII_PY      = os.path.join(WII_FOLDER, "python")
+# New layout: EVERYTHING importable (stdlib, pip code, .so, installed pkgs)
+# lives under python/lib/.  python/pip/ (pip CONFIG) is created at runtime by
+# Py_Init_Custom, not here.
+WII_LIB     = os.path.join(WII_PY, "lib")
 LIB_DIR     = os.path.join(ROOT, "Lib")
 
 # Directories inside Lib/ that are not useful on the Wii
@@ -46,12 +50,15 @@ def extract_pip():
         print(f"  ERROR: wheel not found: {PIP_WHEEL}")
         return
 
-    out_dir = WII_PY
+    out_dir = WII_LIB   # pip CODE is importable -> python/lib/pip/
     extracted = 0
     with zipfile.ZipFile(PIP_WHEEL) as z:
         for name in sorted(z.namelist()):
+            # Extract the COMPLETE pip package (not just .py) so data files
+            # like pip/_vendor/certifi/cacert.pem, *.json, *.pem etc. are
+            # present — certifi.where() / importlib.resources need them.
             if (name.startswith("pip/")
-                    and name.endswith(".py")
+                    and not name.endswith("/")          # skip dir entries
                     and "__pycache__" not in name):
                 target = os.path.join(out_dir, name)
                 os.makedirs(os.path.dirname(target), exist_ok=True)
@@ -59,7 +66,7 @@ def extract_pip():
                     f.write(z.read(name))
                 extracted += 1
 
-    print(f"  pip: {extracted} files -> {os.path.join(WII_PY, 'pip')}")
+    print(f"  pip: {extracted} files -> {os.path.join(WII_LIB, 'pip')}")
 
 
 def copy_stdlib():
@@ -78,7 +85,7 @@ def copy_stdlib():
                 continue
             src = os.path.join(dirpath, fname)
             rel = os.path.relpath(src, LIB_DIR)
-            dst = os.path.join(WII_PY, rel)
+            dst = os.path.join(WII_LIB, rel)   # stdlib -> python/lib/
             os.makedirs(os.path.dirname(dst), exist_ok=True)
             # Skip if destination is already up-to-date
             if (os.path.exists(dst)
@@ -107,6 +114,22 @@ WII_PATCHES = [
             "            return 0  # no user IDs on embedded targets (Wii/libogc)\n"
         ),
     ),
+    # Wii: warn at install time when the configured default-device was not
+    # available and we fell back to the other one (set by Py_Init_Custom).
+    (
+        os.path.join("pip", "_internal", "commands", "install.py"),
+        "    def run(self, options: Values, args: list[str]) -> int:\n"
+        "        if options.use_user_site and options.target_dir is not None:\n",
+        (
+            "    def run(self, options: Values, args: list[str]) -> int:\n"
+            "        import os as _os  # Wii device-fallback warning\n"
+            "        if _os.environ.get('WII_DEVICE_FALLBACK'):\n"
+            "            _parts = (_os.environ['WII_DEVICE_FALLBACK'].split('->') + ['?', '?'])[:2]\n"
+            "            logger.warning(\"Wii: default-device '%s' not available; \"\n"
+            "                           \"installing to '%s' instead\", _parts[0], _parts[1])\n"
+            "        if options.use_user_site and options.target_dir is not None:\n"
+        ),
+    ),
 ]
 
 
@@ -114,7 +137,7 @@ def apply_wii_patches():
     print("Applying Wii-specific patches...")
     patched = 0
     for rel, old, new in WII_PATCHES:
-        path = os.path.join(WII_PY, rel)
+        path = os.path.join(WII_LIB, rel)   # patch targets live under python/lib/
         if not os.path.isfile(path):
             print(f"  SKIP (not found): {rel}")
             continue
@@ -131,7 +154,9 @@ def apply_wii_patches():
 
 
 def main():
-    os.makedirs(WII_PY, exist_ok=True)
+    os.makedirs(WII_LIB, exist_ok=True)      # python/lib/ : import root
+    # python/pip/ (pip config dir) + pip.conf are created at runtime by
+    # Py_Init_Custom, not shipped here.
     extract_pip()
     copy_stdlib()
     apply_wii_patches()

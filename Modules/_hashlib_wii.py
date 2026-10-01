@@ -3,6 +3,12 @@
 # gracefully, but direct `import _hashlib` would raise ImportError without this.
 import _md5 as _m, _sha1 as _s1, _sha2 as _s2, _sha3 as _s3, _blake2 as _b2
 
+# hmac.py does `import _hashlib as _hashopenssl` and, on success, expects
+# `_hashopenssl.compare_digest` (only the ImportError branch falls back to
+# _operator).  Since this shim makes the import succeed, provide the same
+# constant-time comparison here so hmac/urllib3/pip keep working.
+from _operator import _compare_digest as compare_digest
+
 _ALGORITHMS = {
     'md5':       _m.md5,
     'sha1':      _s1.sha1,

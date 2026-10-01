@@ -2,6 +2,7 @@
 #ifdef WII_BUILD
 
 #include <errno.h>
+#include <stdarg.h>     /* va_list for ioctl(...) */
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -35,20 +36,66 @@ int getprotobyname_r(void) { return -1; }
 struct protoent *getprotobyname(const char *name)
     { (void)name; return NULL; }
 
+/* sendmsg: libogc has no net_sendmsg. Emulate by sending each iovec with
+   net_send (no ancillary/control data support — none needed for TCP HTTP). */
 ssize_t sendmsg(int fd, const struct msghdr *msg, int flags)
-    { (void)fd; (void)msg; (void)flags; errno = ENOSYS; return -1; }
+{
+    if (!msg) { errno = EFAULT; return -1; }
+    ssize_t total = 0;
+    for (size_t i = 0; i < (size_t)msg->msg_iovlen; i++) {
+        const struct iovec *iov = &msg->msg_iov[i];
+        if (iov->iov_len == 0) continue;
+        s32 n = net_send(fd, iov->iov_base, (s32)iov->iov_len, (u32)flags);
+        if (n < 0) { if (total > 0) break; errno = -n; return -1; }
+        total += n;
+        if ((size_t)n < iov->iov_len) break;   /* short write, stop */
+    }
+    return total;
+}
 
+/* recvmsg: libogc has no net_recvmsg. Emulate by receiving into each iovec
+   with net_recv (no ancillary/control data). */
 ssize_t recvmsg(int fd, struct msghdr *msg, int flags)
-    { (void)fd; (void)msg; (void)flags; errno = ENOSYS; return -1; }
+{
+    if (!msg) { errno = EFAULT; return -1; }
+    ssize_t total = 0;
+    for (size_t i = 0; i < (size_t)msg->msg_iovlen; i++) {
+        struct iovec *iov = &msg->msg_iov[i];
+        if (iov->iov_len == 0) continue;
+        s32 n = net_recv(fd, iov->iov_base, (s32)iov->iov_len, (u32)flags);
+        if (n < 0) { if (total > 0) break; errno = -n; return -1; }
+        total += n;
+        if ((size_t)n < iov->iov_len) break;   /* short read, stop */
+    }
+    msg->msg_flags = 0;
+    return total;
+}
 
+/* socketpair: libogc provides no AF_UNIX / net_socketpair (verified against
+   libogc/include/network.h — no such symbol). Keep as ENOSYS. */
 int socketpair(int domain, int type, int protocol, int sv[2])
     { (void)domain; (void)type; (void)protocol; (void)sv; errno = ENOSYS; return -1; }
 
+/* select -> libogc net_select (real implementation). */
 int select(int nfds, fd_set *r, fd_set *w, fd_set *e, struct timeval *t)
-    { (void)nfds; (void)r; (void)w; (void)e; (void)t; errno = ENOSYS; return -1; }
+{
+    s32 ret = net_select(nfds, r, w, e, t);
+    if (ret < 0) { errno = -ret; return -1; }
+    return ret;
+}
 
+/* ioctl -> libogc net_ioctl. Handles FIONBIO (non-blocking) which pip/urllib3
+   needs when it sets a socket timeout (internal_setblocking -> ioctl FIONBIO). */
 int ioctl(int fd, int req, ...)
-    { (void)fd; (void)req; errno = ENOSYS; return -1; }
+{
+    va_list ap;
+    va_start(ap, req);
+    void *argp = va_arg(ap, void *);
+    va_end(ap);
+    s32 ret = net_ioctl(fd, (u32)req, argp);
+    if (ret < 0) { errno = -ret; return -1; }
+    return ret;
+}
 
 #if WII_LIBOGC == 2
 /* inet_ntop / inet_pton: libogc2 hat kein POSIX-Aequivalent; libogc1 hat sie in arpa/inet.h */

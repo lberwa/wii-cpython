@@ -10,6 +10,49 @@ import types
 
 w.init()
 
+# --- Tee: alles was geprintet wird landet ZUSAETZLICH in sd:/python-log-crash.log
+# Der Wii-Screen ist zu klein/fluechtig; so ist die komplette Ausgabe (inkl.
+# pip-Output und Tracebacks) auf der SD nachlesbar.  Pro write() wird geflusht,
+# damit bei einem Crash die letzte Zeile sicher auf der SD ist.
+class _Tee:
+    def __init__(self, term, logf):
+        self._term = term
+        self._logf = logf
+    def write(self, s):
+        try:
+            self._term.write(s)
+        except Exception:
+            pass
+        try:
+            self._logf.write(s)
+            self._logf.flush()
+        except Exception:
+            pass
+        return len(s)
+    def flush(self):
+        try:
+            self._term.flush()
+        except Exception:
+            pass
+        try:
+            self._logf.flush()
+        except Exception:
+            pass
+    def isatty(self):
+        return False
+    def __getattr__(self, name):
+        return getattr(self._term, name)
+
+try:
+    # device-aware: sys.prefix == {dev}:/python  ->  {dev}:/python-log-crash.log
+    _LOGPATH = sys.prefix + "-log-crash.log"
+    _LOGF = open(_LOGPATH, "w")
+    sys.stdout = _Tee(sys.stdout, _LOGF)
+    sys.stderr = _Tee(sys.stderr, _LOGF)
+    print("=== log start (tee -> " + _LOGPATH + ") ===")
+except Exception as _e:
+    print("(tee setup failed: " + repr(_e) + ")")
+
 try:
     import _datetime
     sys.modules.setdefault('datetime', _datetime)
@@ -32,6 +75,17 @@ _errors = []
 # Event-Pfad (__wpad_calc_data) auf, der intern crashen kann. Daher hier aus;
 # auf echter Hardware mit Wiimote bewusst aktivierbar.
 _WPAD_RAW_EVENTS = False
+
+
+def _log_tb(label):
+    """Print the current exception's full traceback.  sys.stdout is tee'd to
+    sd:/python-log-crash.log, so this lands both on screen and in the log."""
+    try:
+        import traceback
+        print("\n===== " + str(label) + " =====")
+        print(traceback.format_exc())
+    except Exception as _e:
+        print("  (_log_tb failed: " + repr(_e) + ")")
 
 
 def ok(name, info=""):
@@ -2175,6 +2229,7 @@ def test_pip():
             print("  ... and " + str(len(pkgs) - 10) + " more")
     except Exception as e:
         print("importlib.metadata error: " + repr(e))
+        _log_tb("importlib.metadata")
 
     # 3. pip list (dry-run, no network, no colour)
     import io, sys
@@ -2187,9 +2242,9 @@ def test_pip():
     except SystemExit:
         pass
     except Exception as e:
-        print("[pip list error] " + repr(e), file=old_stdout)
-        import traceback
-        traceback.print_exc(file=old_stdout)
+        sys.stdout = old_stdout
+        print("[pip list error] " + repr(e))
+        _log_tb("pip list")
     finally:
         sys.stdout = old_stdout
     out = buf.getvalue().strip()
@@ -2200,6 +2255,217 @@ def test_pip():
             print("  " + l)
 
     print("pip import: OK")
+
+
+# ===================== pip (install / remove / test / list) ================
+# Gemeinsame Konfiguration + Helfer fuer die vier pip-Menuepunkte.
+# pypiserver: der PEP 503 Index liegt unter /simple/ (der Root gibt nur eine
+# Willkommensseite zurueck).  --index-url MUSS auf /simple/ zeigen.
+_PIP_INDEX   = "http://192.168.15.188:8080/simple/"   # PEP 503 simple index
+_PIP_PKG     = "mein-testpaket"                        # PyPI-Name (dist-info)
+_PIP_IMPORT  = "testpaket"                             # Import-Name (top_level.txt!)
+# HTTP-Index ohne TLS -> pip braucht --trusted-host; Host aus der URL ableiten.
+_PIP_TRUSTED = _PIP_INDEX.split("://", 1)[-1].split("/", 1)[0].split(":", 1)[0]
+
+
+def _pip_target():
+    """Installations-/Import-Ziel = aktiver Import-Pfad {dev}:/python/lib.
+    Vom aktiven Device abgeleitet (sys.prefix == {dev}:/python)."""
+    return sys.prefix + "/lib"
+
+
+def _pip_run(args):
+    """pip in-process ausfuehren; Ausgabe laeuft ueber den tee'd stdout."""
+    try:
+        from pip._internal.cli.main import main as pip_main
+        return pip_main(args)
+    except SystemExit as e:
+        return e.code
+    except Exception as e:
+        print("  pip error: " + repr(e))
+        _log_tb("pip " + " ".join(str(a) for a in args))
+        return None
+
+
+def _pip_tempdir():
+    """Schreibbares tempdir sicherstellen (TMPDIR von Py_Init_Custom)."""
+    import os, tempfile
+    _TMP = os.environ.get("TMPDIR") or (sys.prefix + "/tmp")
+    try:
+        os.mkdir(_TMP)
+    except OSError:
+        pass
+    tempfile.tempdir = _TMP
+    os.environ["TMPDIR"] = _TMP
+    return _TMP
+
+
+def test_pip_install():
+    section("pip install (lokaler Index)")
+    import os, re
+    if not w.IsNetReady():
+        fail("pip install (Netz nicht bereit)", "IsNetReady()==0")
+        return
+    os.environ["NO_COLOR"] = "1"       # kein ANSI-Muell im Terminal/Log
+    _pip_tempdir()
+    TARGET = _pip_target()
+
+    # 1. Was ist installierbar? -> /simple/ abrufen und Paket-Links parsen
+    print("1) Index abfragen: " + _PIP_INDEX)
+    try:
+        r = w.curl_get(_PIP_INDEX, timeout_ms=15000, verify_peer=0, verify_host=0)
+        body = r.get("body", b"")
+        if isinstance(body, (bytes, bytearray)):
+            body = bytes(body).decode("utf-8", "replace")
+        pkgs = re.findall(r'<a[^>]*>([^<]+)</a>', body)
+        print("   verfuegbar (" + str(len(pkgs)) + "): "
+              + ", ".join(p.strip() for p in pkgs[:10]))
+    except Exception as e:
+        print("   index error: " + repr(e))
+        _log_tb("index-get")
+
+    # 2. Installieren (wheel-only: keine Build-Isolation/subprocess auf Wii)
+    print("2) install " + _PIP_PKG + " -> " + TARGET)
+    rc = _pip_run([
+        "install",
+        "--index-url", _PIP_INDEX,
+        "--trusted-host", _PIP_TRUSTED,
+        "--target", TARGET,
+        "--no-cache-dir", "--no-build-isolation", "--no-deps",
+        "--disable-pip-version-check", "--no-input", "-v",
+        _PIP_PKG,
+    ])
+    print("   rc=" + str(rc))
+    if rc == 0:
+        ok("pip install " + _PIP_PKG)
+    else:
+        fail("pip install " + _PIP_PKG, "rc=" + str(rc))
+
+
+def test_pip_list():
+    section("pip list (installiert unter {dev}:/python/lib)")
+    import importlib, importlib.metadata as md
+    TARGET = _pip_target()
+    importlib.invalidate_caches()
+    found = 0
+    try:
+        for d in md.distributions(path=[TARGET]):
+            try:
+                nm = d.metadata["Name"]
+            except Exception:
+                nm = "?"
+            print("  - " + str(nm) + " " + str(d.version))
+            found += 1
+    except Exception as e:
+        print("  metadata error: " + repr(e))
+        _log_tb("pip-list")
+    if found == 0:
+        print("  (keine Pakete installiert)")
+    ok("pip list", str(found) + " Distributionen")
+
+
+def test_pip_import():
+    section("pip test: import " + _PIP_IMPORT + " + .hallo()")
+    import importlib
+    TARGET = _pip_target()
+    try:
+        if TARGET not in sys.path:
+            sys.path.insert(0, TARGET)
+        importlib.invalidate_caches()
+        sys.modules.pop(_PIP_IMPORT, None)
+        mod = importlib.import_module(_PIP_IMPORT)
+        result = mod.hallo()
+        print("  " + _PIP_IMPORT + ".hallo() = " + repr(result))
+        ok(_PIP_IMPORT + ".hallo()", result)
+    except Exception as e:
+        print("  import/test error: " + repr(e))
+        fail(_PIP_IMPORT + " import", e)
+        _log_tb("import-" + _PIP_IMPORT)
+
+
+def test_pip_remove():
+    # pip uninstall kennt --target nicht -> Paket-Ordner + dist-info manuell weg.
+    section("pip remove " + _PIP_PKG)
+    import os, shutil, glob
+    TARGET = _pip_target()
+    sys.modules.pop(_PIP_IMPORT, None)
+    removed = []
+    for cand in (TARGET + "/" + _PIP_IMPORT, TARGET + "/" + _PIP_IMPORT + ".py"):
+        if os.path.isdir(cand):
+            shutil.rmtree(cand, ignore_errors=True)
+            removed.append(cand)
+        elif os.path.isfile(cand):
+            os.remove(cand)
+            removed.append(cand)
+    for meta in glob.glob(TARGET + "/" + _PIP_IMPORT + "*-info") + \
+                glob.glob(TARGET + "/" + _PIP_PKG.replace("-", "_") + "*-info"):
+        shutil.rmtree(meta, ignore_errors=True)
+        removed.append(meta)
+    for rmd in removed:
+        print("  entfernt: " + rmd)
+    if removed:
+        ok("pip remove " + _PIP_PKG, str(len(removed)) + " Eintraege")
+    else:
+        print("  (nichts zu entfernen gefunden)")
+
+
+def test_pathfinder():
+    section("PathFinder/FileFinder Diagnose")
+    # Prueft, ob der originale FileFinder den aktiven Import-Pfad scannen kann.
+    import os
+    P = (sys.path[0] if sys.path else sys.prefix + "/lib")   # {dev}:/python/lib
+
+    print("1) sys.path[:6] = " + repr(sys.path[:6]))
+
+    try:
+        _hooks = [getattr(h, "__name__", type(h).__name__) for h in sys.path_hooks]
+        print("2) sys.path_hooks = " + repr(_hooks))
+    except Exception as e:
+        print("2) path_hooks FAIL: " + repr(e))
+
+    try:
+        st = os.stat(P)
+        print("3) os.stat(sd:/python): mode=0o%o mtime=%r" % (st.st_mode, st.st_mtime))
+        print("   os.path.isdir = " + str(os.path.isdir(P)))
+    except Exception as e:
+        print("3) os.stat FAIL: " + repr(e))
+        _log_tb("stat")
+
+    try:
+        entries = os.listdir(P)
+        print("4) os.listdir count = " + str(len(entries)))
+        print("   'linecache.py' drin: " + str("linecache.py" in entries))
+        print("   erste 8: " + repr(sorted(entries)[:8]))
+    except Exception as e:
+        print("4) os.listdir FAIL: " + repr(e))
+        _log_tb("listdir")
+
+    # direkter FileFinder-Test (umgeht WiiSourceFinder)
+    try:
+        import importlib.machinery as m
+        ff = m.FileFinder(
+            P,
+            (m.SourceFileLoader, m.SOURCE_SUFFIXES),
+            (m.ExtensionFileLoader, m.EXTENSION_SUFFIXES),
+        )
+        print("5) FileFinder('linecache') = " + repr(ff.find_spec("linecache")))
+        print("   FileFinder('_bisect')  = " + repr(ff.find_spec("_bisect")))
+    except Exception as e:
+        print("5) FileFinder FAIL: " + repr(e))
+        _log_tb("filefinder")
+
+    # path_hook direkt: akzeptiert ein Hook sd:/python?
+    try:
+        for h in sys.path_hooks:
+            _nm = getattr(h, "__name__", type(h).__name__)
+            try:
+                print("6) path_hook " + _nm + " -> " + repr(h(P)))
+            except Exception as e2:
+                print("6) path_hook " + _nm + " rejected: " + repr(e2))
+    except Exception as e:
+        print("6) path_hook loop FAIL: " + repr(e))
+
+    print("pathfinder diag: fertig")
 
 
 def test_input():
@@ -2368,6 +2634,11 @@ MENU = [
     ("terminal ctrl",  lambda: _run_single(test_terminal_ctrl)),
     ("input()",        lambda: _run_single(test_input)),
     ("pip",            lambda: _run_single(test_pip)),
+    ("pip install",    lambda: _run_single(test_pip_install)),
+    ("pip remove",     lambda: _run_single(test_pip_remove)),
+    ("pip test",       lambda: _run_single(test_pip_import)),
+    ("pip list",       lambda: _run_single(test_pip_list)),
+    ("pathfinder diag", lambda: _run_single(test_pathfinder)),
     ("frozen modules", lambda: _run_single(test_frozen_modules)),
     ("builtin modules", lambda: _run_single(test_builtin_modules)),
     ("module tests",   module_test_menu),

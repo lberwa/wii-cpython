@@ -3188,7 +3188,10 @@ _PyTrash_thread_destroy_chain(PyThreadState *tstate)
          * up distorting allocation statistics.
          */
         _PyObject_ASSERT(op, Py_REFCNT(op) == 0);
-        (*dealloc)(op);
+        /* Wii: same NULL tp_dealloc guard as in _Py_Dealloc (see there). */
+        if (dealloc != NULL) {
+            (*dealloc)(op);
+        }
     }
 }
 
@@ -3280,7 +3283,29 @@ _Py_Dealloc(PyObject *op)
     _Py_ForgetReference(op);
 #endif
     _PyReftracerTrack(op, PyRefTracer_DESTROY);
-    (*dealloc)(op);
+    /* Wii: guard against a NULL tp_dealloc. During Py_Finalize a module can be
+       collected whose dict still holds an object whose type has no tp_dealloc;
+       calling (*dealloc)(op) would then branch to 0x00000000 and crash. Skip the
+       call in that case (the object leaks, which is harmless at shutdown). */
+    if (dealloc != NULL) {
+#ifdef WII_DEALLOC_CRASH_DEBUG
+        /* Finalize dealloc probe: during Py_Finalize, append each type name to
+           sd:/python-log-crash.log right before its deallocator runs, so the
+           last line in the file before a 0x0 crash is the culprit. Each line
+           is flushed and the file closed immediately, so it survives the crash.
+           No on-screen print, no delay. Enable by defining WII_DEALLOC_CRASH_DEBUG. */
+        if (Py_IsFinalizing()) {
+            FILE *_wlog = fopen("sd:/python-log-crash.log", "a");
+            if (_wlog != NULL) {
+                fprintf(_wlog, "dealloc: %s\n",
+                        type->tp_name ? type->tp_name : "<noname>");
+                fflush(_wlog);
+                fclose(_wlog);
+            }
+        }
+#endif
+        (*dealloc)(op);
+    }
 
 #ifdef Py_DEBUG
     // gh-89373: The tp_dealloc function must leave the current exception

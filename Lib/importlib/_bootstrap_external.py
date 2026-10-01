@@ -1198,8 +1198,17 @@ class PathFinder:
         # https://bugs.python.org/issue45703
         NamespacePath._epoch += 1
 
-        from importlib.metadata import MetadataPathFinder
-        MetadataPathFinder.invalidate_caches()
+        try:
+            from importlib.metadata import MetadataPathFinder
+            MetadataPathFinder.invalidate_caches()
+        except ImportError:
+            # importlib.metadata may be partially initialized (circular import
+            # during early bootstrap).  Remove any partial state from
+            # sys.modules so the next import attempt gets a clean slate.
+            for _k in list(sys.modules.keys()):
+                if _k == 'importlib.metadata' or \
+                        _k.startswith('importlib.metadata.'):
+                    del sys.modules[_k]
 
     @staticmethod
     def _path_hooks(path):
@@ -1316,8 +1325,15 @@ class PathFinder:
         (or all names if ``None`` indicated) along the paths in the list
         of directories ``context.path``.
         """
-        from importlib.metadata import MetadataPathFinder
-        return MetadataPathFinder.find_distributions(*args, **kwargs)
+        try:
+            from importlib.metadata import MetadataPathFinder
+            return MetadataPathFinder.find_distributions(*args, **kwargs)
+        except ImportError:
+            for _k in list(sys.modules.keys()):
+                if _k == 'importlib.metadata' or \
+                        _k.startswith('importlib.metadata.'):
+                    del sys.modules[_k]
+            return iter([])
 
 
 class FileFinder:

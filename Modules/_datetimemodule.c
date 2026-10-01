@@ -4340,7 +4340,11 @@ timezone_dealloc(PyObject *op)
     PyDateTime_TimeZone *self = PyTimeZone_CAST(op);
     Py_CLEAR(self->offset);
     Py_CLEAR(self->name);
-    Py_TYPE(self)->tp_free(self);
+    /* Wii: guard against a NULL tp_free (see datetime_dealloc). */
+    freefunc tp_free = Py_TYPE(self)->tp_free;
+    if (tp_free != NULL) {
+        tp_free(self);
+    }
 }
 
 static PyObject *
@@ -4785,7 +4789,11 @@ time_dealloc(PyObject *op)
     if (HASTZINFO(self)) {
         Py_XDECREF(self->tzinfo);
     }
-    Py_TYPE(self)->tp_free(self);
+    /* Wii: guard against a NULL tp_free (see datetime_dealloc). */
+    freefunc tp_free = Py_TYPE(self)->tp_free;
+    if (tp_free != NULL) {
+        tp_free(self);
+    }
 }
 
 /*
@@ -6172,7 +6180,14 @@ datetime_dealloc(PyObject *op)
     if (HASTZINFO(self)) {
         Py_XDECREF(self->tzinfo);
     }
-    Py_TYPE(self)->tp_free(self);
+    /* Wii: guard against a NULL tp_free. During Py_Finalize the static type's
+       tp_free can already be gone while an instance is still being collected;
+       calling it would then branch to 0x00000000 and crash. Skip it in that
+       case (the object leaks, which is harmless at shutdown). */
+    freefunc tp_free = Py_TYPE(self)->tp_free;
+    if (tp_free != NULL) {
+        tp_free(self);
+    }
 }
 
 /*

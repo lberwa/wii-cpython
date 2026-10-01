@@ -67,8 +67,10 @@ $(TARGET).dol: $(TARGET).elf
 	@echo "gebaut: $@"
 
 # Beispielmodul: WICHTIG -fno-plt (externe Calls -> GOT statt PLT-Stubs)
+# und -lgcc ZULETZT (nach $<): sonst fehlen die _savegpr_*/_restgpr_*-Helfer
+# aus crtsavres.o -> out-of-range R_PPC_REL24 -> "Unknown instruction 00000000".
 $(MODULE): assets/test.c
-	$(PPCPREFIX)-gcc -Os -fPIC -fno-plt -shared -nostdlib $< -o $@
+	$(PPCPREFIX)-gcc -Os -fPIC -fno-plt -shared -nostdlib $< -o $@ -lgcc
 	@echo "gebaut: $@"
 
 # Kopiert .dol + test.so nach WII_SD_SYNC (Dolphin-SD-Ordner)

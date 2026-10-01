@@ -402,7 +402,17 @@ static int sslctx_setattr(PyObject *self_, PyObject *name, PyObject *v)
         self->check_hostname = b;
         return 0;
     }
-    /* Silently accept options, minimum_version, sslsocket_class, etc. */
+    /* Any other attribute: store it in the instance __dict__ instead of
+       silently discarding it.  Python subclasses of _SSLContext (ssl.SSLContext
+       and in turn truststore.SSLContext) carry a managed __dict__, so
+       GenericSetAttr persists e.g. `self._ctx = ...` / `self._ctx_lock = ...`.
+       A bare _SSLContext has no __dict__; there GenericSetAttr fails and we
+       fall back to the previous behaviour (silently accept & ignore) so we
+       don't break options/minimum_version/sslsocket_class assignments. */
+    if (PyObject_GenericSetAttr(self_, name, v) == 0) {
+        return 0;
+    }
+    PyErr_Clear();
     return 0;
 }
 
@@ -724,15 +734,21 @@ static PyObject *sslctx_set_psk_server_callback(PyObject *self_, PyObject *args)
 
 /* --- load_verify_locations --- */
 
-static PyObject *sslctx_load_verify_locations(PyObject *self_, PyObject *args)
+static PyObject *sslctx_load_verify_locations(PyObject *self_, PyObject *args,
+                                              PyObject *kwds)
 {
     PySSLContextObject *self = (PySSLContextObject *)self_;
     const char *cafile = NULL;
     Py_buffer cadata   = {0};
     int has_cadata     = 0;
 
+    /* CPython signature: load_verify_locations(cafile=None, capath=None,
+       cadata=None) — must accept keyword args (truststore calls it with
+       cafile=/capath=/cadata=). */
+    static char *kwlist[] = {"cafile", "capath", "cadata", NULL};
     PyObject *cafile_obj = Py_None, *capath_obj = Py_None, *cadata_obj = Py_None;
-    if (!PyArg_ParseTuple(args, "OOO", &cafile_obj, &capath_obj, &cadata_obj))
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|OOO", kwlist,
+                                     &cafile_obj, &capath_obj, &cadata_obj))
         return NULL;
     /* capath ignored — no filesystem scan on Wii */
 
@@ -993,7 +1009,7 @@ static PyMethodDef sslctx_methods[] = {
     {"set_servername_callback",  sslctx_set_servername_callback, METH_VARARGS, NULL},
     {"load_cert_chain",          sslctx_load_cert_chain,         METH_VARARGS, NULL},
     {"load_dh_params",           sslctx_load_dh_params,          METH_VARARGS, NULL},
-    {"load_verify_locations",    sslctx_load_verify_locations,   METH_VARARGS, NULL},
+    {"load_verify_locations",    (PyCFunction)(void(*)(void))sslctx_load_verify_locations, METH_VARARGS | METH_KEYWORDS, NULL},
     {"set_default_verify_paths", sslctx_set_default_verify_paths,METH_NOARGS,  NULL},
     {"_wrap_socket",             sslctx_wrap_socket,             METH_VARARGS, NULL},
     {"_wrap_bio",                sslctx__wrap_bio,               METH_VARARGS, NULL},

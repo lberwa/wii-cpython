@@ -25,6 +25,9 @@ __Included components:__
 - libcurl: Available through wiitoolsmodule for network and HTTP/HTTPS operations.
 - LodePNG: Available through wiitoolsmodule for PNG image loading and saving.
 - compatible with *.so files which were generated as shown in the [example](#build-so-files)
+- ssl via mbedTLS (not OpenSSL) and a Wii socket layer over libogc net.
+- pip works: install/import/uninstall pure-Python wheels from a (local) index
+  into `{dev}:/python/lib` over the network (see the wiitest "pip" menu entries).
 
 __Python:__
 
@@ -122,11 +125,14 @@ __Example:__
 
 ```c
 #include <Python.h>
+#include <fat.h>
 // #include ...
 // ...
 
 void init_wii_system() {
-	VIDEO_Init();
+	VIDEO_Init(); // init video
+
+    fatInitDefault(); // mount sd/usb
 	//...
 	//...
 }
@@ -137,19 +143,32 @@ int main() {
     //################
 	init_wii_system();
 	
+
     //################
     //INIT PYTHON
     //################
-	size_t count = 2;
+	size_t count = 1;
 	
 	// if you don't want import paths and no symbol map:
 	//Py_Init_Custom(NULL, NULL, NULL);
 	
-    // you can now import from "sd:" and sd:/python
-    // third argument: path to symbols.map (from `nm --defined-only hello_world.elf`)
-    // for the Wii dlopen loader — pass NULL to skip
-    PyStatus status = Py_Init_Custom((const char*[]){ "sd:/", "sd:/python"}, &count,
-                                     "sd:/symbols.map");
+    // All arguments are RELATIVE; Py_Init_Custom prepends the active device
+    // (sd:/ or usb:/), chosen from config.ini + which device is mounted.
+    //
+    // 1st arg (list): import roots. import_paths[0] is the prefix root:
+    //   "python"  -> prefix {dev}:/python, import path {dev}:/python/lib,
+    //                config.ini + pip.conf live under {dev}:/python/.
+    //   further list entries add more import paths ({dev}:/<entry>/lib).
+    // 3rd arg: symbols.map path (relative) for the Wii dlopen loader, e.g.
+    //   "python/symbols.map" -> {dev}:/python/symbols.map; pass NULL to skip.
+    //   (generate it with `nm --defined-only hello_world.elf`)
+    //
+    // Device choice: {dev}:/python/config.ini holds `default-device=sd|usb`.
+    // It is read from sd: first (else usb:) and auto-created if missing.
+    // To prefer usb:, set default-device=usb there. If the default device is
+    // not mounted, the other is used (pip warns on install).
+    PyStatus status = Py_Init_Custom((const char*[]){"python"}, &count,
+                                     "path/to/your/symbols.map");
     
     // return if failed to initialize Python
     if (status._type != _PyStatus_TYPE_OK) { 
@@ -280,9 +299,12 @@ In wiitools.pyi you can also find all the wiitools functions you can use.
 
 #### Other modules
 
-You can copy the contents of the Lib folder to `sd/usb:/python/*`
+Copy the contents of the Lib folder to `sd/usb:/python/lib/` (the import path).
 
-and if your `main.c` has the import path `sd:/python`, you can import these modules.
+With `main.c` passing `"python"` to `Py_Init_Custom`, the import path is
+`{dev}:/python/lib`, so these modules are importable. The easiest way to produce
+a ready-to-copy tree is `make pip-sd` + `make so-modules`, which populate
+`wii-folder/python/lib/` (stdlib, `.so` extensions, and pip).
 
 --------------
 
@@ -295,11 +317,10 @@ build:
 ```bash
 powerpc-eabi-gcc \
     -fPIC -fno-plt -shared -nostdlib \
-    -o out.so     test.c
-#  the .so file | the .c file
+    test.c -o out.so \
+    -lgcc
+#   the .c file | the .so file
 ```
-
-
 
 usage:
 

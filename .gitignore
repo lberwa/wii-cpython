@@ -64,6 +64,8 @@ build-host/
 fat/
 
 CLAUDE.md
+docs/
+.claude/
 
 build-wii/
 tmp/

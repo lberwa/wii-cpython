@@ -258,11 +258,14 @@ wait(300); // 5 Sekunden warten
     PRINT("\n\nFertig.\n");
 #endif
 
-    size_t count = 4;
+    size_t count = 1;
 
-    //Py_Initalize_Custom(NULL, NULL);
-    /* sd:/hello/python: pip and other SD-card packages installed by wiiload */
-    PyStatus status = Py_Init_Custom((const char*[]){ "sd:/", "sd:", "sd:/python", "sd:/hello/python"}, &count, NULL);
+    /* Pass RELATIVE paths only: Py_Init_Custom prepends the active device
+     * ({dev}:/) and appends /lib for the import path, and resolves {dev}
+     * (sd/usb) from availability + {dev}:/python/config.ini.
+     *   "python"            -> import path  {dev}:/python/lib
+     *   "python/symbols.map" -> symbol map  {dev}:/python/symbols.map  */
+    PyStatus status = Py_Init_Custom((const char*[]){ "python" }, &count, "python/symbols.map");
 
     if (status._type != _PyStatus_TYPE_OK) {
         // Init ist fehlgeschlagen

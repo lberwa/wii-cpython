@@ -304,22 +304,19 @@ frozen-modules:
 	fi
 
 libpython: configure frozen-modules ssl curl $(BUILD_DIR)/Modules/wiitoolsmodule.o
-	@# Ensure build-wii uses our local module setup (e.g. math)
-	@cmp -s "$(srcdir)/Modules/Setup.local" "$(BUILD_DIR)/Modules/Setup.local" 2>/dev/null || \
-		cp "$(srcdir)/Modules/Setup.local" "$(BUILD_DIR)/Modules/Setup.local"
-	@# configure runs makesetup with an empty Setup.local, producing a Makefile
-	@# with MODOBJS=[] and a config.c that references only bootstrap modules.
-	@# With -j8, the archive rule can complete with those empty MODOBJS before
-	@# make restarts after detecting that our Setup.local caused Makefile to be
-	@# regenerated -- leaving all PyInit_* symbols out of libpython.a.
-	@# Fix: delete config.c here so makesetup is forced to run as the very first
-	@# step (single-threaded) and produce both a correct Makefile and config.c
-	@# before any compilation starts.
-	@rm -f "$(BUILD_DIR)/Modules/config.c"
-	@$(MAKE) -j1 -C "$(BUILD_DIR)" Modules/config.c
-	@# Re-apply Wii-specific patches (makesetup just overwrote Makefile).
-	@$(MAKE) -f $(MAKEFILE_DIR)Makefile wii-patch-makefile BUILD_DIR="$(BUILD_DIR)"
-	@touch "$(BUILD_DIR)/Makefile"
+	@# Regenerate config.c and Makefile only when Setup.local changed or
+	@# config.c is missing. Unconditional regeneration touches build-wii/Makefile
+	@# on every run, making it newer than MODOBJS and forcing unnecessary rebuilds.
+	@if ! cmp -s "$(srcdir)/Modules/Setup.local" "$(BUILD_DIR)/Modules/Setup.local" \
+	        2>/dev/null \
+	    || [ ! -f "$(BUILD_DIR)/Modules/config.c" ]; then \
+	    echo "Setup.local changed or config.c missing -- regenerating"; \
+	    cp "$(srcdir)/Modules/Setup.local" "$(BUILD_DIR)/Modules/Setup.local"; \
+	    rm -f "$(BUILD_DIR)/Modules/config.c"; \
+	    $(MAKE) -j1 -C "$(BUILD_DIR)" Modules/config.c; \
+	    $(MAKE) -f $(MAKEFILE_DIR)Makefile wii-patch-makefile BUILD_DIR="$(BUILD_DIR)"; \
+	    touch "$(BUILD_DIR)/Makefile"; \
+	fi
 	@# Interrupted builds can leave behind empty object files that make treats as
 	@# up-to-date. Drop them so they are rebuilt before archiving/linking.
 	@find "$(BUILD_DIR)" -name '*.o' -size 0 -print -delete 2>/dev/null || true
@@ -438,11 +435,15 @@ wii-patch-makefile:
 	    "$(BUILD_DIR)/Makefile"; \
 	sed -i 's|-I\$$(abs_srcdir)/curl/wii/include -I\$$(LIBOGC_INC) -DHAVE_SOCKET|-I$$(abs_srcdir)/curl/wii/include -I$$(LIBOGC_INC) -I$$(LIBOGC_INC)/ogc -include $$(abs_srcdir)/curl/wii/include/curl_wii_net_compat.h -DHAVE_SOCKET|' \
 	    "$(BUILD_DIR)/Makefile"; \
+	sed -i '/^Modules\/_hacl\/[A-Za-z_]*\.o:.*LIBHACL/{N;d}' \
+	    "$(BUILD_DIR)/Makefile"; \
+	sed -i '/^Modules\/expat\/[a-z]*\.o:.*LIBEXPAT/{N;d}' \
+	    "$(BUILD_DIR)/Makefile"; \
 	echo '# WII_MAKEFILE_PATCHED' >> "$(BUILD_DIR)/Makefile"
 
 wiitools-build: $(BUILD_DIR)/Modules/wiitoolsmodule.o
 
-$(BUILD_DIR)/Modules/wiitoolsmodule.o: curl $(srcdir)/Modules/wiitoolsmodule.c
+$(BUILD_DIR)/Modules/wiitoolsmodule.o: $(srcdir)/Modules/wiitoolsmodule.c | curl
 	@mkdir -p "$(BUILD_DIR)/Modules"
 	$(CC) \
 		-I$(srcdir)/Modules \
@@ -589,19 +590,29 @@ pip-sd-clean:
 # These were removed from Setup.local (and thus from libpython.a) to shrink
 # boot.dol. WiiSourceFinder loads them via dlopen from sd:/python/<name>.so.
 #
-# Flags: -fPIC -fno-plt -shared -nostdlib (same as spam.so in wiitest).
+# Flags: -fPIC -fno-plt -shared -nostdlib, plus -lgcc LAST (see SO_LIBS above).
 # Symbol resolution: the main .elf exports all Python API symbols.
 # ---------------------------------------------------------------------------
 
-SO_OUT_DIR  := $(WII_FOLDER)/python
+# .so / .py shims are importable -> new layout puts them under python/lib/
+SO_OUT_DIR  := $(WII_FOLDER)/python/lib
 SO_CC       := $(CC)
-SO_CFLAGS   := -Os -fPIC -Wall -DWII_BUILD -D__WII__ -D__wii__ \
+SO_CFLAGS   := -Os -fPIC -fno-plt -Wall -DWII_BUILD -D__WII__ -D__wii__ \
                -I$(MAKEFILE_DIR)build-wii \
                -I$(MAKEFILE_DIR)Include \
                -I$(MAKEFILE_DIR)Include/internal \
                -I$(MAKEFILE_DIR)Modules \
                $(WII_INCLUDE_DIRS)
-SO_LDFLAGS  := -shared -nostdlib -lgcc -Wl,-z,notext
+# NOTE: -lgcc MUST come AFTER the object files on the link line, otherwise the
+# linker discards crtsavres.o (the _savegpr_*/_restgpr_* register save/restore
+# helpers) before the module objects reference them. Those refs then stay
+# undefined and get resolved by the Wii dlopen loader against the main .dol in
+# MEM1 -- but a bl/R_PPC_REL24 branch cannot reach MEM1 (0x80xxxxxx) from a .so
+# in MEM2 (0x90xxxxxx): the 24-bit offset is truncated and the branch lands in
+# a zero region -> "Unknown instruction 00000000" crash. Keep -lgcc in SO_LIBS
+# and append it at the very end of every link recipe.
+SO_LDFLAGS  := -shared -nostdlib -Wl,-z,notext
+SO_LIBS     := -lgcc
 
 MPDEC_SRCS := \
     $(MAKEFILE_DIR)Modules/_decimal/libmpdec/basearith.c \
@@ -647,7 +658,6 @@ SO_TARGETS := \
     $(SO_OUT_DIR)/xxsubtype.so \
     $(SO_OUT_DIR)/xxlimited.so \
     $(SO_OUT_DIR)/xxlimited_35.so \
-    $(SO_OUT_DIR)/_datetime.so \
     $(SO_OUT_DIR)/_decimal.so \
     $(SO_OUT_DIR)/_sqlite3.so \
     $(SO_OUT_DIR)/_multibytecodec.so \
@@ -660,68 +670,70 @@ SO_TARGETS := \
     $(SO_OUT_DIR)/_ctypes.so
 
 SO_PY_TARGETS := \
-    $(SO_OUT_DIR)/_hashlib.py
+    $(SO_OUT_DIR)/_hashlib.py \
+    $(SO_OUT_DIR)/mmap.py
 
 so-modules: $(SO_TARGETS) $(SO_PY_TARGETS)
 	@echo "so-modules: $(words $(SO_TARGETS)) .so + $(words $(SO_PY_TARGETS)) .py -> $(SO_OUT_DIR)"
 
 $(SO_OUT_DIR)/_bisect.so: $(MAKEFILE_DIR)Modules/_bisectmodule.c
 	@mkdir -p $(SO_OUT_DIR)
-	$(SO_CC) $(SO_CFLAGS) $(SO_LDFLAGS) -DPy_BUILD_CORE_MODULE $< -o $@
+	$(SO_CC) $(SO_CFLAGS) $(SO_LDFLAGS) -DPy_BUILD_CORE_MODULE $< -o $@ $(SO_LIBS)
 
 $(SO_OUT_DIR)/_random.so: $(MAKEFILE_DIR)Modules/_randommodule.c
 	@mkdir -p $(SO_OUT_DIR)
-	$(SO_CC) $(SO_CFLAGS) $(SO_LDFLAGS) -DPy_BUILD_CORE_MODULE $< -o $@
+	$(SO_CC) $(SO_CFLAGS) $(SO_LDFLAGS) -DPy_BUILD_CORE_MODULE $< -o $@ $(SO_LIBS)
 
 $(SO_OUT_DIR)/_statistics.so: $(MAKEFILE_DIR)Modules/_statisticsmodule.c
 	@mkdir -p $(SO_OUT_DIR)
-	$(SO_CC) $(SO_CFLAGS) $(SO_LDFLAGS) -DPy_BUILD_CORE_MODULE $< -o $@
+	$(SO_CC) $(SO_CFLAGS) $(SO_LDFLAGS) -DPy_BUILD_CORE_MODULE $< -o $@ $(SO_LIBS)
 
 $(SO_OUT_DIR)/cmath.so: $(MAKEFILE_DIR)Modules/cmathmodule.c
 	@mkdir -p $(SO_OUT_DIR)
-	$(SO_CC) $(SO_CFLAGS) $(SO_LDFLAGS) -DPy_BUILD_CORE_MODULE $< -o $@
+	$(SO_CC) $(SO_CFLAGS) $(SO_LDFLAGS) -DPy_BUILD_CORE_MODULE $< -o $@ $(SO_LIBS)
 
 $(SO_OUT_DIR)/_csv.so: $(MAKEFILE_DIR)Modules/_csv.c
 	@mkdir -p $(SO_OUT_DIR)
-	$(SO_CC) $(SO_CFLAGS) $(SO_LDFLAGS) -DPy_BUILD_CORE_MODULE $< -o $@
+	$(SO_CC) $(SO_CFLAGS) $(SO_LDFLAGS) -DPy_BUILD_CORE_MODULE $< -o $@ $(SO_LIBS)
 
 $(SO_OUT_DIR)/_lsprof.so: $(MAKEFILE_DIR)Modules/_lsprof.c $(MAKEFILE_DIR)Modules/rotatingtree.c
 	@mkdir -p $(SO_OUT_DIR)
 	$(SO_CC) $(SO_CFLAGS) $(SO_LDFLAGS) -DPy_BUILD_CORE_MODULE \
-	    $(MAKEFILE_DIR)Modules/_lsprof.c $(MAKEFILE_DIR)Modules/rotatingtree.c -o $@
+	    $(MAKEFILE_DIR)Modules/_lsprof.c $(MAKEFILE_DIR)Modules/rotatingtree.c -o $@ $(SO_LIBS)
 
 $(SO_OUT_DIR)/_asyncio.so: $(MAKEFILE_DIR)Modules/_asynciomodule.c
 	@mkdir -p $(SO_OUT_DIR)
-	$(SO_CC) $(SO_CFLAGS) $(SO_LDFLAGS) -DPy_BUILD_CORE_MODULE $< -o $@
+	$(SO_CC) $(SO_CFLAGS) $(SO_LDFLAGS) -DPy_BUILD_CORE_MODULE $< -o $@ $(SO_LIBS)
 
 $(SO_OUT_DIR)/_queue.so: $(MAKEFILE_DIR)Modules/_queuemodule.c
 	@mkdir -p $(SO_OUT_DIR)
-	$(SO_CC) $(SO_CFLAGS) $(SO_LDFLAGS) -DPy_BUILD_CORE_MODULE $< -o $@
+	$(SO_CC) $(SO_CFLAGS) $(SO_LDFLAGS) -DPy_BUILD_CORE_MODULE $< -o $@ $(SO_LIBS)
 
 $(SO_OUT_DIR)/_heapq.so: $(MAKEFILE_DIR)Modules/_heapqmodule.c
 	@mkdir -p $(SO_OUT_DIR)
-	$(SO_CC) $(SO_CFLAGS) $(SO_LDFLAGS) -DPy_BUILD_CORE_MODULE $< -o $@
+	$(SO_CC) $(SO_CFLAGS) $(SO_LDFLAGS) -DPy_BUILD_CORE_MODULE $< -o $@ $(SO_LIBS)
 
 $(SO_OUT_DIR)/array.so: $(MAKEFILE_DIR)Modules/arraymodule.c
 	@mkdir -p $(SO_OUT_DIR)
-	$(SO_CC) $(SO_CFLAGS) $(SO_LDFLAGS) -DPy_BUILD_CORE_MODULE $< -o $@
+	$(SO_CC) $(SO_CFLAGS) $(SO_LDFLAGS) -DPy_BUILD_CORE_MODULE $< -o $@ $(SO_LIBS)
 
 $(SO_OUT_DIR)/xxsubtype.so: $(MAKEFILE_DIR)Modules/xxsubtype.c
 	@mkdir -p $(SO_OUT_DIR)
-	$(SO_CC) $(SO_CFLAGS) $(SO_LDFLAGS) -DPy_BUILD_CORE_MODULE $< -o $@
+	$(SO_CC) $(SO_CFLAGS) $(SO_LDFLAGS) -DPy_BUILD_CORE_MODULE $< -o $@ $(SO_LIBS)
 
 # xxlimited defines Py_LIMITED_API itself — do not pass Py_BUILD_CORE_MODULE
 $(SO_OUT_DIR)/xxlimited.so: $(MAKEFILE_DIR)Modules/xxlimited.c
 	@mkdir -p $(SO_OUT_DIR)
-	$(SO_CC) $(SO_CFLAGS) $(SO_LDFLAGS) $< -o $@
+	$(SO_CC) $(SO_CFLAGS) $(SO_LDFLAGS) $< -o $@ $(SO_LIBS)
 
 $(SO_OUT_DIR)/xxlimited_35.so: $(MAKEFILE_DIR)Modules/xxlimited_35.c
 	@mkdir -p $(SO_OUT_DIR)
-	$(SO_CC) $(SO_CFLAGS) $(SO_LDFLAGS) $< -o $@
+	$(SO_CC) $(SO_CFLAGS) $(SO_LDFLAGS) $< -o $@ $(SO_LIBS)
 
-$(SO_OUT_DIR)/_datetime.so: $(MAKEFILE_DIR)Modules/_datetimemodule.c
-	@mkdir -p $(SO_OUT_DIR)
-	$(SO_CC) $(SO_CFLAGS) $(SO_LDFLAGS) -DPy_BUILD_CORE_MODULE $< -o $@
+# NOTE: _datetime is a built-in (Modules/config.c), so it is intentionally NOT
+# shipped as a .so — loading the .so via dlopen gave its static types a broken
+# metaclass (type(datetime).__name__ == '') and tripped PyType_Ready. The
+# WiiSourceFinder also skips built-ins, so a stray _datetime.so would be ignored.
 
 $(SO_OUT_DIR)/_decimal.so: $(MAKEFILE_DIR)Modules/_decimal/_decimal.c $(MPDEC_SRCS)
 	@mkdir -p $(SO_OUT_DIR)
@@ -729,7 +741,7 @@ $(SO_OUT_DIR)/_decimal.so: $(MAKEFILE_DIR)Modules/_decimal/_decimal.c $(MPDEC_SR
 	    -DCONFIG_32 -DANSI \
 	    -I$(MAKEFILE_DIR)Modules/_decimal \
 	    -I$(MAKEFILE_DIR)Modules/_decimal/libmpdec \
-	    $(MAKEFILE_DIR)Modules/_decimal/_decimal.c $(MPDEC_SRCS) -o $@
+	    $(MAKEFILE_DIR)Modules/_decimal/_decimal.c $(MPDEC_SRCS) -o $@ $(SO_LIBS)
 
 $(SO_OUT_DIR)/_sqlite3.so: $(SQLITE_SRCS) $(MAKEFILE_DIR)sqlite/sqlite3.c
 	@mkdir -p $(SO_OUT_DIR)
@@ -737,47 +749,51 @@ $(SO_OUT_DIR)/_sqlite3.so: $(SQLITE_SRCS) $(MAKEFILE_DIR)sqlite/sqlite3.c
 	    -DSQLITE_OMIT_LOAD_EXTENSION -DMODULE_NAME='"sqlite3"' \
 	    -DSQLITE_OMIT_WAL -DSQLITE_OMIT_MMAP \
 	    -I$(MAKEFILE_DIR)sqlite \
-	    $(SQLITE_SRCS) $(MAKEFILE_DIR)sqlite/sqlite3.c -o $@
+	    $(SQLITE_SRCS) $(MAKEFILE_DIR)sqlite/sqlite3.c -o $@ $(SO_LIBS)
 
 # _multibytecodec: the framework module (PyInit__multibytecodec lives here)
 $(SO_OUT_DIR)/_multibytecodec.so: $(CJKCODECS_DIR)/multibytecodec.c
 	@mkdir -p $(SO_OUT_DIR)
 	$(SO_CC) $(SO_CFLAGS) $(SO_LDFLAGS) -DPy_BUILD_CORE_MODULE \
-	    -I$(CJKCODECS_DIR) $< -o $@
+	    -I$(CJKCODECS_DIR) $< -o $@ $(SO_LIBS)
 
 # Each codec .so bundles multibytecodec.c to resolve internal symbols
 # (Wii dlopen resolves only against the main .elf, not other .so files).
 $(SO_OUT_DIR)/_codecs_cn.so: $(CJKCODECS_DIR)/_codecs_cn.c $(CJKCODECS_DIR)/multibytecodec.c
 	@mkdir -p $(SO_OUT_DIR)
 	$(SO_CC) $(SO_CFLAGS) $(SO_LDFLAGS) -DPy_BUILD_CORE_MODULE \
-	    -I$(CJKCODECS_DIR) $^ -o $@
+	    -I$(CJKCODECS_DIR) $^ -o $@ $(SO_LIBS)
 
 $(SO_OUT_DIR)/_codecs_hk.so: $(CJKCODECS_DIR)/_codecs_hk.c $(CJKCODECS_DIR)/multibytecodec.c
 	@mkdir -p $(SO_OUT_DIR)
 	$(SO_CC) $(SO_CFLAGS) $(SO_LDFLAGS) -DPy_BUILD_CORE_MODULE \
-	    -I$(CJKCODECS_DIR) $^ -o $@
+	    -I$(CJKCODECS_DIR) $^ -o $@ $(SO_LIBS)
 
 $(SO_OUT_DIR)/_codecs_jp.so: $(CJKCODECS_DIR)/_codecs_jp.c $(CJKCODECS_DIR)/multibytecodec.c
 	@mkdir -p $(SO_OUT_DIR)
 	$(SO_CC) $(SO_CFLAGS) $(SO_LDFLAGS) -DPy_BUILD_CORE_MODULE \
-	    -I$(CJKCODECS_DIR) $^ -o $@
+	    -I$(CJKCODECS_DIR) $^ -o $@ $(SO_LIBS)
 
 $(SO_OUT_DIR)/_codecs_kr.so: $(CJKCODECS_DIR)/_codecs_kr.c $(CJKCODECS_DIR)/multibytecodec.c
 	@mkdir -p $(SO_OUT_DIR)
 	$(SO_CC) $(SO_CFLAGS) $(SO_LDFLAGS) -DPy_BUILD_CORE_MODULE \
-	    -I$(CJKCODECS_DIR) $^ -o $@
+	    -I$(CJKCODECS_DIR) $^ -o $@ $(SO_LIBS)
 
 $(SO_OUT_DIR)/_codecs_tw.so: $(CJKCODECS_DIR)/_codecs_tw.c $(CJKCODECS_DIR)/multibytecodec.c
 	@mkdir -p $(SO_OUT_DIR)
 	$(SO_CC) $(SO_CFLAGS) $(SO_LDFLAGS) -DPy_BUILD_CORE_MODULE \
-	    -I$(CJKCODECS_DIR) $^ -o $@
+	    -I$(CJKCODECS_DIR) $^ -o $@ $(SO_LIBS)
 
 $(SO_OUT_DIR)/_codecs_iso2022.so: $(CJKCODECS_DIR)/_codecs_iso2022.c $(CJKCODECS_DIR)/multibytecodec.c
 	@mkdir -p $(SO_OUT_DIR)
 	$(SO_CC) $(SO_CFLAGS) $(SO_LDFLAGS) -DPy_BUILD_CORE_MODULE \
-	    -I$(CJKCODECS_DIR) $^ -o $@
+	    -I$(CJKCODECS_DIR) $^ -o $@ $(SO_LIBS)
 
 $(SO_OUT_DIR)/_hashlib.py: $(MAKEFILE_DIR)Modules/_hashlib_wii.py
+	@mkdir -p $(SO_OUT_DIR)
+	cp $< $@
+
+$(SO_OUT_DIR)/mmap.py: $(MAKEFILE_DIR)Modules/mmap_wii.py
 	@mkdir -p $(SO_OUT_DIR)
 	cp $< $@
 
@@ -813,7 +829,7 @@ $(SO_OUT_DIR)/_ctypes.so: $(CTYPES_SRCS) $(FFI_LIB)
 	$(SO_CC) $(SO_CFLAGS) $(SO_LDFLAGS) -DPy_BUILD_CORE_MODULE \
 	    -I$(FFI_INSTALL)/include \
 	    -I$(MAKEFILE_DIR)dlfcn \
-	    $(CTYPES_SRCS) $(FFI_LIB) -o $@
+	    $(CTYPES_SRCS) $(FFI_LIB) -o $@ $(SO_LIBS)
 
 libffi-clean:
 	@-rm -rf "$(FFI_BUILD)" "$(FFI_INSTALL)"

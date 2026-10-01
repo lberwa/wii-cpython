@@ -5173,12 +5173,18 @@ static PyObject *WiiStdin_readable(PyObject *self, PyObject *args)
 { (void)self; (void)args; Py_RETURN_TRUE; }
 static PyObject *WiiStdin_writable(PyObject *self, PyObject *args)
 { (void)self; (void)args; Py_RETURN_FALSE; }
+static PyObject *WiiStdin_isatty(PyObject *self, PyObject *args)
+{ (void)self; (void)args; Py_RETURN_FALSE; }
+static PyObject *WiiStdin_fileno(PyObject *self, PyObject *args)
+{ (void)self; (void)args; return PyLong_FromLong(0); }  /* stdin fd */
 
 static PyMethodDef WiiStdin_methods[] = {
     {"readline", (PyCFunction)WiiStdin_readline, METH_VARARGS, "Read one line via WPAD/keyboard"},
     {"read",     (PyCFunction)WiiStdin_read,     METH_VARARGS, "Read via WPAD/keyboard"},
     {"readable", WiiStdin_readable,              METH_NOARGS,  "Returns True"},
     {"writable", WiiStdin_writable,              METH_NOARGS,  "Returns False"},
+    {"isatty",   WiiStdin_isatty,                METH_NOARGS,  "Returns False (not a TTY)"},
+    {"fileno",   WiiStdin_fileno,                METH_NOARGS,  "Returns 0 (stdin fd)"},
     {NULL, NULL, 0, NULL}
 };
 

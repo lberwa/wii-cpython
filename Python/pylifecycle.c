@@ -1544,8 +1544,72 @@ pyinit_main(PyThreadState *tstate)
 
 #ifdef __WII__
 #include <fat.h>
+#include <dirent.h>               // opendir() for device-availability probe
+#include <sys/stat.h>            // mkdir() for the pip config dir
+#include <string.h>              // strcmp/strncmp/strchr for config.ini parsing
 #include "../dlfcn/wii_dlfcn.h"
 #include "../bitmap/include/render_text.h"
+
+/* --- Wii device resolution (sd:/ vs usb:/) + config.ini -------------------
+ * The import prefix is chosen at boot from an available storage device.
+ * config.ini (key=value, only key: default-device=sd|usb) lives under
+ * {dev}:/python/config.ini.  See docs/superpowers/specs/2026-10-01-*. */
+
+/* 1 if the device root (e.g. "sd:/") is mounted/accessible. */
+static int wii_device_available(const char *dev_root)
+{
+    DIR *d = opendir(dev_root);
+    if (d) { closedir(d); return 1; }
+    return 0;
+}
+
+/* Read default-device from {confdev}:/{prefix}/config.ini into out[n].
+ * Returns 1 if the key was found, else 0. */
+static int wii_read_default_device(const char *confdev, const char *prefix,
+                                   char *out, size_t n)
+{
+    char path[96];
+    snprintf(path, sizeof(path), "%s:/%s/config.ini", confdev, prefix);
+    FILE *f = fopen(path, "r");
+    if (!f) return 0;
+    char line[160];
+    int found = 0;
+    while (fgets(line, sizeof(line), f)) {
+        char *p = line;
+        while (*p == ' ' || *p == '\t') p++;
+        if (*p == '#' || *p == '\n' || *p == '\r' || *p == '\0') continue;
+        if (strncmp(p, "default-device", 14) == 0) {
+            char *eq = strchr(p, '=');
+            if (eq) {
+                eq++;
+                while (*eq == ' ' || *eq == '\t') eq++;
+                char *end = eq;
+                while (*end && *end != '\n' && *end != '\r'
+                       && *end != ' ' && *end != '\t') end++;
+                size_t len = (size_t)(end - eq);
+                if (len > 0 && len < n) {
+                    memcpy(out, eq, len);
+                    out[len] = '\0';
+                    found = 1;
+                }
+            }
+        }
+    }
+    fclose(f);
+    return found;
+}
+
+/* Create {confdev}:/{prefix}/config.ini with default-device=dev (best effort). */
+static void wii_write_default_device(const char *confdev, const char *prefix,
+                                     const char *dev)
+{
+    char path[96];
+    snprintf(path, sizeof(path), "%s:/%s/config.ini", confdev, prefix);
+    FILE *f = fopen(path, "w");
+    if (!f) return;
+    fprintf(f, "# Wii Python loader config\ndefault-device=%s\n", dev);
+    fclose(f);
+}
 #endif
 
 #ifdef OS_REPORT_PYTHON_PRINT
@@ -1689,6 +1753,12 @@ Py_Init_Custom(const char** import_paths, size_t *count,
     char *script;
     size_t script_len;
     int rc;
+    const char *wii_dev = "sd";      /* active storage device: "sd" or "usb" */
+    char wii_symmap[128] = "";       /* {dev}:/<symbols_map_path> (used later) */
+    /* import_paths[0] is the prefix root (relative), e.g. "python". */
+    const char *wii_prefix_rel =
+        (import_paths && count && *count > 0 && import_paths[0])
+        ? import_paths[0] : "python";
 
 #if defined(WII_BUILD)
     if (!fatInitDefault()) {
@@ -1698,6 +1768,44 @@ Py_Init_Custom(const char** import_paths, size_t *count,
         s.err_msg = "fatInitDefault returned ERROR!";
         s.exitcode = 0;
         return s;
+    }
+
+    /* --- resolve active device (sd/usb) from availability + config.ini --- */
+    {
+        int avail_sd  = wii_device_available("sd:/");
+        int avail_usb = wii_device_available("usb:/");
+        if (!avail_sd && !avail_usb) {
+            PyStatus s;
+            s._type = _PyStatus_TYPE_ERROR;
+            s.func = "Py_Init_Custom";
+            s.err_msg = "no storage device (sd:/ or usb:/) available";
+            s.exitcode = 0;
+            return s;
+        }
+        /* config.ini home: prefer SD, else USB */
+        const char *confdev = avail_sd ? "sd" : "usb";
+        char want[16] = "";
+        if (wii_read_default_device(confdev, wii_prefix_rel, want, sizeof(want))) {
+            int want_sd  = (strcmp(want, "sd")  == 0);
+            int want_usb = (strcmp(want, "usb") == 0);
+            int want_avail = (want_sd && avail_sd) || (want_usb && avail_usb);
+            if (want_avail) {
+                wii_dev = want_sd ? "sd" : "usb";
+            } else {
+                /* default-device not reachable -> use the available one,
+                 * and record the fallback so pip can warn at install time. */
+                wii_dev = avail_sd ? "sd" : "usb";
+                if ((want_sd || want_usb) && strcmp(want, wii_dev) != 0) {
+                    char fb[32];
+                    snprintf(fb, sizeof(fb), "%s->%s", want, wii_dev);
+                    setenv("WII_DEVICE_FALLBACK", fb, 1);
+                }
+            }
+        } else {
+            /* no config.ini -> use available (prefer SD) and create it */
+            wii_dev = avail_sd ? "sd" : "usb";
+            wii_write_default_device(confdev, wii_prefix_rel, wii_dev);
+        }
     }
 #endif
     
@@ -1714,25 +1822,36 @@ Py_Init_Custom(const char** import_paths, size_t *count,
     config._install_importlib = 1;
     //config.utf8_mode = 1;
 
-    // Minimal filesystem/stdlib setup (match your SD layout)
+    /* Device-aware setup.  import_paths[0] is the PREFIX root (relative):
+     *   prefix/home/exec_prefix = {dev}:/{arg0}   (e.g. {dev}:/python)
+     *   executable              = {dev}:/{arg0}/python
+     * Every import_paths[i] additionally adds the import entry
+     * {dev}:/{arg_i}/lib (loop below), so arg0 also yields {dev}:/{arg0}/lib. */
     PyConfig_SetString(&config, &config.program_name, L"python");
-    PyConfig_SetString(&config, &config.executable, L"sd:/python/python");
-    PyConfig_SetString(&config, &config.home, L"sd:/python");
-    PyConfig_SetString(&config, &config.prefix, L"sd:/python");
-    PyConfig_SetString(&config, &config.exec_prefix, L"sd:/python");
-    PyConfig_SetString(&config, &config.base_prefix, L"sd:/python");
-    PyConfig_SetString(&config, &config.base_exec_prefix, L"sd:/python");
+    {
+        char _p[128];
+        wchar_t *_w;
+        #define WII_SET_CFG(field, suffix) do { \
+            snprintf(_p, sizeof(_p), "%s:/%s%s", wii_dev, wii_prefix_rel, suffix); \
+            _w = Py_DecodeLocale(_p, NULL); \
+            if (_w) { PyConfig_SetString(&config, &(field), _w); PyMem_RawFree(_w); } \
+        } while (0)
+        WII_SET_CFG(config.executable,       "/python");
+        WII_SET_CFG(config.home,             "");
+        WII_SET_CFG(config.prefix,           "");
+        WII_SET_CFG(config.exec_prefix,      "");
+        WII_SET_CFG(config.base_prefix,      "");
+        WII_SET_CFG(config.base_exec_prefix, "");
+        #undef WII_SET_CFG
+    }
     config.module_search_paths_set = 1;
-    PyWideStringList_Append(&config.module_search_paths, L"sd:/python");
-    PyWideStringList_Append(&config.module_search_paths, L"sd:/python/Lib");
-    PyWideStringList_Append(&config.module_search_paths, L"sd:/python/lib/");
-    PyWideStringList_Append(&config.module_search_paths, L"usb:/python");
-    PyWideStringList_Append(&config.module_search_paths, L"usb:/python/Lib");
-    PyWideStringList_Append(&config.module_search_paths, L"usb:/python/lib/");
 
+    /* import entries: each relative path p -> {dev}:/{p}/lib */
     if (import_paths && count) {
         for (size_t i = 0; i < *count; i++) {
-            wchar_t *wpath = Py_DecodeLocale(import_paths[i], NULL);
+            char _p[128];
+            snprintf(_p, sizeof(_p), "%s:/%s/lib", wii_dev, import_paths[i]);
+            wchar_t *wpath = Py_DecodeLocale(_p, NULL);
             if (!wpath) {
                 return (PyStatus){
                     _PyStatus_TYPE_ERROR,
@@ -1745,6 +1864,38 @@ Py_Init_Custom(const char** import_paths, size_t *count,
             PyMem_RawFree(wpath);
         }
     }
+
+#if defined(WII_BUILD)
+    /* symbols.map path for the .so loader: {dev}:/<symbols_map_path>. */
+    if (symbols_map_path && symbols_map_path[0]) {
+        snprintf(wii_symmap, sizeof(wii_symmap), "%s:/%s", wii_dev, symbols_map_path);
+    }
+    /* Environment for pip/tempfile (read at runtime via os.environ). */
+    {
+        char _e[128];
+        snprintf(_e, sizeof(_e), "%s:/%s/pip/pip.conf", wii_dev, wii_prefix_rel);
+        setenv("PIP_CONFIG_FILE", _e, 1);
+        /* Create the pip config dir + an empty pip.conf skeleton at runtime
+         * (not shipped in wii-folder). */
+        FILE *_pc = fopen(_e, "r");
+        if (_pc) {
+            fclose(_pc);
+        } else {
+            char _pd[128];
+            snprintf(_pd, sizeof(_pd), "%s:/%s/pip", wii_dev, wii_prefix_rel);
+            mkdir(_pd, 0777);   /* ensure config dir exists; ignore EEXIST */
+            FILE *_pw = fopen(_e, "w");
+            if (_pw) {
+                fprintf(_pw, "[global]\n"
+                             "# index-url = http://HOST:PORT/simple/\n"
+                             "# trusted-host = HOST\n");
+                fclose(_pw);
+            }
+        }
+        snprintf(_e, sizeof(_e), "%s:/%s/tmp", wii_dev, wii_prefix_rel);
+        setenv("TMPDIR", _e, 1);
+    }
+#endif
 
     PyConfig_SetString(&config, &config.filesystem_encoding, L"utf-8");
     PyConfig_SetString(&config, &config.filesystem_errors, L"surrogatepass");
@@ -1804,6 +1955,107 @@ Py_Init_Custom(const char** import_paths, size_t *count,
         "import sys, os\n"
         "import importlib.machinery\n"
         "\n"
+        "# Make os.path.abspath() Wii-aware: posixpath.isabs('sd:/x') is False\n"
+        "# (does not start with '/'), so abspath() prepends cwd ('sd:/') and\n"
+        "# produces 'sd:/sd:/x'.  This breaks tempfile.mkstemp(), certifi, etc.\n"
+        "# Treat device-prefixed paths ('sd:/', 'usb:/', 'fat:/', ...) — i.e. a\n"
+        "# ':' immediately before the first '/' — as absolute.\n"
+        "import posixpath as _pp\n"
+        "def _wii_isabs(s):\n"
+        "    s = os.fspath(s)\n"
+        "    if isinstance(s, bytes):\n"
+        "        if s[:1] == b'/':\n"
+        "            return True\n"
+        "        _i = s.find(b'/')\n"
+        "        return _i > 0 and s[_i-1:_i] == b':'\n"
+        "    if s[:1] == '/':\n"
+        "        return True\n"
+        "    _i = s.find('/')\n"
+        "    return _i > 0 and s[_i-1:_i] == ':'\n"
+        "_pp.isabs = _wii_isabs\n"
+        "os.path.isabs = _wii_isabs\n"
+        "# posixpath.abspath() in 3.13+ inlines `path.startswith('/')` instead of\n"
+        "# calling isabs(), so patch abspath() itself to use _wii_isabs.\n"
+        "def _wii_abspath(p):\n"
+        "    p = os.fspath(p)\n"
+        "    if not _wii_isabs(p):\n"
+        "        if isinstance(p, bytes):\n"
+        "            p = _pp.join(os.getcwdb(), p)\n"
+        "        else:\n"
+        "            p = _pp.join(os.getcwd(), p)\n"
+        "    return _pp.normpath(p)\n"
+        "_pp.abspath = _wii_abspath\n"
+        "os.path.abspath = _wii_abspath\n"
+        "# realpath uses _joinrealpath (symlink resolution) which ALSO assumes\n"
+        "# POSIX '/'-absolute paths and mangles 'sd:/...' into 'sd://sd:/...'.\n"
+        "# FAT/libfat has no symlinks, so realpath == abspath here.\n"
+        "def _wii_realpath(p, *args, **kwargs):\n"
+        "    return _wii_abspath(p)\n"
+        "_pp.realpath = _wii_realpath\n"
+        "os.path.realpath = _wii_realpath\n"
+        "# CRUCIAL: importlib._bootstrap_external has its OWN internal\n"
+        "# _path_isabs/_path_abspath (independent of os.path, for bootstrap).\n"
+        "# FileFinder.__init__ does: if not _path_isabs(self.path):\n"
+        "#     self.path = _path_join(getcwd(), self.path) -> 'sd:/sd:/python'.\n"
+        "# So the original PathFinder/FileFinder can't find SD modules unless we\n"
+        "# also patch this internal isabs to treat sd:/ usb:/ as absolute.\n"
+        "import importlib._bootstrap_external as _be\n"
+        "def _wii_be_isabs(p):\n"
+        "    if not p:\n"
+        "        return False\n"
+        "    if p[:1] == '/':\n"
+        "        return True\n"
+        "    _i = p.find('/')\n"
+        "    return _i > 0 and p[_i-1:_i] == ':'\n"
+        "_be._path_isabs = _wii_be_isabs\n"
+        "# Wii: libogc has no uname()/gethostname().  platform.uname() (used by\n"
+        "# uuid and pip via platform.system()) tries os.uname() first and only\n"
+        "# falls back to socket.gethostname() on AttributeError.  Provide a fake\n"
+        "# os.uname() so platform works without needing socket.gethostname.\n"
+        "if not hasattr(os, 'uname'):\n"
+        "    import collections as _coll\n"
+        "    _UnameResult = _coll.namedtuple('uname_result',\n"
+        "        'sysname nodename release version machine')\n"
+        "    os.uname = lambda: _UnameResult('Wii', 'wii', '1.0', 'libogc', 'powerpc')\n"
+        "# os.umask: FAT/libfat has no Unix permission mask; pip's current_umask()\n"
+        "# calls os.umask(0).  Return 0 (0o666 & ~0 == 0o666, fine on FAT).\n"
+        "if not hasattr(os, 'umask'):\n"
+        "    os.umask = lambda mask=0: 0\n"
+        "# os.chmod exists but the underlying chmod() returns ENOSYS on FAT (no\n"
+        "# Unix permission bits).  pip's wheel install calls os.chmod on every\n"
+        "# generated file -> make it a no-op (permissions are meaningless on FAT).\n"
+        "os.chmod = lambda *a, **k: None\n"
+        "# os.replace/os.rename on libfat (FAT) do NOT atomically overwrite an\n"
+        "# existing destination (they fail with EEXIST); POSIX rename does.\n"
+        "# pip's wheel install uses os.replace(tmp, final) -> remove dst first.\n"
+        "_wii_orig_replace = os.replace\n"
+        "def _wii_replace(src, dst, *a, **k):\n"
+        "    try:\n"
+        "        os.remove(dst)\n"
+        "    except OSError:\n"
+        "        pass\n"
+        "    return _wii_orig_replace(src, dst, *a, **k)\n"
+        "os.replace = _wii_replace\n"
+        "_wii_orig_rename = os.rename\n"
+        "def _wii_rename(src, dst, *a, **k):\n"
+        "    try:\n"
+        "        os.remove(dst)\n"
+        "    except OSError:\n"
+        "        pass\n"
+        "    return _wii_orig_rename(src, dst, *a, **k)\n"
+        "os.rename = _wii_rename\n"
+        "# errno: some socket error codes used by urllib3's connection-broken\n"
+        "# detection may be missing on Wii; make sure they exist.\n"
+        "import errno as _wii_errno\n"
+        "for _en, _ev in (('ESHUTDOWN', 110), ('EPROTOTYPE', 107),\n"
+        "                 ('ECONNRESET', 104), ('EPIPE', 32), ('ENOTCONN', 128)):\n"
+        "    if not hasattr(_wii_errno, _en):\n"
+        "        setattr(_wii_errno, _en, _ev)\n"
+#if 1  /* WiiSourceFinder active.  (Set to 0 to test the original frozen
+          PathFinder instead — but note it fails to find SD modules; see the
+          test_pathfinder diagnostic.)  The abspath/isabs patch above stays
+          active regardless. */
+        "\n"
         "# Avoid importlib.util.spec_from_file_location() here.\n"
         "# It normalizes non-POSIX paths like 'sd:/foo.py' via os.path.abspath(),\n"
         "# which (with cwd='sd:/') becomes 'sd:/sd:/foo.py'.\n"
@@ -1819,6 +2071,16 @@ Py_Init_Custom(const char** import_paths, size_t *count,
         "        self.pkg_path = pkg_path\n"
         "    def create_module(self, spec):\n"
         "        return None\n"
+        "    def get_resource_reader(self, name):\n"
+        "        # Reuse CPython's standard FileReader (importlib.resources) so\n"
+        "        # importlib.resources.files()/as_file() work for SD packages.\n"
+        "        # Without this the resources machinery falls back to\n"
+        "        # CompatibilityFiles -> OrphanPath ('Can't open orphan path'),\n"
+        "        # which breaks e.g. certifi.where() -> requests -> pip.\n"
+        "        # FileReader uses pathlib.Path(self.path).parent, which is\n"
+        "        # correct for sd:/ paths.\n"
+        "        import importlib.resources.readers as _r\n"
+        "        return _r.FileReader(self)\n"
         "    def exec_module(self, module):\n"
         "        module.__file__ = self.path\n"
         "        if self.is_package:\n"
@@ -1886,17 +2148,39 @@ Py_Init_Custom(const char** import_paths, size_t *count,
         "        exec(code, module.__dict__)\n"
         "class WiiSourceFinder:\n"
         "    def find_spec(self, fullname, path=None, target=None):\n"
+        "        # Never shadow a built-in module with an SD .so of the same\n"
+        "        # name.  E.g. _datetime is both built-in (Modules/config.c) and\n"
+        "        # shipped as _datetime.so; loading the .so via dlopen gives its\n"
+        "        # static types a broken metaclass (type(datetime).__name__ == '')\n"
+        "        # which later trips PyType_Ready ('Type does not define the\n"
+        "        # tp_name field.').  Let BuiltinImporter handle built-ins.\n"
+        "        if fullname in sys.builtin_module_names:\n"
+        "            return None\n"
         "        _name = fullname.split('.')[-1]\n"
+        "        _parent = '/'.join(fullname.split('.')[:-1])\n"
+        "        _roots = []\n"
+        "        for _p in sys.path:\n"
+        "            if _p.startswith(('sd:', 'usb:')):\n"
+        "                _roots.append(_p if _p.endswith('/') else _p + '/')\n"
+        "        if not _roots:\n"
+        "            _roots = ['sd:/', 'usb:/']\n"
         "        if path is not None:\n"
         "            _bases = [_p for _p in path\n"
         "                if _p.startswith('sd:') or _p.startswith('usb:')]\n"
-        "        else:\n"
-        "            _bases = ['sd:/', 'usb:/']\n"
-        "            for _p in sys.path:\n"
-        "                if _p.startswith(('sd:', 'usb:')):\n"
-        "                    _b = _p if _p.endswith('/') else _p + '/'\n"
+        "            # Fallback for frozen/namespace parents whose __path__ has\n"
+        "            # no sd: entry (e.g. frozen 'importlib' -> __path__ == []):\n"
+        "            # rebuild the parent dir from the sd: roots so submodules\n"
+        "            # like importlib.metadata._meta are still found on the SD.\n"
+        "            if _parent:\n"
+        "                for _r in _roots:\n"
+        "                    _b = _r + _parent\n"
         "                    if _b not in _bases:\n"
         "                        _bases.append(_b)\n"
+        "        else:\n"
+        "            _bases = ['sd:/', 'usb:/']\n"
+        "            for _r in _roots:\n"
+        "                if _r not in _bases:\n"
+        "                    _bases.append(_r)\n"
         "        for _base in _bases:\n"
         "            if not _base.endswith('/'):\n"
         "                _base = _base + '/'\n"
@@ -1937,15 +2221,55 @@ Py_Init_Custom(const char** import_paths, size_t *count,
         "                pass\n"
         "        return None\n"
         "sys.meta_path.insert(0, WiiSourceFinder())\n"
+#endif
     );
 
 #if defined(WII_BUILD)
     /* Symbol-Map laden: Wii-Aequivalent zu --export-dynamic.
      * Ohne sie kann wii_dlopen() externe Symbole (.so -> libpython) nicht
-     * aufloesen und jeder C-Extension-Import schlaegt fehl. */
-    if (symbols_map_path)
-        wii_dl_load_symbol_map(symbols_map_path);
+     * aufloesen und jeder C-Extension-Import schlaegt fehl.
+     * Failure is non-fatal: .so imports will crash, but pure-Python code works. */
+    if (wii_symmap[0]) {
+        long n = wii_dl_load_symbol_map(wii_symmap);
+        if (n < 0)
+            PySys_WriteStderr("wii_dl: warning: symbol map not loaded (%s) "
+                              "-- .so imports will fail\n", wii_symmap);
+        else
+            PySys_WriteStderr("wii_dl: loaded %ld symbols from %s\n",
+                              n, wii_symmap);
+    }
 #endif
+
+    /* Disable the incremental (threshold-based) GC on Wii.
+     * The GC traversal crashes with a DSI when it encounters objects whose
+     * type pointer is stale -- this happens with types from dlopen'd .so
+     * modules and with partially-initialised importlib.metadata types left
+     * over from circular imports during bootstrap.  Reference counting still
+     * reclaims non-cyclic garbage; cyclic garbage accumulates but Wii
+     * programs are short-lived and MEM1+MEM2 = 88 MB is enough headroom.
+     * The Py_Finalize GC passes are already guarded with #ifndef WII_BUILD. */
+    (void)PyRun_SimpleString("import gc; gc.disable()\n");
+    PyErr_Clear();
+
+    /* Pre-load importlib.metadata so it is fully initialized before user code
+     * runs.  pip's import chain does `import importlib.metadata` at module
+     * level in several files.  The frozen _bootstrap_external.py can trigger
+     * a partial import of importlib.metadata via PathFinder.invalidate_caches()
+     * during startup; if pip then tries the same import before the first one
+     * completes, Python's circular-import guard raises
+     * "cannot import name '_meta' from partially initialized module
+     * 'importlib.metadata'", which corrupts the module state and causes
+     * subsequent crashes (bad ob_type in maybe_tracked / PyTuple_FromArray).
+     * _bootstrap_external.py now also cleans up partial importlib.metadata
+     * state from sys.modules after ImportError, so this pre-load gets a
+     * clean slate. */
+    (void)PyRun_SimpleString(
+        "try:\n"
+        "    import importlib.metadata\n"
+        "except Exception:\n"
+        "    pass\n"
+    );
+    PyErr_Clear();
 
     return _PyStatus_OK();
 }
@@ -2302,7 +2626,11 @@ finalize_modules(PyThreadState *tstate)
     finalize_restore_builtins(tstate);
 
     // Collect garbage
+#ifndef WII_BUILD
+    // On Wii: skip -- GC traversal DSI-crashes after module dicts are
+    // cleared (type pointers from dlopen'd .so modules become stale).
     _PyGC_CollectNoFail(tstate);
+#endif
 
     // Dump GC stats before it's too late, since it uses the warnings
     // machinery.
@@ -2345,7 +2673,10 @@ finalize_modules(PyThreadState *tstate)
     _PyImport_ClearModules(interp);
 
     // Collect garbage once more
+#ifndef WII_BUILD
+    // On Wii: same reason as above -- skip to avoid DSI on stale types.
     _PyGC_CollectNoFail(tstate);
+#endif
 }
 
 
@@ -2800,7 +3131,13 @@ _Py_Finalize(_PyRuntimeState *runtime)
      * XXX but I'm unclear on exactly how that one happens.  In any case,
      * XXX I haven't seen a real-life report of either of these.
      */
+#ifndef WII_BUILD
+    /* On Wii: skip this GC pass. The GC traversal crashes (DSI) when
+     * types defined in dlopen'd .so modules are encountered -- the
+     * pre-module-cleanup GC is advisory only (upstream already disables
+     * the final GC with #if 0 for similar reasons). */
     PyGC_Collect();
+#endif
 
     /* Destroy all modules */
     _PyImport_FiniExternal(tstate->interp);

@@ -26,6 +26,9 @@ CPPFLAGS   += $(INCLUDE)
 
 # Includes & Libs
 LDFLAGS += -T$(DEVKITPPC)/powerpc-eabi/lib/rvl.ld -Wl,--gc-sections
+# Force-retain private CPython symbols referenced by .so modules but not
+# by the main program (--gc-sections would otherwise remove them).
+LDFLAGS += -Wl,-u,_PyOS_URandomNonblock
 
 # wii_rules ueberschreibt LIBOGC_LIB immer auf libogc-v1 — direkt von LIBOGC ableiten
 ifeq ($(LIBOGC),2)
@@ -93,20 +96,26 @@ PYMOD_INC  := -I$(MAKEFILE_DIR)../build-wii -I$(MAKEFILE_DIR)../Include
 .PHONY: $(BUILD) clean sync_sd run deploy_so
 .DEFAULT_GOAL := $(BUILD)
 
+# NOTE: -lgcc MUST be last (after $<). GCC emits out-of-line _savegpr_*/_restgpr_*
+# helpers (crtsavres.o) that only get linked if -lgcc follows the objects.
+# Otherwise they stay undefined -> resolved into the .dol (MEM1) -> out-of-range
+# R_PPC_REL24 branch -> "Unknown instruction 00000000" crash. See README.
 $(PYMOD_SO): $(PYMOD_SRC)
-	$(PPCPREFIX)-gcc -Os -fPIC -fno-plt -shared -nostdlib $(PYMOD_INC) $< -o $@
+	$(PPCPREFIX)-gcc -Os -fPIC -fno-plt -shared -nostdlib $(PYMOD_INC) $< -o $@ -lgcc
 	@echo "gebaut: $@"
 
 $(SYMBOL_MAP): $(OUTPUT).elf
 	$(PPCPREFIX)-nm --defined-only $(OUTPUT).elf > $@
 	@echo "erzeugt: $@ ($$(wc -l <$@) Symbole)"
 
-# Kopiert spam.so + symbols.map nach WII_SD_SYNC (Dolphin-SD-Ordner).
+# Kopiert spam.so -> python/lib/ (importierbar) + symbols.map -> python/
+# (neues Layout). WII_SD_SYNC ist der SD-Root (enthaelt python/).
 deploy_so: $(PYMOD_SO) $(SYMBOL_MAP)
 	@if [ -n "$(WII_SD_SYNC)" ] && [ -d "$(WII_SD_SYNC)" ] && [ -w "$(WII_SD_SYNC)" ]; then \
-		cp -f $(PYMOD_SO) "$(WII_SD_SYNC)/$(PYMOD_SO)"; \
-		cp -f $(SYMBOL_MAP) "$(WII_SD_SYNC)/$(SYMBOL_MAP)"; \
-		echo "SD sync: $(PYMOD_SO) + $(SYMBOL_MAP) -> $(WII_SD_SYNC)"; \
+		mkdir -p "$(WII_SD_SYNC)/python/lib"; \
+		cp -f $(PYMOD_SO) "$(WII_SD_SYNC)/python/lib/$(PYMOD_SO)"; \
+		cp -f $(SYMBOL_MAP) "$(WII_SD_SYNC)/python/$(SYMBOL_MAP)"; \
+		echo "SD sync: $(PYMOD_SO) -> python/lib/ , $(SYMBOL_MAP) -> python/"; \
 	else \
 		echo "Note: WII_SD_SYNC nicht gesetzt/schreibbar - $(PYMOD_SO)/$(SYMBOL_MAP) nicht kopiert"; \
 	fi
@@ -142,6 +151,7 @@ run: clean
 	@$(MAKE) $(BUILD) -j$(nproc) 
 	
 	cp $(OUTPUT).dol $(SD_APP_PATH)/boot.dol
+	cp $(SYMBOL_MAP) $(SD_APP_PATH)
 	sync
 
 else
