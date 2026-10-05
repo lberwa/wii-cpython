@@ -1063,7 +1063,19 @@ sock_call_ex(PySocketSockObject *s,
         }
 
         if (s->sock_timeout > 0
-            && (CHECK_ERRNO(EWOULDBLOCK) || CHECK_ERRNO(EAGAIN))) {
+            && (CHECK_ERRNO(EWOULDBLOCK) || CHECK_ERRNO(EAGAIN)
+#ifdef WII_BUILD
+                /* libogc2/lwIP quirk: recv()/send() on a connection that was
+                   just connect()ed (SO_ERROR already 0, select() reports it
+                   writable) can still return EINPROGRESS for a brief moment
+                   while the TCP handshake finishes -- where other stacks would
+                   return EWOULDBLOCK.  Treat it the same: loop on select() and
+                   retry until the socket is really ready or the timeout hits.
+                   Only on timeout sockets; non-blocking (timeout==0) sockets
+                   still surface EINPROGRESS to the caller as usual. */
+                || CHECK_ERRNO(EINPROGRESS)
+#endif
+                )) {
             /* False positive: sock_func() failed with EWOULDBLOCK or EAGAIN.
 
                For example, select() could indicate a socket is ready for

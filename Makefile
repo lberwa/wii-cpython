@@ -54,6 +54,11 @@ endif
 export LIBOGC
 export LIBOGC_INC
 export LIBOGC_LIB
+# Export TMPDIR so gcc/as write intermediate .s files to the project-local ./tmp
+# (on the big root partition) instead of the default /tmp (a 1 GB tmpfs that
+# overflows during -j parallel builds of large files like sqlite3.c/_ctypes ->
+# "No space left on device").
+export TMPDIR
 
 WII_INCLUDE_DIRS := \
 	-I. \
@@ -264,6 +269,13 @@ $(HOST_VENV_PYTHON): $(HOST_BUILD_PYTHON)
 	@rm -rf "$(HOST_VENV_DIR)"
 	"$(HOST_BUILD_PYTHON)" -m venv "$(HOST_VENV_DIR)"
 	"$(HOST_VENV_PYTHON)" -m pip install --quiet jinja2
+	@# markupsafe's C extension (_speedups) is incompatible with this 3.15.0a7
+	@# ("SystemError: unknown slot ID 86") and that is NOT caught by markupsafe's
+	@# ImportError fallback.  Delete the .so so the import fails with ImportError
+	@# -> markupsafe falls back to its pure-Python _native implementation, which
+	@# is all jinja2 needs for the mbedtls/tf-psa-crypto code generation.
+	@rm -f "$(HOST_VENV_DIR)"/lib/python*/site-packages/markupsafe/_speedups*.so
+	@echo "--- markupsafe _speedups removed (pure-Python fallback) ---"
 
 configure: $(BUILD_DIR)/Makefile
 
@@ -328,6 +340,19 @@ libpython: configure frozen-modules ssl curl $(BUILD_DIR)/Modules/wiitoolsmodule
 		echo "frozen sources changed -> rebuilding frozen.o"; \
 		rm -f "$(BUILD_DIR)/Python/frozen.o"; \
 	fi
+	@# socketmodule.o / selectmodule_wii.o are force-compiled with -include
+	@# curl/wii/include/curl_wii_net_compat.h (see build-wii/Makefile sed patch),
+	@# but that -include'd header is NOT tracked as a dependency there.  Editing the
+	@# compat header (or wii_socket_compat.h) would otherwise leave a stale .o that
+	@# still calls the old net_* mappings (e.g. net_setsockopt -> ENOSYS on pip).
+	@# Invalidate the .o whenever either header changed.
+	@for o in Modules/socketmodule.o Modules/selectmodule_wii.o; do \
+	    if [ -f "$(BUILD_DIR)/$$o" ] && \
+	        [ -n "$$(find $(srcdir)/curl/wii/include/curl_wii_net_compat.h $(srcdir)/Modules/wii_socket_compat.h -newer $(BUILD_DIR)/$$o 2>/dev/null)" ]; then \
+			echo "net compat header changed -> rebuilding $$o"; \
+			rm -f "$(BUILD_DIR)/$$o"; \
+		fi; \
+	done
 	$(MAKE) -j$(CPU_CORES) -C  "$(BUILD_DIR)" libpython$(VERSION).a
 	@# Add wiitools to the library
 	$(AR) rcs "$(BUILD_DIR)/libpython$(VERSION).a" "$(BUILD_DIR)/Modules/wiitoolsmodule.o"
@@ -336,6 +361,11 @@ libpython: configure frozen-modules ssl curl $(BUILD_DIR)/Modules/wiitoolsmodule
 		-c "$(srcdir)/Modules/wii_socket_stubs.c" \
 		-o "$(BUILD_DIR)/Modules/wii_socket_stubs.o"
 	$(AR) rcs "$(BUILD_DIR)/libpython$(VERSION).a" "$(BUILD_DIR)/Modules/wii_socket_stubs.o"
+	@# Compile and add Wii POSIX stubs (signal/posix/fcntl/_ctypes functions newlib lacks)
+	$(CC) $(CFLAGS) $(CFLAGS_WII) -I"$(srcdir)/Include" -I"$(BUILD_DIR)" -DPy_BUILD_CORE \
+		-c "$(srcdir)/Modules/wii_posix_stubs.c" \
+		-o "$(BUILD_DIR)/Modules/wii_posix_stubs.o"
+	$(AR) rcs "$(BUILD_DIR)/libpython$(VERSION).a" "$(BUILD_DIR)/Modules/wii_posix_stubs.o"
 
 python: libpython
 
@@ -597,12 +627,23 @@ pip-sd-clean:
 # .so / .py shims are importable -> new layout puts them under python/lib/
 SO_OUT_DIR  := $(WII_FOLDER)/python/lib
 SO_CC       := $(CC)
-SO_CFLAGS   := -Os -fPIC -fno-plt -Wall -DWII_BUILD -D__WII__ -D__wii__ \
+# -MMD -MP: emit a .d next to each .so so header edits (pyport.h, HACL endian
+# header, ...) trigger a rebuild of the affected .so.  Without it a .so only
+# depended on its .c and silently kept a stale object after a header fix.
+# -msecure-plt: use the modern GOT-based PLT (data slots) instead of the old
+# executable BSS-PLT.  devkitPPC defaults to BSS-PLT, whose 8-byte two-level
+# code stubs the minimal Wii dlopen loader can't resolve (it only writes the
+# resolved address) -> crash at _ctypes/libffi init.  Secure-PLT JMP_SLOT
+# relocations point to plain data GOT slots the loader fills correctly.
+SO_CFLAGS   := -Os -fPIC -fno-plt -msecure-plt -Wall -DWII_BUILD -D__WII__ -D__wii__ \
+               -MMD -MP \
                -I$(MAKEFILE_DIR)build-wii \
                -I$(MAKEFILE_DIR)Include \
                -I$(MAKEFILE_DIR)Include/internal \
                -I$(MAKEFILE_DIR)Modules \
                $(WII_INCLUDE_DIRS)
+# Pull in the generated .so dependency files (harmless when none exist yet).
+-include $(wildcard $(SO_OUT_DIR)/*.d)
 # NOTE: -lgcc MUST come AFTER the object files on the link line, otherwise the
 # linker discards crtsavres.o (the _savegpr_*/_restgpr_* register save/restore
 # helpers) before the module objects reference them. Those refs then stay
@@ -810,11 +851,23 @@ CTYPES_SRCS := \
     $(MAKEFILE_DIR)Modules/_ctypes/cfield.c
 
 $(FFI_LIB):
-	@[ -f $(FFI_DIR)/configure ] || (cd $(FFI_DIR) && autoreconf -fi)
+	@# Regenerate the autotools tree if configure OR any required auxiliary file
+	@# is missing (a prior partial checkout/clean can leave configure present but
+	@# ltmain.sh/compile/missing absent -> "cannot find required auxiliary files").
+	@if [ ! -f $(FFI_DIR)/configure ] || [ ! -f $(FFI_DIR)/ltmain.sh ] \
+	    || [ ! -f $(FFI_DIR)/compile ] || [ ! -f $(FFI_DIR)/missing ]; then \
+		echo "libffi: (re)generating autotools files"; \
+		(cd $(FFI_DIR) && autoreconf -fi); \
+	fi
+	@# config.guess/config.sub/install-sh must be executable (git/checkout can
+	@# drop the +x bit -> "config.guess: Permission denied").
+	@chmod +x $(FFI_DIR)/config.guess $(FFI_DIR)/config.sub $(FFI_DIR)/install-sh \
+		$(FFI_DIR)/missing $(FFI_DIR)/compile 2>/dev/null; true
 	@mkdir -p $(FFI_BUILD)
 	cd $(FFI_BUILD) && \
 	CC="$(CC)" AR="$(AR)" RANLIB="$(RANLIB)" \
-	CFLAGS="-Os -fPIC -D__wii__ -DGEKKO -I$(LIBOGC_INC)" \
+	CFLAGS="-Os -fPIC -msecure-plt -D__wii__ -DGEKKO -I$(LIBOGC_INC)" \
+	CCASFLAGS="-msecure-plt" \
 	$(FFI_DIR)/configure \
 	    --host=powerpc-eabi \
 	    --build=$$($(FFI_DIR)/config.guess) \
@@ -826,7 +879,9 @@ $(FFI_LIB):
 
 $(SO_OUT_DIR)/_ctypes.so: $(CTYPES_SRCS) $(FFI_LIB)
 	@mkdir -p $(SO_OUT_DIR)
-	$(SO_CC) $(SO_CFLAGS) $(SO_LDFLAGS) -DPy_BUILD_CORE_MODULE \
+	@# -Bsymbolic: bind intra-.so refs (ffi_call, ffi_prep_closure_loc) directly,
+	@# removing their PLT entries; -z now: eager binding, no lazy PLT resolver.
+	$(SO_CC) $(SO_CFLAGS) $(SO_LDFLAGS) -Wl,-Bsymbolic -Wl,-z,now -DPy_BUILD_CORE_MODULE \
 	    -I$(FFI_INSTALL)/include \
 	    -I$(MAKEFILE_DIR)dlfcn \
 	    $(CTYPES_SRCS) $(FFI_LIB) -o $@ $(SO_LIBS)
@@ -843,3 +898,18 @@ clean: wiitest-clean bitmap-clean glibc-clean pip-sd-clean libffi-clean
 	@-rm -rf $(MAKEFILE_DIR)bitmap/build
 	@-rm -rf $(LIB_DIR)
 	@echo "cleaning ..."
+
+# py-objclean: drop the compiled CPython objects + libpython archive so the next
+# build recompiles them against the CURRENT headers.  Needed as a ONE-TIME step
+# after editing a widely-included header (Include/pyport.h, the HACL endianness
+# header, ...) on a tree built BEFORE header-dependency tracking existed; from
+# then on the generated .d files handle rebuilds automatically.
+.PHONY: py-objclean
+py-objclean:
+	@-find "$(BUILD_DIR)" \( -name '*.o' -o -name '*.d' \) \
+		-not -path '*/curl/*' -not -path '*/mbedtls/*' -delete 2>/dev/null; true
+	@-rm -f "$(BUILD_DIR)/libpython$(VERSION).a" $(LIB_DIR)/libpython$(VERSION).a 2>/dev/null; true
+	@# .so modules depend only on their .c, so a header fix leaves them stale too;
+	@# drop them (and any dep files) so the next build recompiles them as well.
+	@-rm -f $(SO_TARGETS) $(SO_PY_TARGETS) $(SO_OUT_DIR)/*.d 2>/dev/null; true
+	@echo "py-objclean: CPython objects + .so cleared -- next 'make' recompiles with current headers"

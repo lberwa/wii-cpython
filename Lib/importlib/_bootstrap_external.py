@@ -184,7 +184,11 @@ if _MS_WINDOWS:
 else:
     def _path_isabs(path):
         """Replacement for os.path.isabs."""
-        return path.startswith(path_separators)
+        if path.startswith(path_separators):
+            return True
+        # Treat device-prefixed paths (e.g. 'sd:/', 'usb:/') as absolute.
+        i = path.find('/')
+        return i > 0 and path[i - 1] == ':'
 
 
 def _path_abspath(path):
@@ -1590,7 +1594,10 @@ def _get_supported_file_loaders():
                 suffix.replace(".so", ".fwork")
                 for suffix in _imp.extension_suffixes()
             ])]
-        extension_loaders.append((ExtensionFileLoader, _imp.extension_suffixes()))
+        _ext_sfx = list(_imp.extension_suffixes())
+        if '.so' not in _ext_sfx:
+            _ext_sfx.insert(0, '.so')
+        extension_loaders.append((ExtensionFileLoader, _ext_sfx))
     source = SourceFileLoader, SOURCE_SUFFIXES
     bytecode = SourcelessFileLoader, BYTECODE_SUFFIXES
     return extension_loaders + [source, bytecode]

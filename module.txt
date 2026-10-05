@@ -18,7 +18,7 @@
 | `_contextvars`           | Kontextvariablen                                  | ✅ (built-in) |
 | `_csv`                   | Schneller CSV-Parser                              | ✅ |
 | `_ctypes`                | Foreign Function Interface (libffi PPC-SYSV)      | ✅ (.so SD-Karte) |
-| `_datetime`              | C-Beschleuniger für `datetime`                    | ✅ (.so SD-Karte) |
+| `_datetime`              | C-Beschleuniger für `datetime`                    | ✅ (built-in; NICHT als .so — static types brechen beim dlopen, siehe Makefile) |
 | `_dbm`                   | DBM-Datenbanken (ndbm-Interface)                  | ✅ |
 | `_decimal`               | C-Beschleuniger für `decimal` (libmpdec inline)   | ✅ (.so SD-Karte) |
 | `_elementtree`           | XML-Verarbeitung                                  | ✅ |

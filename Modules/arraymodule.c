@@ -2521,7 +2521,7 @@ array_subscr(PyObject *op, PyObject *item)
     }
     else if (PySlice_Check(item)) {
         Py_ssize_t start, stop, step, slicelength, i;
-        size_t cur;
+        Py_ssize_t cur;
         PyObject* result;
         arrayobject* ar;
         int itemsize = self->ob_descr->itemsize;
@@ -2678,7 +2678,7 @@ array_ass_subscr(PyObject *op, PyObject *item, PyObject *value)
     }
     else if (needed == 0) {
         /* Delete slice */
-        size_t cur;
+        Py_ssize_t cur;
         Py_ssize_t i;
 
         if (step < 0) {
@@ -2707,7 +2707,7 @@ array_ass_subscr(PyObject *op, PyObject *item, PyObject *value)
         return 0;
     }
     else {
-        size_t cur;
+        Py_ssize_t cur;
         Py_ssize_t i;
 
         if (needed != slicelength) {

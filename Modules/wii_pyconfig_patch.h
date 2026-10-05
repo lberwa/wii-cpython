@@ -39,15 +39,37 @@ typedef unsigned int    u_int;
 #undef HAVE_NET_IF_H
 #undef HAVE_HSTRERROR
 
-/* Socket-Funktionen die in libogc und libogc2 fehlen */
+/* Socket functions genuinely missing on libogc/libogc2 -> keep disabled. */
 #undef HAVE_SENDMSG
 #undef HAVE_RECVMSG
-#undef HAVE_SOCKETPAIR
 #undef HAVE_GETSERVBY
 #undef HAVE_GETPROTOBYNAME
 #undef HAVE_GETHOSTBYADDR
 #undef HAVE_SELECT
 #undef HAVE_H_ERRNO
+
+/* Socket functions that ARE available on the Wii but which autoconf cannot
+ * detect in the cross-build (it can't link a test program against libogc), so
+ * they end up #undef in the generated pyconfig.h.  Force-enable them here so
+ * socketmodule.c exposes the corresponding methods (bind/connect/setsockopt/
+ * socketpair/...).  Backing implementations:
+ *   bind/listen/sendto/recvfrom/setsockopt/getsockname/shutdown -> net_* (libogc,
+ *     mapped via curl/wii/include/curl_wii_net_compat.h, present in libogc1+2)
+ *   connect/accept        -> curl_wii_* (static inline in the compat header)
+ *   getpeername/socketpair -> Modules/wii_socket_stubs.c
+ * Without these, asyncio (socketpair -> bind fallback) and pip (setsockopt)
+ * fail with "'socket' object has no attribute 'bind'/'setsockopt'". */
+#define HAVE_BIND 1
+#define HAVE_CONNECT 1
+#define HAVE_LISTEN 1
+#define HAVE_ACCEPT 1
+#define HAVE_SETSOCKOPT 1
+#define HAVE_GETSOCKNAME 1
+#define HAVE_GETPEERNAME 1
+#define HAVE_RECVFROM 1
+#define HAVE_SENDTO 1
+#define HAVE_SHUTDOWN 1
+#define HAVE_SOCKETPAIR 1
 /* getaddrinfo/getnameinfo: wii_socket_stubs.c liefert Implementierungen.
    HAVE_GETADDRINFO kommt via -DHAVE_GETADDRINFO auf der Kommandozeile. */
 

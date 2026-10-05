@@ -115,11 +115,18 @@
 
 #  define htobe64(x) (x)
 #  define be64toh(x) (x)
+/* htole64 on big-endian must reverse ALL 8 bytes.  The original used htobe32
+ * (identity on big-endian) for each half, so it only swapped the two 32-bit
+ * words and left the bytes WITHIN each word in big-endian order -- a broken
+ * little-endian conversion.  store64_le() is used for the trailing length field
+ * of MD5/SHA-2/SHA-512/BLAKE2, so this produced wrong digests on PPC.  Use
+ * htole32 (which byte-swaps) on each half and cross them over for a full
+ * 8-byte reversal. */
 #  define htole64(x)                                                           \
     (__extension__({                                                           \
       uint64_t __temp = (x);                                                   \
-      uint32_t __low = htobe32((uint32_t)__temp);                              \
-      uint32_t __high = htobe32((uint32_t)(__temp >> 32));                     \
+      uint32_t __low = htole32((uint32_t)__temp);                              \
+      uint32_t __high = htole32((uint32_t)(__temp >> 32));                     \
       (((uint64_t)__low) << 32) | __high;                                      \
     }))
 #  define le64toh(x) (htole64((x)))

@@ -312,8 +312,18 @@ static int apply_rela_table(wii_module *m, const Elf32_Rela *tab, size_t bytes) 
 
 /* ---- Hauptfunktion: laden ------------------------------------------------- */
 
+/* Sentinel handle for dlopen(NULL): represents the main program's global symbol
+ * table (symbols.map).  ctypes does `PyDLL(None)` -> dlopen(NULL) at import time
+ * to expose the Python C API; dlsym() on this handle resolves via the main
+ * program's exports/symbol map instead of a loaded .so's dynsym. */
+#define WII_RTLD_DEFAULT_HANDLE ((void *)(uintptr_t)1)
+
 void *wii_dlopen(const char *path, int mode) {
     (void)mode;
+    if (path == NULL) {
+        /* dlopen(NULL): handle to the main program's global symbols. */
+        return WII_RTLD_DEFAULT_HANDLE;
+    }
     size_t filesz = 0;
     uint8_t *file = read_file(path, &filesz);
     if (!file) return NULL;
@@ -420,6 +430,12 @@ void *wii_dlopen(const char *path, int mode) {
 /* ---- Symbol-Lookup -------------------------------------------------------- */
 
 void *wii_dlsym(void *handle, const char *symbol) {
+    if (handle == WII_RTLD_DEFAULT_HANDLE) {
+        /* dlopen(NULL) handle: look up in the main program's global symbols. */
+        void *addr = resolve_extern(symbol);
+        if (!addr) { set_error("wii_dlsym: symbol not found: %s", symbol); return NULL; }
+        return addr;
+    }
     wii_module *m = (wii_module *)handle;
     if (!m) { set_error("wii_dlsym: NULL handle", NULL); return NULL; }
     for (uint32_t i = 0; i < m->nsyms; i++) {
@@ -436,6 +452,10 @@ void *wii_dlsym(void *handle, const char *symbol) {
 /* ---- Entladen ------------------------------------------------------------- */
 
 int wii_dlclose(void *handle) {
+    if (handle == WII_RTLD_DEFAULT_HANDLE) {
+        /* dlopen(NULL) handle owns nothing: nothing to unload. */
+        return 0;
+    }
     wii_module *m = (wii_module *)handle;
     if (!m) return -1;
     /* Fini in umgekehrter Reihenfolge, dann DT_FINI. */

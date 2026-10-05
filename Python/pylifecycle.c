@@ -1993,21 +1993,28 @@ Py_Init_Custom(const char** import_paths, size_t *count,
         "    return _wii_abspath(p)\n"
         "_pp.realpath = _wii_realpath\n"
         "os.path.realpath = _wii_realpath\n"
-        "# CRUCIAL: importlib._bootstrap_external has its OWN internal\n"
-        "# _path_isabs/_path_abspath (independent of os.path, for bootstrap).\n"
-        "# FileFinder.__init__ does: if not _path_isabs(self.path):\n"
-        "#     self.path = _path_join(getcwd(), self.path) -> 'sd:/sd:/python'.\n"
-        "# So the original PathFinder/FileFinder can't find SD modules unless we\n"
-        "# also patch this internal isabs to treat sd:/ usb:/ as absolute.\n"
+        "# _path_isabs in _bootstrap_external.py is fixed in the source, but the\n"
+        "# runtime patch here stays as a fallback (active even before regen-importlib).\n"
         "import importlib._bootstrap_external as _be\n"
         "def _wii_be_isabs(p):\n"
-        "    if not p:\n"
-        "        return False\n"
-        "    if p[:1] == '/':\n"
-        "        return True\n"
+        "    if not p: return False\n"
+        "    if p[:1] == '/': return True\n"
         "    _i = p.find('/')\n"
         "    return _i > 0 and p[_i-1:_i] == ':'\n"
         "_be._path_isabs = _wii_be_isabs\n"
+        "# sys._stdlib_dir must be set so FrozenImporter._resolve_filename() can\n"
+        "# compute pkgdir for frozen packages.  However, _fix_up_module() is called\n"
+        "# during bootstrap -- before this PyRun_SimpleString -- so importlib.__path__\n"
+        "# is already [] by the time we get here.  We therefore also patch __path__\n"
+        "# directly so PathFinder can search sd:/python/lib/importlib/ for submodules\n"
+        "# like importlib.metadata.\n"
+        "if not getattr(sys, '_stdlib_dir', None) and sys.prefix:\n"
+        "    sys._stdlib_dir = sys.prefix + '/lib'\n"
+        "import importlib as _il\n"
+        "_il_path = sys._stdlib_dir + '/importlib'\n"
+        "if _il_path not in _il.__path__:\n"
+        "    _il.__path__.insert(0, _il_path)\n"
+        "del _il, _il_path\n"
         "# Wii: libogc has no uname()/gethostname().  platform.uname() (used by\n"
         "# uuid and pip via platform.system()) tries os.uname() first and only\n"
         "# falls back to socket.gethostname() on AttributeError.  Provide a fake\n"
@@ -2021,6 +2028,17 @@ Py_Init_Custom(const char** import_paths, size_t *count,
         "# calls os.umask(0).  Return 0 (0o666 & ~0 == 0o666, fine on FAT).\n"
         "if not hasattr(os, 'umask'):\n"
         "    os.umask = lambda mask=0: 0\n"
+        "# os.sysconf: POSIX sysconf() is absent on Wii. asyncio/selector_events.py\n"
+        "# calls os.sysconf('SC_IOV_MAX') at import time to cap sendmsg iovec count.\n"
+        "if not hasattr(os, 'sysconf'):\n"
+        "    _wii_sysconf_map = {'SC_IOV_MAX': 1024, 'SC_OPEN_MAX': 64,\n"
+        "                        'SC_NGROUPS_MAX': 0, 'SC_CLK_TCK': 60}\n"
+        "    def _wii_sysconf(name):\n"
+        "        if isinstance(name, str):\n"
+        "            return _wii_sysconf_map.get(name, -1)\n"
+        "        return -1\n"
+        "    os.sysconf = _wii_sysconf\n"
+        "    os.sysconf_names = {k: i for i, k in enumerate(_wii_sysconf_map)}\n"
         "# os.chmod exists but the underlying chmod() returns ENOSYS on FAT (no\n"
         "# Unix permission bits).  pip's wheel install calls os.chmod on every\n"
         "# generated file -> make it a no-op (permissions are meaningless on FAT).\n"
@@ -2051,10 +2069,9 @@ Py_Init_Custom(const char** import_paths, size_t *count,
         "                 ('ECONNRESET', 104), ('EPIPE', 32), ('ENOTCONN', 128)):\n"
         "    if not hasattr(_wii_errno, _en):\n"
         "        setattr(_wii_errno, _en, _ev)\n"
-#if 1  /* WiiSourceFinder active.  (Set to 0 to test the original frozen
-          PathFinder instead — but note it fails to find SD modules; see the
-          test_pathfinder diagnostic.)  The abspath/isabs patch above stays
-          active regardless. */
+#if 0  /* WiiSourceFinder disabled: sd:/ path issues are fixed in
+          _bootstrap_external.py (_path_isabs, _get_supported_file_loaders)
+          and sys._stdlib_dir points FrozenImporter to the SD stdlib dir. */
         "\n"
         "# Avoid importlib.util.spec_from_file_location() here.\n"
         "# It normalizes non-POSIX paths like 'sd:/foo.py' via os.path.abspath(),\n"
@@ -2063,12 +2080,18 @@ Py_Init_Custom(const char** import_paths, size_t *count,
         "    spec = importlib.machinery.ModuleSpec(fullname, loader, origin=path)\n"
         "    spec.has_location = True\n"
         "    return spec\n"
-        "class WiiSourceLoader:\n"
+        "import importlib.abc as _importlib_abc\n"
+        "class WiiSourceLoader(_importlib_abc.SourceLoader):\n"
         "    def __init__(self, name, path, is_package=False, pkg_path=None):\n"
         "        self.name = name\n"
         "        self.path = path\n"
         "        self.is_package = is_package\n"
         "        self.pkg_path = pkg_path\n"
+        "    def get_filename(self, name):\n"
+        "        return self.path\n"
+        "    def get_data(self, path):\n"
+        "        with open(path, 'rb') as _f:\n"
+        "            return _f.read()\n"
         "    def create_module(self, spec):\n"
         "        return None\n"
         "    def get_resource_reader(self, name):\n"
@@ -2240,15 +2263,23 @@ Py_Init_Custom(const char** import_paths, size_t *count,
     }
 #endif
 
-    /* Disable the incremental (threshold-based) GC on Wii.
-     * The GC traversal crashes with a DSI when it encounters objects whose
-     * type pointer is stale -- this happens with types from dlopen'd .so
-     * modules and with partially-initialised importlib.metadata types left
-     * over from circular imports during bootstrap.  Reference counting still
-     * reclaims non-cyclic garbage; cyclic garbage accumulates but Wii
-     * programs are short-lived and MEM1+MEM2 = 88 MB is enough headroom.
-     * The Py_Finalize GC passes are already guarded with #ifndef WII_BUILD. */
-    (void)PyRun_SimpleString("import gc; gc.disable()\n");
+    /* GC: previously disabled on Wii because GC traversal crashed with a DSI on
+     * stale type pointers (dlopen'd .so types, partially-initialised
+     * importlib.metadata types from circular bootstrap imports).  Leaving GC off
+     * makes cyclic garbage accumulate until MemoryError (e.g. loading many
+     * modules), so it is re-enabled here.  The importlib.metadata partial-init
+     * is now cleaned up (see below) and manual gc.collect() runs without
+     * crashing, so the original fault should no longer reproduce.
+     *
+     * gc.freeze() (called AFTER the importlib.metadata pre-load below) moves all
+     * current startup objects (interned strings, frozen stdlib, pre-loaded
+     * importlib.metadata, built-in types) into the permanent generation: GC
+     * never traverses them again, so even if one of those older objects had a
+     * fragile type pointer it can't trigger the DSI.  Only NEW cyclic garbage
+     * created after startup is collected.
+     * If a DSI in gc traversal still reproduces, capture the faulting type and
+     * fix its lifecycle rather than disabling GC wholesale again. */
+    (void)PyRun_SimpleString("import gc; gc.enable()\n");
     PyErr_Clear();
 
     /* Pre-load importlib.metadata so it is fully initialized before user code
@@ -2269,6 +2300,13 @@ Py_Init_Custom(const char** import_paths, size_t *count,
         "except Exception:\n"
         "    pass\n"
     );
+    PyErr_Clear();
+
+    /* Freeze all startup objects into the permanent GC generation now that
+     * importlib.metadata and the built-in/frozen stdlib are loaded.  These are
+     * never traversed by GC again (protects against the historical stale-type
+     * DSI), while cyclic garbage created later by user code is still collected. */
+    (void)PyRun_SimpleString("import gc; gc.freeze()\n");
     PyErr_Clear();
 
     return _PyStatus_OK();

@@ -53,6 +53,25 @@ try:
 except Exception as _e:
     print("(tee setup failed: " + repr(_e) + ")")
 
+
+def _sync_log():
+    """Force python-log-crash.log onto the physical SD card.
+
+    libfat only commits written data on close() and fsync() is a no-op stub on
+    Wii, so while the interactive menu keeps running the file's contents never
+    reach the card.  Closing and reopening (append) flushes libfat's cache; we
+    then re-point both tee streams at the fresh handle."""
+    global _LOGF
+    try:
+        _LOGF.close()
+        _LOGF = open(_LOGPATH, "a")
+        if isinstance(sys.stdout, _Tee):
+            sys.stdout._logf = _LOGF
+        if isinstance(sys.stderr, _Tee):
+            sys.stderr._logf = _LOGF
+    except Exception:
+        pass
+
 try:
     import _datetime
     sys.modules.setdefault('datetime', _datetime)
@@ -266,9 +285,9 @@ def test_frozen_modules():
         "io",
         "_collections_abc",
         "_sitebuiltins",
-        "_genericpath",
-        "_stat",
-        "_osx_support",
+        # NOTE: _genericpath / _stat / _osx_support / __phello__.spam.ham are NOT
+        # frozen even on standard CPython (wrong names / macOS-only / missing demo
+        # submodule) -- removed so the check reflects reality.
         "genericpath",
         "posixpath",
         "ntpath",
@@ -283,7 +302,6 @@ def test_frozen_modules():
         "__phello__",
         "__phello__.ham",
         "__phello__.spam",
-        "__phello__.spam.ham",
     ]
 
     for module in modules:
@@ -510,8 +528,13 @@ def test_wpad():
         fail("WPAD_Accel", e)
 
     try:
-        raw = w.WPAD_Expansion(0)
-        ok("WPAD_Expansion(0)", str(len(raw)) + "B")
+        # WPAD_Expansion returns None (no expansion controller) or a dict with a
+        # 'type' key -- NOT bytes, so don't call len() on it.
+        exp = w.WPAD_Expansion(0)
+        if exp is None:
+            ok("WPAD_Expansion(0)", "None (kein Expansion-Controller)")
+        else:
+            ok("WPAD_Expansion(0)", "type=" + str(exp.get("type")))
     except Exception as e:
         fail("WPAD_Expansion", e)
 
@@ -742,6 +765,7 @@ def test_conf():
         ok("CONF_GetNickName", repr(w.CONF_GetNickName()))
     except Exception as e:
         fail("CONF_GetNickName", e)
+    # Parental password/answer return None when unset (fresh Wii / Dolphin).
     try:
         ok("CONF_GetParentalPassword", repr(w.CONF_GetParentalPassword()))
     except Exception as e:
@@ -1649,8 +1673,8 @@ def run_all_tests():
     test_curl_http()
     test_threading()
     _print_results()
-    test_frozen_modules()
-    test_builtin_modules()
+    #test_frozen_modules()
+    #test_builtin_modules()
 
 # ======================================================= Modul-Tests (✅) ===
 
@@ -2344,7 +2368,12 @@ def test_pip_install():
 
 def test_pip_list():
     section("pip list (installiert unter {dev}:/python/lib)")
-    import importlib, importlib.metadata as md
+    try:
+        import importlib.metadata as md
+    except Exception as e:
+        _log_tb("import importlib.metadata")
+        return fail("import importlib.metadata", e)
+    import importlib
     TARGET = _pip_target()
     importlib.invalidate_caches()
     found = 0
@@ -2606,6 +2635,277 @@ def test_terminal_ctrl():
 
     print("Terminal-Test fertig.")
 
+def test_module_all():
+    try:
+        import runpy
+        runpy.run_module("test_all", run_name="__main2__")
+    except:
+        return fail("test_all", sys.exc_info()[1])
+
+
+def test_sockets_diag():
+    """Diagnose: blocking vs. non-blocking connect auf dem aktiven libogc-Netz-
+    stack.  Isoliert das 'EINPROGRESS (119)'-Problem (errno 119 == EINPROGRESS
+    auf newlib; strerror-Text 'Connection already in progress' ist irrefuehrend)
+    von pip/urllib3.  Es geht zum SELBEN Server wie 'pip install'
+    (aus _PIP_INDEX abgeleitet).
+
+    Jeder Teilschritt wird sofort via _sync_log() auf die physische SD
+    committet, damit die Diagnose auch bei einem harten Absturz (DSI, keine
+    Python-Exception) im python-log-crash.log nachlesbar ist."""
+    section("Socket-Diagnose (blocking vs. non-blocking connect)")
+    import socket, errno
+    import select as _sel
+
+    # Host/Port aus der pip-Index-URL ableiten -> exakt derselbe Server wie pip
+    _netloc = _PIP_INDEX.split("://", 1)[-1].split("/", 1)[0]
+    if ":" in _netloc:
+        HOST, _p = _netloc.split(":", 1)
+        try:
+            PORT = int(_p)
+        except ValueError:
+            PORT = 80
+    else:
+        HOST, PORT = _netloc, 80
+    print("Ziel: " + HOST + ":" + str(PORT)
+          + "   (EINPROGRESS == errno " + str(errno.EINPROGRESS) + ")")
+
+    if not w.IsNetReady():
+        fail("socket-diag (Netz nicht bereit)", "IsNetReady()==0")
+        _sync_log()
+        return
+
+    req = ("GET /simple/ HTTP/1.0\r\nHost: " + HOST + "\r\n\r\n").encode()
+
+    def _errinfo(e):
+        return ("errno=" + str(e.errno) + " ("
+                + str(errno.errorcode.get(e.errno, "?")) + ")")
+
+    # --- Test 1: BLOCKING connect (timeout None) -> umgeht non-blocking-Pfad --
+    print("")
+    print("=== Test 1: blocking connect (settimeout(None)) ===")
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        s.settimeout(None)
+        s.connect((HOST, PORT))
+        ok("T1 connect")
+        s.sendall(req)
+        ok("T1 sendall", str(len(req)) + "B")
+        data = s.recv(64)
+        ok("T1 recv", repr(data[:40]))
+    except OSError as e:
+        fail("T1", e, _errinfo(e))
+    finally:
+        try: s.close()
+        except Exception: pass
+    _sync_log()   # Diagnose sofort auf SD sichern
+
+    # --- Test 2: connect MIT timeout -> der Pfad den pip/urllib3 nimmt --------
+    print("")
+    print("=== Test 2: connect mit settimeout(10) ===")
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        s.settimeout(10)
+        s.connect((HOST, PORT))
+        ok("T2 connect")
+        so_err = s.getsockopt(socket.SOL_SOCKET, socket.SO_ERROR)
+        ok("T2 SO_ERROR direkt nach connect", so_err)
+        s.sendall(req)
+        ok("T2 sendall", str(len(req)) + "B")
+        data = s.recv(64)
+        ok("T2 recv", repr(data[:40]))
+    except OSError as e:
+        fail("T2", e, _errinfo(e))
+    finally:
+        try: s.close()
+        except Exception: pass
+    _sync_log()
+
+    # --- Test 3: explizit NON-blocking connect + manuelles select ------------
+    #     Baut exakt den Pfad nach, den CPython intern im timeout-Fall geht:
+    #     connect_ex -> EINPROGRESS -> select(writable) -> getsockopt(SO_ERROR).
+    #     Zeigt, ob select zu frueh 'writable' meldet oder SO_ERROR luegt.
+    print("")
+    print("=== Test 3: non-blocking connect + select ===")
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        s.setblocking(False)
+        rc = s.connect_ex((HOST, PORT))
+        print("  connect_ex rc=" + str(rc) + " ("
+              + str(errno.errorcode.get(rc, "?")) + ")   "
+              + "(EINPROGRESS hier = NORMAL)")
+        r, wli, x = _sel.select([s], [s], [s], 10)
+        print("  select: readable=" + str(bool(r))
+              + " writable=" + str(bool(wli)) + " exc=" + str(bool(x)))
+        so_err = s.getsockopt(socket.SOL_SOCKET, socket.SO_ERROR)
+        ok("T3 SO_ERROR nach select", str(so_err) + " ("
+           + str(errno.errorcode.get(so_err, "?")) + ")")
+        if so_err == 0:
+            s.setblocking(True)
+            s.sendall(req)
+            ok("T3 sendall", str(len(req)) + "B")
+            data = s.recv(64)
+            ok("T3 recv", repr(data[:40]))
+        else:
+            fail("T3 connect unvollstaendig",
+                 "SO_ERROR=" + str(so_err))
+    except OSError as e:
+        fail("T3", e, _errinfo(e))
+    finally:
+        try: s.close()
+        except Exception: pass
+    _sync_log()
+
+    # --- Test 4: select()-Varianten auf einem SAUBER verbundenen Socket ------
+    #     Isoliert, WELCHE fd-Menge net_select ablehnt (read/write/except).
+    #     Ein verbundener Socket ist sofort writable -> 2s Timeout genuegt.
+    #     Verdacht: libogc2s net_select lehnt exceptset (..E) ab.
+    print("")
+    print("=== Test 4: select-Varianten (verbundener Socket) ===")
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        s.settimeout(10)
+        s.connect((HOST, PORT))
+        fd = s.fileno()
+        print("  fileno = " + str(fd))
+        s.setblocking(True)
+        variants = [
+            ("R..", [s], [],  []),
+            (".W.", [],  [s], []),
+            ("..E", [],  [],  [s]),
+            ("RW.", [s], [s], []),
+            ("RWE", [s], [s], [s]),
+        ]
+        for name, rl, wl, xl in variants:
+            try:
+                r, wr, x = _sel.select(rl, wl, xl, 2)
+                ok("T4 select " + name,
+                   "r=" + str(len(r)) + " w=" + str(len(wr)) + " x=" + str(len(x)))
+            except OSError as e:
+                fail("T4 select " + name, e, _errinfo(e))
+            _sync_log()
+    except OSError as e:
+        fail("T4 setup", e, _errinfo(e))
+    finally:
+        try: s.close()
+        except Exception: pass
+    _sync_log()
+
+    # --- Test 5: socket.create_connection -> genau das nutzt urllib3/pip ------
+    print("")
+    print("=== Test 5: socket.create_connection((host,port), 10) ===")
+    s = None
+    try:
+        s = socket.create_connection((HOST, PORT), timeout=10)
+        ok("T5 create_connection", "fileno=" + str(s.fileno()))
+        s.sendall(req)
+        ok("T5 sendall", str(len(req)) + "B")
+        data = s.recv(64)
+        ok("T5 recv", repr(data[:40]))
+    except OSError as e:
+        fail("T5", e, _errinfo(e))
+    finally:
+        try:
+            if s is not None: s.close()
+        except Exception: pass
+    _sync_log()
+
+    # --- Test 6: http.client -> stdlib-HTTP (naeher an pip/urllib3) -----------
+    print("")
+    print("=== Test 6: http.client HTTPConnection GET /simple/ ===")
+    try:
+        import http.client
+        conn = http.client.HTTPConnection(HOST, PORT, timeout=10)
+        conn.request("GET", "/simple/")
+        resp = conn.getresponse()
+        ok("T6 status", str(resp.status) + " " + str(resp.reason))
+        body = resp.read(80)
+        ok("T6 body", repr(body[:50]))
+        conn.close()
+    except Exception as e:
+        fail("T6", e, _errinfo(e) if isinstance(e, OSError) else "")
+        _log_tb("T6 http.client")
+    _sync_log()
+
+    # --- Test 7/8: recv_into mit grossem vs. mittlerem Buffer -----------------
+    #     Gleicher (funktionierender) HTTP/1.0-Send wie T5, nur die recv-Methode
+    #     variiert: isoliert, ob net_recv() mit grossem Buffer (IOS-IPC-Limit?)
+    #     haengt. T6 nutzt recv_into(bytearray(65537)) via http.client.
+    for _tag, _bufsz in (("T7 recv_into 65537B", 65537), ("T8 recv_into 4096B", 4096)):
+        print("")
+        print("=== " + _tag + " ===")
+        s = None
+        try:
+            s = socket.create_connection((HOST, PORT), timeout=10)
+            s.sendall(req)                      # identisch zu T5 (funktioniert)
+            buf = bytearray(_bufsz)
+            n = s.recv_into(buf)
+            ok(_tag, str(n) + "B: " + repr(bytes(buf[:40])))
+        except OSError as e:
+            fail(_tag, e, _errinfo(e))
+        finally:
+            try:
+                if s is not None: s.close()
+            except Exception: pass
+        _sync_log()
+
+    print("")
+    print("Socket-Diagnose fertig.")
+
+
+def test_socketpair_diag():
+    """Verifiziert socket.socketpair() + asyncio.new_event_loop().
+    Die Wii-Emulation (wii_socket_stubs.c) baut einen echten TCP-Loopback
+    (bind explicit port -> listen -> connect device-IP -> accept), weil
+    IOS/libogc net_bind port 0 mit EINVAL ablehnt."""
+    section("socketpair / asyncio self-pipe")
+    import socket, errno
+    def _ei(e):
+        return ("errno=" + str(e.errno) + " ("
+                + str(errno.errorcode.get(e.errno, "?")) + ")")
+
+    # 1) socketpair erstellen (asyncio self-pipe nutzt genau das)
+    a = b = None
+    try:
+        a, b = socket.socketpair()
+        ok("socketpair erstellt", "fds=" + str(a.fileno()) + "," + str(b.fileno()))
+        # 2) bidirektionales I/O ueber das pair -> echter Loopback-Beweis
+        a.sendall(b"ping")
+        got = b.recv(16)
+        ok("socketpair a->b", repr(got))
+        b.sendall(b"pong")
+        got2 = a.recv(16)
+        ok("socketpair b->a", repr(got2))
+    except OSError as e:
+        fail("socketpair", e, _ei(e))
+    finally:
+        for _s in (a, b):
+            try:
+                if _s is not None: _s.close()
+            except Exception: pass
+    _sync_log()
+
+    # 3) asyncio event loop (scheiterte frueher an socketpair -> OSError(22))
+    try:
+        import asyncio
+        loop = asyncio.new_event_loop()
+        ok("asyncio.new_event_loop", type(loop).__name__)
+        try:
+            loop.call_soon(lambda: None)
+            loop.stop()
+            loop.run_forever()
+            ok("asyncio loop run/stop")
+        finally:
+            loop.close()
+    except Exception as e:
+        fail("asyncio.new_event_loop", e,
+             _ei(e) if isinstance(e, OSError) else "")
+        _log_tb("asyncio")
+    _sync_log()
+
+    print("")
+    print("socketpair/asyncio fertig.")
+
 
 MENU = [
     ("Alle Tests",    run_all_tests),
@@ -2624,6 +2924,8 @@ MENU = [
     ("graphics",      lambda: _run_single(test_graphics)),
     ("con",           lambda: _run_single(test_con)),
     ("net api",       lambda: _run_single(test_netapi)),
+    ("socket diag",   lambda: _run_single(test_sockets_diag)),
+    ("socketpair diag", lambda: _run_single(test_socketpair_diag)),
     ("png",           lambda: _run_single(test_png)),
     ("network",       lambda: _run_single(test_network)),
     ("curl (https)",  lambda: _run_single(test_curl)),
@@ -2642,6 +2944,7 @@ MENU = [
     ("frozen modules", lambda: _run_single(test_frozen_modules)),
     ("builtin modules", lambda: _run_single(test_builtin_modules)),
     ("module tests",   module_test_menu),
+    ("module test all", lambda: _run_single(test_module_all)),
     ("snake",          snake),
 
     # ("mein Test",   my_test_fn),
@@ -2683,6 +2986,7 @@ def menu_loop():
                 print("  str:  " + str(v))
                 print("(A druecken um weiter)")
                 wait_a()
+            _sync_log()   # commit this run's output to the physical SD card
             show_menu(sel)
 
 

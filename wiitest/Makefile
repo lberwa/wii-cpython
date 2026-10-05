@@ -29,6 +29,29 @@ LDFLAGS += -T$(DEVKITPPC)/powerpc-eabi/lib/rvl.ld -Wl,--gc-sections
 # Force-retain private CPython symbols referenced by .so modules but not
 # by the main program (--gc-sections would otherwise remove them).
 LDFLAGS += -Wl,-u,_PyOS_URandomNonblock
+# _Py_c_neg is not called inside complexobject.c (complex_neg inlines it),
+# so --gc-sections removes it. cmath.so needs it at runtime.
+LDFLAGS += -Wl,-u,_Py_c_neg
+# CPython API symbols referenced by SD-card .so modules (_ctypes, _sqlite3, ...)
+# but not by the main program.  --gc-sections would drop them from the .elf, so
+# they'd be absent from symbols.map and the dlopen loader would fail with
+# "unresolved symbol".  Force-retain every such symbol here.
+#
+# To regenerate this list after adding/changing .so modules:
+#   for so in wii-folder/python/lib/*.so; do \
+#     powerpc-eabi-objdump -R "$so"; done | awk '{print $NF}' | grep -E '^_?Py' | \
+#   sort -u > /tmp/need.txt
+#   comm -23 /tmp/need.txt <(awk '{print $3}' wiitest/symbols.map | sort -u)
+#   # keep only names defined in libpython3.15.a (not intra-.so symbols)
+WII_SO_SYMS := \
+	PyObject_GetTypeData PyGILState_Check \
+	_PyArg_ParseStack _Py_IncRef PyUnicode_InternInPlace \
+	PyExc_ArithmeticError \
+	PyLong_AsUInt32 PyLong_AsUnsignedLongMask PyLong_FromInt32 \
+	wii_dlclose localtime geteuid \
+	pthread_mutex_trylock \
+	pthread_mutexattr_init pthread_mutexattr_settype pthread_mutexattr_destroy
+LDFLAGS += $(foreach s,$(WII_SO_SYMS),-Wl,-u,$(s))
 
 # wii_rules ueberschreibt LIBOGC_LIB immer auf libogc-v1 — direkt von LIBOGC ableiten
 ifeq ($(LIBOGC),2)

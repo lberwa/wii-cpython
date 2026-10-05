@@ -9,6 +9,30 @@ import _md5 as _m, _sha1 as _s1, _sha2 as _s2, _sha3 as _s3, _blake2 as _b2
 # constant-time comparison here so hmac/urllib3/pip keep working.
 from _operator import _compare_digest as compare_digest
 
+# hmac.py evaluates `_hashopenssl.UnsupportedDigestmodError` inside an except
+# clause.  If the attribute is absent, the except-clause evaluation itself
+# raises AttributeError which propagates uncaught.  Provide the class so
+# hmac falls through to its built-in (_hmac / pure-Python) path gracefully.
+class UnsupportedDigestmodError(ValueError):
+    """Raised when a requested digest algorithm is not supported by OpenSSL."""
+
+# Lowercase alias used in some internal code paths.
+unsupportedDigestmodError = UnsupportedDigestmodError
+
+# hmac.py calls hmac_new() and hmac_digest() when _hashopenssl is available.
+# Raise UnsupportedDigestmodError so hmac.py falls through to _hmac / pure Python.
+def hmac_new(key, msg=b'', digestmod=None):
+    raise UnsupportedDigestmodError("OpenSSL HMAC not available on Wii")
+
+def hmac_digest(key, msg, digest):
+    raise UnsupportedDigestmodError("OpenSSL hmac_digest not available on Wii")
+
+# HASH / HASHXOF: base types checked with isinstance() in some stdlib code.
+class HASH:
+    """Stub for OpenSSL HASH base type (not used on Wii)."""
+class HASHXOF(HASH):
+    """Stub for OpenSSL HASHXOF base type (not used on Wii)."""
+
 _ALGORITHMS = {
     'md5':       _m.md5,
     'sha1':      _s1.sha1,

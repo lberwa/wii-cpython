@@ -12,6 +12,7 @@
 #include <my_text_renderer.h>
 #include <fat.h>
 #include <gccore.h>
+
 #if WII_LIBOGC == 2
 #include <ogc/timesupp.h>
 #else
@@ -28,6 +29,7 @@
 #include <ogc/audio.h>
 #include <ogc/cache.h>
 #include <ogc/consol.h>
+#include <malloc.h>   /* mallinfo() for mem_free() */
 #include <sys/time.h>
 
 #include <malloc.h>
@@ -990,6 +992,15 @@ static PyObject* terminal_init(PyObject *self, PyObject *args) {
 	terminal_clear();
 
     return py_none();
+}
+
+static PyObject* wt_terminal_print(PyObject *self, PyObject *args) {
+    (void)self;
+    const char *msg;
+    if (!PyArg_ParseTuple(args, "s", &msg))
+        return NULL;
+    terminal_print(msg);
+    Py_RETURN_NONE;
 }
 
 #define FIFO_SIZE (256 * 1024)
@@ -4487,14 +4498,20 @@ static PyObject* wt_CONF_GetParentalPassword(PyObject *self, PyObject *args) {
     (void)self; s8 buf[64];
     if (!PyArg_ParseTuple(args, ":CONF_GetParentalPassword")) return NULL;
     memset(buf, 0, sizeof(buf));
-    if (CONF_GetParentalPassword(buf) < 0) { PyErr_SetString(PyExc_RuntimeError, "CONF_GetParentalPassword failed"); return NULL; }
+    s32 r = CONF_GetParentalPassword(buf);
+    /* No parental password configured -> not an error, return None. */
+    if (r == CONF_EBADVALUE || r == CONF_ENOENT) Py_RETURN_NONE;
+    if (r < 0) { PyErr_SetString(PyExc_RuntimeError, "CONF_GetParentalPassword failed"); return NULL; }
     return PyUnicode_FromString((const char *)buf);
 }
 static PyObject* wt_CONF_GetParentalAnswer(PyObject *self, PyObject *args) {
     (void)self; s8 buf[64];
     if (!PyArg_ParseTuple(args, ":CONF_GetParentalAnswer")) return NULL;
     memset(buf, 0, sizeof(buf));
-    if (CONF_GetParentalAnswer(buf) < 0) { PyErr_SetString(PyExc_RuntimeError, "CONF_GetParentalAnswer failed"); return NULL; }
+    s32 r = CONF_GetParentalAnswer(buf);
+    /* No parental answer configured -> not an error, return None. */
+    if (r == CONF_EBADVALUE || r == CONF_ENOENT) Py_RETURN_NONE;
+    if (r < 0) { PyErr_SetString(PyExc_RuntimeError, "CONF_GetParentalAnswer failed"); return NULL; }
     return PyUnicode_FromString((const char *)buf);
 }
 static PyObject* wt_CONF_GetPadDevices(PyObject *self, PyObject *args) {
@@ -4519,6 +4536,29 @@ WT_GET_L0(SYS_GetGBSMode)
 WT_GET_UL0(SYS_GetFontEncoding)
 WT_GET_UL0(SYS_GetArena1Size)
 WT_GET_UL0(SYS_GetArena2Size)
+
+/* mem_free() -> dict with the REAL reusable free memory.
+ * The newlib heap grows from MEM1 seamlessly into MEM2.  Freed blocks go to the
+ * malloc free-list (mallinfo.fordblks), NOT back to the arena -- so the bare
+ * SYS_GetArena2Size() shrinks monotonically and is misleading.  True usable
+ * free = free-list + unclaimed MEM1 arena + unclaimed MEM2 arena. */
+static PyObject* wt_mem_free(PyObject *self, PyObject *args) {
+    (void)self; (void)args;
+    struct mallinfo mi = mallinfo();
+    u32 arena1    = SYS_GetArena1Size();
+    u32 mem2_hi   = (u32)SYS_GetArena2Hi();
+    u32 mem2_lo   = (u32)SYS_GetArena2Lo();
+    u32 mem2      = mem2_hi > mem2_lo ? mem2_hi - mem2_lo : 0;
+    u32 freelist  = (u32)mi.fordblks;
+    u32 usable    = freelist + arena1 + mem2;
+    return Py_BuildValue("{s:I,s:I,s:I,s:I,s:I,s:I}",
+                         "usable",    usable,     /* total reusable free */
+                         "freelist",  freelist,   /* malloc free-list (fordblks) */
+                         "arena1",    arena1,     /* unclaimed MEM1 */
+                         "arena2",    mem2,       /* unclaimed MEM2 */
+                         "arena_used", (u32)mi.uordblks,  /* allocated blocks */
+                         "arena_total",(u32)mi.arena);    /* total heap claimed */
+}
 WT_SET_1(SYS_SetCounterBias, u32)
 WT_SET_1(SYS_SetDisplayOffsetH, s8)
 WT_SET_1(SYS_SetEuRGB60, u8)
@@ -5302,6 +5342,7 @@ static PyMethodDef wiitools_methods[] = {
     {"WPAD_Expansion", wpad_expansion, METH_VARARGS, "WPAD_Expansion(chan) -> None | dict with 'type' key (nunchuk/classic/guitar/unknown)"},
 
 	{"terminal_init",  terminal_init,  METH_VARARGS, "Init Debug screen"},
+	{"terminal_print", wt_terminal_print, METH_VARARGS, "terminal_print(msg) -> print string to Wii debug terminal"},
 	{"rendering_init", rendering_init, METH_VARARGS, "Init rendering screen"},
 	{"rendering_adopt", rendering_adopt, METH_VARARGS,
 	 "rendering_adopt(mode_ptr, fb_ptr[, empty_q]) -> uebernimmt das vom Host initialisierte Rendering, ohne neu zu initialisieren"},
@@ -5346,8 +5387,8 @@ static PyMethodDef wiitools_methods[] = {
     {"CONF_GetCounterBias", wt_CONF_GetCounterBias, METH_VARARGS, "CONF_GetCounterBias() -> int"},
     {"CONF_GetDisplayOffsetH", wt_CONF_GetDisplayOffsetH, METH_VARARGS, "CONF_GetDisplayOffsetH() -> int"},
     {"CONF_GetNickName", wt_CONF_GetNickName, METH_VARARGS, "CONF_GetNickName() -> str (Konsolen-Spitzname)"},
-    {"CONF_GetParentalPassword", wt_CONF_GetParentalPassword, METH_VARARGS, "CONF_GetParentalPassword() -> str"},
-    {"CONF_GetParentalAnswer", wt_CONF_GetParentalAnswer, METH_VARARGS, "CONF_GetParentalAnswer() -> str"},
+    {"CONF_GetParentalPassword", wt_CONF_GetParentalPassword, METH_VARARGS, "CONF_GetParentalPassword() -> str | None (None if not set)"},
+    {"CONF_GetParentalAnswer", wt_CONF_GetParentalAnswer, METH_VARARGS, "CONF_GetParentalAnswer() -> str | None (None if not set)"},
     {"CONF_GetPadDevices", wt_CONF_GetPadDevices, METH_VARARGS, "CONF_GetPadDevices() -> int (Anzahl registrierter Geräte)"},
 
     /* ---- SYS ---- */
@@ -5375,6 +5416,7 @@ static PyMethodDef wiitools_methods[] = {
     {"SYS_GetFontEncoding", wt_SYS_GetFontEncoding, METH_VARARGS, "SYS_GetFontEncoding() -> int"},
     {"SYS_GetArena1Size", wt_SYS_GetArena1Size, METH_VARARGS, "SYS_GetArena1Size() -> int (freier MEM1-Arena in Bytes)"},
     {"SYS_GetArena2Size", wt_SYS_GetArena2Size, METH_VARARGS, "SYS_GetArena2Size() -> int (freier MEM2-Arena in Bytes)"},
+    {"mem_free", wt_mem_free, METH_VARARGS, "mem_free() -> dict: real reusable free memory (usable/freelist/arena1/arena2/arena_used/arena_total)"},
     {"SYS_STDIO_Report", wt_SYS_STDIO_Report, METH_VARARGS, "SYS_STDIO_Report(enable)"},
     {"SYS_Report", wt_SYS_Report, METH_VARARGS, "SYS_Report(msg)  Nachricht ins Systemlog"},
     {"SYS_ResetSystem", wt_SYS_ResetSystem, METH_VARARGS, "SYS_ResetSystem(reset[, code=0, force_menu=0])"},

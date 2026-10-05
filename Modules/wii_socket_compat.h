@@ -42,4 +42,6 @@ typedef unsigned int    u_int;
 #define IN_EXPERIMENTAL(i) (((u_long)(i) & 0xe0000000) == 0xe0000000)
 #endif
 
+#include <sys/ioctl.h>
+
 #endif /* WII_SOCKET_COMPAT_H */

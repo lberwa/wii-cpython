@@ -12,6 +12,31 @@
 
 #include <stdlib.h>               // malloc()
 
+/* Step-by-step diagnostics for the tracemalloc.start() path on Wii.  Disabled
+ * by default; define TM_DEBUG_LOG (e.g. -DTM_DEBUG_LOG) to re-enable.  When on,
+ * it writes to the libogc system log (SYS_Report -> Dolphin OSReport) AND to
+ * sd:/tm.log, using only libc malloc (not the hooked PyMem domains) so it is
+ * safe even while tracemalloc has installed its allocator hooks. */
+#if defined(WII_BUILD) && defined(TM_DEBUG_LOG)
+#include <stdio.h>
+#include <stdarg.h>
+extern void SYS_Report(const char *fmt, ...);
+static void tm_dbg(const char *fmt, ...)
+{
+    char buf[256];
+    va_list ap;
+    va_start(ap, fmt);
+    vsnprintf(buf, sizeof(buf), fmt, ap);
+    va_end(ap);
+    SYS_Report("[tm] %s\n", buf);
+    FILE *f = fopen("sd:/tm.log", "a");
+    if (f) { fputs("[tm] ", f); fputs(buf, f); fputc('\n', f); fclose(f); }
+}
+#define TM_DBG(...) tm_dbg(__VA_ARGS__)
+#else
+#define TM_DBG(...) ((void)0)
+#endif
+
 #define tracemalloc_config _PyRuntime.tracemalloc.config
 
 _Py_DECLARE_STR(anon_unknown, "<unknown>");
@@ -93,6 +118,38 @@ tracemalloc_error(const char *format, ...)
 /* Any non-NULL pointer can be used */
 #define REENTRANT Py_True
 
+#ifdef WII_BUILD
+/* Wii: libsysbase's pthread_key_create() has a tiny TLS-key budget which is
+ * already exhausted by the time user code imports many modules, so
+ * PyThread_tss_create() for the reentrant guard fails -> tracemalloc.start()
+ * raised MemoryError.  PPC-EABI also has no compiler __thread TLS.
+ *
+ * The GIL is a real lock here (take_gil/drop_gil are the full implementation),
+ * so Python-level allocations are serialised -- but PyMem_RawMalloc can run
+ * without the GIL, so the guard must still distinguish threads.  We store the
+ * ident of the thread currently inside the hook: get_reentrant() is true only
+ * for THAT same thread (no cross-thread false positives), which is exactly the
+ * same-thread-recursion the guard protects against -- without any TLS key. */
+static unsigned long tracemalloc_reentrant_thread = 0;  /* 0 = none */
+
+static int
+get_reentrant(void)
+{
+    return tracemalloc_reentrant_thread == PyThread_get_thread_ident();
+}
+
+static void
+set_reentrant(int reentrant)
+{
+    assert(reentrant == 0 || reentrant == 1);
+    if (reentrant) {
+        tracemalloc_reentrant_thread = PyThread_get_thread_ident();
+    }
+    else {
+        tracemalloc_reentrant_thread = 0;
+    }
+}
+#else
 static int
 get_reentrant(void)
 {
@@ -123,6 +180,7 @@ set_reentrant(int reentrant)
         PyThread_tss_set(&tracemalloc_reentrant_key, NULL);
     }
 }
+#endif /* WII_BUILD */
 
 
 static Py_uhash_t
@@ -442,8 +500,22 @@ tracemalloc_add_trace_unlocked(unsigned int domain, uintptr_t ptr,
 {
     assert(tracemalloc_config.tracing);
 
+#ifdef WII_BUILD
+    /* One-shot: log the first few traced allocations so we can see whether the
+     * explosion is here (huge size, runaway nframe, growing table). */
+    static int _tm_trace_calls = 0;
+    if (_tm_trace_calls < 12) {
+        _tm_trace_calls++;
+        TM_DBG("add_trace #%d: domain=%u size=%u traceback=%p nframe=%d",
+               _tm_trace_calls, domain, (unsigned)size,
+               (void*)tracemalloc_traceback,
+               tracemalloc_traceback ? (int)tracemalloc_traceback->nframe : -1);
+    }
+#endif
+
     traceback_t *traceback = traceback_new();
     if (traceback == NULL) {
+        TM_DBG("add_trace: traceback_new returned NULL");
         return -1;
     }
 
@@ -734,41 +806,59 @@ tracemalloc_clear_traces_unlocked(void)
 }
 
 
-PyStatus
-_PyTraceMalloc_Init(void)
+/* Create the TSS key, hash tables and the empty traceback.
+   Split out of _PyTraceMalloc_Init() so it can be run either at interpreter
+   startup (normal builds) or lazily on the first tracemalloc.start() call
+   (Wii build — see _PyTraceMalloc_Init / _PyTraceMalloc_Start below). */
+static PyStatus
+tracemalloc_create_tables(void)
 {
-#ifdef WII_BUILD
-    tracemalloc_config.initialized = TRACEMALLOC_INITIALIZED;
-    return _PyStatus_OK();
-#endif
-    assert(tracemalloc_config.initialized == TRACEMALLOC_NOT_INITIALIZED);
-
+    TM_DBG("create_tables: enter");
     PyMem_GetAllocator(PYMEM_DOMAIN_RAW, &allocators.raw);
+    TM_DBG("create_tables: got RAW allocator (malloc=%p ctx=%p)",
+           (void*)allocators.raw.malloc, (void*)allocators.raw.ctx);
 
+#ifdef WII_BUILD
+    /* Wii: reentrant guard is tracked by thread-ident (see get_reentrant above);
+     * no TLS key needed -- libsysbase's key budget is exhausted by this point. */
+    tracemalloc_reentrant_thread = 0;
+    TM_DBG("create_tables: reentrant guard = thread-ident (no tss key)");
+#else
     if (PyThread_tss_create(&tracemalloc_reentrant_key) != 0) {
+        TM_DBG("create_tables: PyThread_tss_create FAILED");
         return _PyStatus_NO_MEMORY();
     }
+    TM_DBG("create_tables: tss_create ok");
+#endif
 
     tracemalloc_filenames = hashtable_new(hashtable_hash_pyobject,
                                           hashtable_compare_unicode,
                                           tracemalloc_clear_filename, NULL);
+    TM_DBG("create_tables: filenames=%p", (void*)tracemalloc_filenames);
 
     tracemalloc_tracebacks = hashtable_new(hashtable_hash_traceback,
                                            hashtable_compare_traceback,
                                            raw_free, NULL);
+    TM_DBG("create_tables: tracebacks=%p", (void*)tracemalloc_tracebacks);
 
     tracemalloc_traces = tracemalloc_create_traces_table();
+    TM_DBG("create_tables: traces=%p", (void*)tracemalloc_traces);
     tracemalloc_domains = tracemalloc_create_domains_table();
+    TM_DBG("create_tables: domains=%p", (void*)tracemalloc_domains);
 
     if (tracemalloc_filenames == NULL || tracemalloc_tracebacks == NULL
        || tracemalloc_traces == NULL || tracemalloc_domains == NULL)
     {
+        TM_DBG("create_tables: a table is NULL -> NO_MEMORY");
         return _PyStatus_NO_MEMORY();
     }
 
     assert(tracemalloc_empty_traceback == NULL);
+    TM_DBG("create_tables: TRACEBACK_SIZE(1)=%u", (unsigned)TRACEBACK_SIZE(1));
     tracemalloc_empty_traceback = raw_malloc(TRACEBACK_SIZE(1));
+    TM_DBG("create_tables: empty_traceback=%p", (void*)tracemalloc_empty_traceback);
     if (tracemalloc_empty_traceback  == NULL) {
+        TM_DBG("create_tables: empty_traceback NULL -> NO_MEMORY");
         return _PyStatus_NO_MEMORY();
     }
 
@@ -779,8 +869,32 @@ _PyTraceMalloc_Init(void)
     tracemalloc_empty_traceback->frames[0].lineno = 0;
     tracemalloc_empty_traceback->hash = traceback_hash(tracemalloc_empty_traceback);
 
+    TM_DBG("create_tables: OK");
+    return _PyStatus_OK();
+}
+
+PyStatus
+_PyTraceMalloc_Init(void)
+{
+#ifdef WII_BUILD
+    /* Wii: defer table creation until the first tracemalloc.start() call.
+       Running the full init during early interpreter boot crashed (the
+       interned string / allocator state is not ready that early). We mark the
+       subsystem initialized so IsTracing()/deinit behave, and create the
+       tables lazily in _PyTraceMalloc_Start(). */
     tracemalloc_config.initialized = TRACEMALLOC_INITIALIZED;
     return _PyStatus_OK();
+#else
+    assert(tracemalloc_config.initialized == TRACEMALLOC_NOT_INITIALIZED);
+
+    PyStatus status = tracemalloc_create_tables();
+    if (_PyStatus_EXCEPTION(status)) {
+        return status;
+    }
+
+    tracemalloc_config.initialized = TRACEMALLOC_INITIALIZED;
+    return _PyStatus_OK();
+#endif
 }
 
 
@@ -802,7 +916,9 @@ tracemalloc_deinit(void)
     _Py_hashtable_destroy(tracemalloc_tracebacks);
     _Py_hashtable_destroy(tracemalloc_filenames);
 
+#ifndef WII_BUILD
     PyThread_tss_delete(&tracemalloc_reentrant_key);
+#endif
 
     raw_free(tracemalloc_empty_traceback);
     tracemalloc_empty_traceback = NULL;
@@ -812,7 +928,9 @@ tracemalloc_deinit(void)
 int
 _PyTraceMalloc_Start(int max_nframe)
 {
+    TM_DBG("Start: enter max_nframe=%d", max_nframe);
     if (max_nframe < 1 || max_nframe > MAX_NFRAME) {
+        TM_DBG("Start: max_nframe out of range (MAX_NFRAME=%d)", (int)MAX_NFRAME);
         PyErr_Format(PyExc_ValueError,
                      "the number of frames must be in range [1; %i]",
                      MAX_NFRAME);
@@ -821,16 +939,34 @@ _PyTraceMalloc_Start(int max_nframe)
 
     if (_PyTraceMalloc_IsTracing()) {
         /* hooks already installed: do nothing */
+        TM_DBG("Start: already tracing");
         return 0;
     }
+
+#ifdef WII_BUILD
+    /* Wii: the hash tables are created lazily on the first start (see the
+       deferred-init note in _PyTraceMalloc_Init). */
+    TM_DBG("Start: tracemalloc_traces=%p (lazy-init if NULL)", (void*)tracemalloc_traces);
+    if (tracemalloc_traces == NULL) {
+        PyStatus status = tracemalloc_create_tables();
+        if (_PyStatus_EXCEPTION(status)) {
+            TM_DBG("Start: create_tables returned EXCEPTION -> MemoryError");
+            PyErr_NoMemory();
+            return -1;
+        }
+    }
+#endif
 
     tracemalloc_config.max_nframe = max_nframe;
 
     /* allocate a buffer to store a new traceback */
     size_t size = TRACEBACK_SIZE(max_nframe);
+    TM_DBG("Start: traceback buffer size=%u", (unsigned)size);
     assert(tracemalloc_traceback == NULL);
     tracemalloc_traceback = raw_malloc(size);
+    TM_DBG("Start: tracemalloc_traceback=%p", (void*)tracemalloc_traceback);
     if (tracemalloc_traceback == NULL) {
+        TM_DBG("Start: traceback buffer NULL -> MemoryError");
         PyErr_NoMemory();
         return -1;
     }
@@ -858,7 +994,9 @@ _PyTraceMalloc_Start(int max_nframe)
     PyMem_GetAllocator(PYMEM_DOMAIN_OBJ, &allocators.obj);
     PyMem_SetAllocator(PYMEM_DOMAIN_OBJ, &alloc);
 
+    TM_DBG("Start: allocator hooks installed, setting RefTracer");
     if (PyRefTracer_SetTracer(_PyTraceMalloc_TraceRef, NULL) < 0) {
+        TM_DBG("Start: PyRefTracer_SetTracer FAILED");
         return -1;
     }
 
@@ -867,6 +1005,7 @@ _PyTraceMalloc_Start(int max_nframe)
     _Py_atomic_store_int_relaxed(&tracemalloc_config.tracing, 1);
     TABLES_UNLOCK();
 
+    TM_DBG("Start: tracing ENABLED, returning 0 (success)");
     return 0;
 }
 

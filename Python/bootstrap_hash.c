@@ -474,6 +474,54 @@ lcg_urandom(unsigned int x0, unsigned char *buffer, size_t size)
      a function fails with EINTR: retry directly the interrupted function
    - Don't release the GIL to call functions.
 */
+#ifdef WII_BUILD
+/* Wii has no getrandom()/getentropy()/dev/urandom.  Derive entropy from the PPC
+ * timebase register (read via mftb, increments at ~60.75 MHz) mixed through
+ * splitmix64 with a persistent counter.  A fresh timebase sample is stirred in
+ * for every 8 output bytes.  Suitable for hash randomization, uuid4, random
+ * seeding and os.urandom's "weak" contract; it is NOT a hardware CSPRNG (the
+ * Wii exposes none readily), so not for long-lived asymmetric private keys. */
+static inline uint64_t
+wii_read_timebase(void)
+{
+    uint32_t tbu, tbl, tmp;
+    do {
+        __asm__ volatile ("mftbu %0" : "=r"(tbu));
+        __asm__ volatile ("mftb  %0" : "=r"(tbl));
+        __asm__ volatile ("mftbu %0" : "=r"(tmp));
+    } while (tbu != tmp);
+    return ((uint64_t)tbu << 32) | tbl;
+}
+
+static int
+wii_urandom(void *buffer, Py_ssize_t size)
+{
+    static uint64_t state = 0;
+    static int seeded = 0;
+    unsigned char *buf = (unsigned char *)buffer;
+    Py_ssize_t i = 0;
+
+    if (!seeded) {
+        state = wii_read_timebase() ^ (uint64_t)(uintptr_t)&state;
+        seeded = 1;
+    }
+
+    while (i < size) {
+        state += wii_read_timebase();          /* fresh entropy every 8 bytes */
+        state += 0x9E3779B97F4A7C15ULL;        /* splitmix64 mixing */
+        uint64_t z = state;
+        z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9ULL;
+        z = (z ^ (z >> 27)) * 0x94D049BB133111EBULL;
+        z = z ^ (z >> 31);
+        for (int b = 0; b < 8 && i < size; b++, i++) {
+            buf[i] = (unsigned char)(z & 0xFF);
+            z >>= 8;
+        }
+    }
+    return 0;
+}
+#endif /* WII_BUILD */
+
 static int
 pyurandom(void *buffer, Py_ssize_t size, int blocking, int raise)
 {
@@ -492,6 +540,11 @@ pyurandom(void *buffer, Py_ssize_t size, int blocking, int raise)
     if (size == 0) {
         return 0;
     }
+
+#ifdef WII_BUILD
+    (void)blocking; (void)raise;
+    return wii_urandom(buffer, size);
+#endif
 
 #ifdef MS_WINDOWS
     return win32_urandom((unsigned char *)buffer, size, raise);

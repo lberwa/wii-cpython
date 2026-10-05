@@ -1295,6 +1295,32 @@ static int
 py_process_time(time_module_state *state, PyTime_t *tp,
                 _Py_clock_info_t *info)
 {
+#ifdef WII_BUILD
+    /* Wii: newlib clock() returns (clock_t)-1, which makes py_clock() raise
+     * RuntimeError.  Read the PPC timebase register directly (mftb) instead --
+     * no libogc dependency, works for both libogc1 and libogc2.  The timebase
+     * runs at bus_clock/4 = 243 MHz / 4 = 60.75 MHz. */
+    (void)state;
+    {
+        uint32_t tbu, tbl, tmp;
+        do {
+            __asm__ volatile ("mftbu %0" : "=r"(tbu));
+            __asm__ volatile ("mftb  %0" : "=r"(tbl));
+            __asm__ volatile ("mftbu %0" : "=r"(tmp));
+        } while (tbu != tmp);
+        uint64_t ticks = ((uint64_t)tbu << 32) | tbl;
+        const uint64_t TB_HZ = 60750000ULL;
+        *tp = (PyTime_t)(ticks / TB_HZ) * 1000000000LL
+            + (PyTime_t)((ticks % TB_HZ) * 1000000000ULL / TB_HZ);
+        if (info) {
+            info->implementation = "mftb";
+            info->resolution     = 1.0 / (double)TB_HZ;
+            info->monotonic      = 1;
+            info->adjustable     = 0;
+        }
+        return 0;
+    }
+#endif
 #if defined(MS_WINDOWS)
     HANDLE process;
     FILETIME creation_time, exit_time, kernel_time, user_time;

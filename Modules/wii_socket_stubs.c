@@ -16,6 +16,22 @@
 /* libogc2 hat weder servent noch protoent */
 struct servent  { const char *s_name; char **s_aliases; int s_port; const char *s_proto; };
 struct protoent { const char *p_name; char **p_aliases; int p_proto; };
+/* libogc2 also lacks struct iovec / struct msghdr (libogc1 has them in
+ * sys/_iovec.h and sys/socket.h).  Define them with the same layout so the
+ * sendmsg()/recvmsg() emulation below compiles. */
+struct iovec {
+    void  *iov_base;
+    size_t iov_len;
+};
+struct msghdr {
+    void         *msg_name;
+    socklen_t     msg_namelen;
+    struct iovec *msg_iov;
+    int           msg_iovlen;
+    void         *msg_control;
+    socklen_t     msg_controllen;
+    int           msg_flags;
+};
 #endif
 /* h_errno: PPC-EABI unterstuetzt kein TLS, daher immer non-TLS.
  * libogc1's netdb.h deklariert "extern __thread int h_errno" - dieses
@@ -71,10 +87,141 @@ ssize_t recvmsg(int fd, struct msghdr *msg, int flags)
     return total;
 }
 
-/* socketpair: libogc provides no AF_UNIX / net_socketpair (verified against
-   libogc/include/network.h — no such symbol). Keep as ENOSYS. */
+/* setsockopt wrapper: libogc's net_setsockopt supports only a subset of options
+   (mainly SOL_SOCKET).  urllib3/pip set IPPROTO_TCP/TCP_NODELAY, SO_KEEPALIVE,
+   etc.; if net_setsockopt rejects one, the whole connection setup aborts with a
+   bogus errno ("Function not implemented").  Treat failures as success so these
+   advisory options don't break higher-level code; supported options (e.g.
+   SO_REUSEADDR) still take effect. */
+int wii_setsockopt(int s, int level, int optname, const void *optval, socklen_t optlen)
+{
+    s32 r = net_setsockopt(s, (u32)level, (u32)optname, optval, optlen);
+    return r < 0 ? 0 : r;
+}
+
+/* socketpair: AF_UNIX does not work on Wii IOS. Emulate with TCP loopback.
+   asyncio uses socketpair() for its self-pipe wakeup mechanism. */
 int socketpair(int domain, int type, int protocol, int sv[2])
-    { (void)domain; (void)type; (void)protocol; (void)sv; errno = ENOSYS; return -1; }
+{
+    (void)protocol;
+    /* Strip SOCK_CLOEXEC / SOCK_NONBLOCK flag bits: CPython's socket_socketpair
+       calls socketpair(family, type | SOCK_CLOEXEC, ...).  We only support
+       stream sockets; the flags are harmless on Wii (no exec, blocking handled
+       by the caller via setblocking). */
+    int base = type;
+#ifdef SOCK_CLOEXEC
+    base &= ~SOCK_CLOEXEC;
+#endif
+#ifdef SOCK_NONBLOCK
+    base &= ~SOCK_NONBLOCK;
+#endif
+    /* Accept AF_UNIX as well — redirect to AF_INET TCP loopback. */
+    if (base != SOCK_STREAM) { errno = EPROTONOSUPPORT; return -1; }
+    (void)domain;
+
+    int listener = net_socket(AF_INET, SOCK_STREAM, 0);
+    if (listener < 0) { errno = -listener; return -1; }
+
+    /* Bind the listener to INADDR_ANY (0.0.0.0): the Wii IOS/lwIP stack has no
+       usable 127.0.0.1 loopback interface, so binding/connecting to 127.0.0.1
+       fails.  Binding to ANY and connecting to the device's own IP keeps the
+       whole exchange on the real interface, which does loop back.
+
+       NOTE 1: libogc2's lwIP validates sockaddr_in.sin_len; a zeroed sin_len
+       (from memset) makes net_bind reject the address.  Set it explicitly.
+       NOTE 2: IOS/libogc net_bind() rejects port 0 (auto-select) with EINVAL,
+       so we can't let the OS pick a port.  Try an explicit range of ephemeral
+       ports until one binds free.  net_* return the negated errno on failure
+       (libogc convention) -- pass that through so failures are diagnosable. */
+    struct sockaddr_in addr;
+    s32 r = -1;
+    for (unsigned p = 49152; p <= 49152u + 256u; p++) {
+        memset(&addr, 0, sizeof(addr));
+        addr.sin_len         = sizeof(addr);
+        addr.sin_family      = AF_INET;
+        addr.sin_addr.s_addr = htonl(0x00000000UL); /* INADDR_ANY */
+        addr.sin_port        = htons((u16)p);       /* explicit port (0 -> EINVAL) */
+        r = net_bind(listener, (struct sockaddr *)&addr, sizeof(addr));
+        if (r >= 0) break;
+    }
+    if (r < 0) {
+        net_close(listener); errno = (r < 0 ? -r : EADDRINUSE); return -1;
+    }
+    socklen_t alen = sizeof(addr);
+    r = net_getsockname(listener, (struct sockaddr *)&addr, &alen);
+    if (r < 0) {
+        net_close(listener); errno = (r < 0 ? -r : ENOTSOCK); return -1;
+    }
+    r = net_listen(listener, 1);
+    if (r < 0) {
+        net_close(listener); errno = (r < 0 ? -r : EOPNOTSUPP); return -1;
+    }
+
+    /* Connect to the device's own IP (net_gethostip) at the bound port.
+       getsockname may have clobbered sin_len/sin_family -- restore them. */
+    u32 hostip = net_gethostip();
+    addr.sin_len    = sizeof(addr);
+    addr.sin_family = AF_INET;
+    if (hostip != 0) {
+        addr.sin_addr.s_addr = hostip;
+    } else {
+        addr.sin_addr.s_addr = htonl(0x7f000001UL); /* fallback: 127.0.0.1 */
+    }
+
+    int client = net_socket(AF_INET, SOCK_STREAM, 0);
+    if (client < 0) { net_close(listener); errno = -client; return -1; }
+
+    r = net_connect(client, (struct sockaddr *)&addr, sizeof(addr));
+    if (r < 0) {
+        net_close(listener); net_close(client);
+        errno = (r < 0 ? -r : ECONNREFUSED); return -1;
+    }
+
+    struct sockaddr_in peer;
+    socklen_t plen = sizeof(peer);
+    int server = net_accept(listener, (struct sockaddr *)&peer, &plen);
+    net_close(listener);
+    if (server < 0) { net_close(client); errno = -server; return -1; }
+
+    sv[0] = server;  /* server end (ssock in asyncio) */
+    sv[1] = client;  /* client end (csock in asyncio) */
+    return 0;
+}
+
+/* getpeername: IOS IOCTL_SO_GETPEERNAME is TODO in libogc; lwip_getpeername
+   is declared in libogc1 headers but not present in libogc.a.
+   socketmodule.c is compiled without libogc headers so the macro
+   getpeername->lwip_getpeername never fires there; the linker needs the
+   plain symbol 'getpeername'. We provide it here (undef any header macro
+   first), plus 'lwip_getpeername' for code compiled WITH the libogc1 headers.
+   Stub returns 127.0.0.1 — correct for our socketpair() loopback connections. */
+static int _wii_getpeername(int fd, struct sockaddr *addr, socklen_t *addrlen)
+{
+    (void)fd;
+    if (!addr || !addrlen) { errno = EFAULT; return -1; }
+    if (*addrlen < (socklen_t)sizeof(struct sockaddr_in)) { errno = ENOBUFS; return -1; }
+    struct sockaddr_in *sin = (struct sockaddr_in *)addr;
+    memset(sin, 0, sizeof(*sin));
+    sin->sin_family      = AF_INET;
+    sin->sin_addr.s_addr = htonl(0x7f000001UL); /* 127.0.0.1 loopback */
+    sin->sin_port        = 0;
+    *addrlen = sizeof(*sin);
+    return 0;
+}
+
+/* Export plain 'getpeername' for callers compiled without libogc headers. */
+#ifdef getpeername
+#undef getpeername
+#endif
+int getpeername(int fd, struct sockaddr *addr, socklen_t *addrlen)
+    { return _wii_getpeername(fd, addr, addrlen); }
+
+#if WII_LIBOGC != 2
+/* libogc1: also export 'lwip_getpeername' for callers compiled WITH the
+   libogc1 header that expands getpeername -> lwip_getpeername. */
+int lwip_getpeername(int fd, struct sockaddr *name, socklen_t *namelen)
+    { return _wii_getpeername(fd, name, namelen); }
+#endif
 
 /* select -> libogc net_select (real implementation). */
 int select(int nfds, fd_set *r, fd_set *w, fd_set *e, struct timeval *t)

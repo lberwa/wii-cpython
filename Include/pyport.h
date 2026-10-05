@@ -145,6 +145,12 @@ Used in:  Py_SAFE_DOWNCAST
 typedef uintptr_t       Py_uintptr_t;
 typedef intptr_t        Py_intptr_t;
 
+/* Wii/devkitPPC (newlib): in this include context <stdint.h> leaves SIZE_MAX
+ * expanding to *empty* (it is not wired to the GCC builtin __SIZE_MAX__).  That
+ * makes SSIZE_MAX -> (SIZE_MAX >> 1) -> empty, hence PY_SSIZE_T_MAX empty, which
+ * silently breaks EVERY `x > PY_SSIZE_T_MAX - y` overflow check port-wide (e.g.
+ * BytesIO SEEK_END used by zipfile).  Restore SIZE_MAX from the GCC builtin
+ * before Py_ssize_t / PY_SSIZE_T_MAX are derived below. */
 /* Py_ssize_t is a signed integral type such that sizeof(Py_ssize_t) ==
  * sizeof(size_t).  C99 doesn't define such a thing directly (size_t is an
  * unsigned integral type).  See PEP 353 for details.
@@ -163,6 +169,20 @@ typedef Py_intptr_t     Py_ssize_t;
 #   define PY_SSIZE_T_MAX INTPTR_MAX
 #else
 #   error "Python needs a typedef for Py_ssize_t in pyport.h."
+#endif
+
+/* Wii/devkitPPC (newlib): the SIZE_MAX macro expands to *empty* in this include
+ * context, so the SSIZE_MAX-based PY_SSIZE_T_MAX above expands to empty/garbage
+ * at USE time, silently breaking every `x > PY_SSIZE_T_MAX - y` overflow check
+ * (e.g. BytesIO SEEK_END in zipfile, and slice bounds in [::step]).  Fixing the
+ * SIZE_MAX macro is fragile (a later <stdint.h> can re-clobber it, and
+ * PY_SSIZE_T_MAX is a macro expanded at use time).  Use the GCC builtin
+ * __INTPTR_MAX__: it is the exact max of an intptr_t-sized signed type (== the
+ * max of ssize_t/Py_ssize_t here) and, unlike a (size_t)-1 cast, it is a plain
+ * integer constant that also works in preprocessor `#if PY_SSIZE_T_MAX ...`. */
+#if defined(__INTPTR_MAX__)
+#  undef PY_SSIZE_T_MAX
+#  define PY_SSIZE_T_MAX __INTPTR_MAX__
 #endif
 
 /* Smallest negative value of type Py_ssize_t. */
